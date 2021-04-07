@@ -1,0 +1,19 @@
+{
+    "header_title": "Gestionnaire de QRCode",
+    "waiting": "Patientez...",
+    "tab_scan": "Scanner",
+    "tab_history": "Historique",
+    "search_placeholder": "Rechercher",
+    "alert_delete_item": "Effacer cet élément",
+    "alert_delete_item_message": "Etes-vous certain de vouloir supprimer cet élément? Il sera supprimé de la liste et de vos favoris.",
+    "alert_delete_list": "Effacer la liste",
+    "alert_delete_list_message": "Etes-vous certain de vouloir supprimer cette liste? Tous les éléments seront supprimés, y compris les favoris.",
+    "alert_ok": "OK",
+    "alert_cancel": "ANNULER",
+    "snackbar_open": "OUVRIR",
+    "about_subtitle": "Lecteur de QR Code gratuit",
+    "about_text_1": "texte 1",
+    "about_text_2": "texte 2",
+    "link": "lien"
+  }
+  

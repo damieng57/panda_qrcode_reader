@@ -1,0 +1,18 @@
+{
+  "header_title": "QRCode Manager",
+  "waiting": "Waiting...",
+  "tab_scan": "Scan",
+  "tab_history": "History",
+  "search_placeholder": "Search",
+  "alert_delete_item": "Delete this item",
+  "alert_delete_item_message": "Are you sure you want delete this item? It will be also remove from your favorties.",
+  "alert_delete_list": "Delete this list",
+  "alert_delete_list_message": "Are you sure you want to clear this list? All your items will be delete. Your favorites will be deleted too.",
+  "alert_ok": "OK",
+  "alert_cancel": "CANCEL",
+  "snackbar_open": "OPEN",
+  "about_subtitle": "Free QRCode reader",
+  "about_text_1": "This product is completely free. No ads, no tracking and really your privacy. If you want to encourage me to continue, you can rate this app with 5 stars on the PlayStore. You can also donate a tip for the effort because I do this app on my free time.",
+  "about_text_2": "texte 2",
+  "link": "lien"
+}
