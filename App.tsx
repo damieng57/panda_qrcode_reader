@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, Platform, StatusBar} from 'react-native';
 import {
   NavigationContainer,
   DarkTheme as NavigationDarkTheme,
@@ -15,8 +15,9 @@ import {
 } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
 import {createStackNavigator} from '@react-navigation/stack';
-import { QrCode } from './Objects/QrCode'
-import { getTranslation } from './Utils/helpers'
+import {QrCode} from './Objects/QrCode';
+import {getTranslation} from './Utils/helpers';
+import SplashScreen from 'react-native-splash-screen';
 
 const CombinedDarkTheme = {
   ...PaperDarkTheme,
@@ -25,8 +26,8 @@ const CombinedDarkTheme = {
 };
 
 interface IQrCode {
-    history: QrCode[],
-    setHistory: (value: QrCode[]) => void,
+  history?: QrCode[];
+  setHistory: (value: QrCode[]) => void | undefined;
 }
 
 const globalState: IQrCode = {
@@ -57,6 +58,20 @@ function MainNavigator() {
           ),
         }}
       />
+      <Tab.Screen
+        name="About"
+        component={AboutScreen}
+        options={{
+          tabBarLabel: getTranslation('tab_about'),
+          tabBarIcon: ({color}) => (
+            <MaterialCommunityIcons
+              name="information-outline"
+              color={color}
+              size={26}
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -68,20 +83,22 @@ const Tab = createMaterialBottomTabNavigator();
 
 export default function App() {
   const [history, setHistory] = React.useState();
-  const value = {history, setHistory};
+  const currentHistory: IQrCode = {history, setHistory};
+
+  React.useEffect(() => {
+    SplashScreen.hide();
+  });
 
   // AsyncStorage.multiRemove(['QRCODE_DG::FAVORITES', 'QRCODE_DG::HISTORY']);
 
   React.useEffect(() => {
     AsyncStorage.getItem('QRCODE_DG::HISTORY')
       .then(value => {
-        console.log(value);
-
         if (value) {
           setHistory(JSON.parse(value));
         }
       })
-      .catch(e => console.log(e));
+      .catch(e => console.error(e));
   }, []);
 
   React.useEffect(() => {
@@ -89,25 +106,19 @@ export default function App() {
       AsyncStorage.setItem(
         'QRCODE_DG::HISTORY',
         JSON.stringify(history),
-      ).catch(e => console.log(e));
+      ).catch(e => console.error(e));
     }
   }, [history]);
 
   return (
     <PaperProvider theme={CombinedDarkTheme}>
-      <AppContext.Provider value={value}>
+      <AppContext.Provider value={currentHistory}>
         <NavigationContainer theme={CombinedDarkTheme}>
+          {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
           <Stack.Navigator>
             <Stack.Screen
               name="Main"
               component={MainNavigator}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen
-              name="About"
-              component={AboutScreen}
               options={{
                 header: () => null,
               }}
