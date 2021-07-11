@@ -1,7 +1,5 @@
 import * as React from 'react';
-import {useContext} from 'react';
 import {StyleSheet, FlatList, View, Share, Alert, Linking} from 'react-native';
-import {AppContext} from '../App';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   Appbar,
@@ -11,19 +9,25 @@ import {
   Switch,
   List,
   Subheading,
-  useTheme,
   Divider,
 } from 'react-native-paper';
 import AsyncStorage from '@react-native-community/async-storage';
-import {getTranslation} from '../Utils/helpers';
+import {getTranslation} from '../utils/helpers';
+import { useAtom } from 'jotai'
+import { useTheme } from '../theme'
+import { atomWithStorage } from '../hooks/useAsyncStorage'
+ 
+const historyAtom = atomWithStorage('DG:HISTORY', [])
 
-export const HistoryScreen = props => {
-  const globalState = useContext(AppContext);
+
+export const HistoryScreen = (props: any) => {
+  const theme = useTheme()
+  const [history, setHistory] = useAtom(historyAtom);
   const [isFavorites, setIsFavorites] = React.useState();
   const [searchQuery, setSearchQuery] = React.useState('');
   const {colors} = useTheme();
 
-  const _onChangeSearch = query => setSearchQuery(query);
+  const _onChangeSearch = () => console.log(search)
 
   const _renderItem = (item, index) => {
     const _handlePress = async () => {
@@ -40,13 +44,13 @@ export const HistoryScreen = props => {
     };
 
     const _isFavorites = () => {
-      const objIndex = globalState.history.map(obj => {
-        if (obj._id === item.item._id) {
-          obj.favorite = !obj.favorite;
-        }
-        return obj;
-      });
-      globalState.setHistory(objIndex);
+      // const objIndex = history.map(obj => {
+      //   if (obj._id === item.item._id) {
+      //     obj.favorite = !obj.favorite;
+      //   }
+      //   return obj;
+      // });
+      // globalState.setHistory(objIndex);
     };
 
     const _isShared = async () => {
@@ -71,10 +75,10 @@ export const HistoryScreen = props => {
           {
             text: getTranslation('alert_ok'),
             onPress: () => {
-              const objIndex = globalState.history.filter(
+              const objIndex = history.filter(
                 obj => obj._id !== item.item._id,
               );
-              globalState.setHistory(objIndex);
+              setHistory(objIndex);
             },
           },
         ],
@@ -119,7 +123,7 @@ export const HistoryScreen = props => {
         {
           text: getTranslation('alert_ok'),
           onPress: () => {
-            globalState.setHistory([]);
+            setHistory([]);
             AsyncStorage.multiRemove(['QRCODE_DG::HISTORY']);
           },
         },
@@ -128,12 +132,12 @@ export const HistoryScreen = props => {
   };
 
   const _generateList = () => {
-    let _temp = globalState.history;
-    if (isFavorites) _temp = _temp.filter(item => item.favorite);
-    if (searchQuery !== '')
-      _temp = _temp.filter(item =>
-        item.data.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+    let _temp = history;
+    // if (isFavorites) _temp = _temp.filter(item => item.favorite);
+    // if (searchQuery !== '')
+    //   _temp = _temp.filter(item =>
+    //     item.data.toLowerCase().includes(searchQuery.toLowerCase()),
+    //   );
     return _temp;
   };
 
@@ -141,9 +145,6 @@ export const HistoryScreen = props => {
     <>
       <Appbar.Header>
         <Appbar.Content title={getTranslation('header_title')}></Appbar.Content>
-        <Appbar.Action
-          icon="information"
-          onPress={() => props.navigation.navigate('About')}></Appbar.Action>
       </Appbar.Header>
       <Surface
         style={{
@@ -171,7 +172,9 @@ export const HistoryScreen = props => {
           </View>
           <Switch
             onValueChange={() => setIsFavorites(!isFavorites)}
-            value={isFavorites}></Switch>
+            value={isFavorites}
+            theme={theme}
+            ></Switch>
           <IconButton icon="delete" onPress={_delete}></IconButton>
         </View>
       </Surface>
@@ -188,7 +191,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    backgroundColor: 'black',
   },
   preview: {
     flex: 1,

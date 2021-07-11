@@ -1,60 +1,56 @@
 import * as React from 'react';
-import {Text, View, StyleSheet, Vibration, Dimensions} from 'react-native';
+import {View, StyleSheet, Vibration, Dimensions} from 'react-native';
 import {RNCamera} from 'react-native-camera';
-import {AppContext} from '../App';
-import {Appbar, Snackbar} from 'react-native-paper';
+import {Snackbar, Text} from 'react-native-paper';
 import {QrCode} from '../Objects/QrCode';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
-import {getTranslation} from '../Utils/helpers';
+import {getTranslation} from '../utils/helpers';
+import {useTheme} from '../theme';
+import {useAtom} from 'jotai';
+import { atomWithStorage } from '../hooks/useAsyncStorage'
 
-const PendingView = () => (
-  <View
-    style={{
-      backgroundColor: 'white',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%',
-      height: '100%',
-    }}>
-    <Text>{getTranslation('waiting')}</Text>
-  </View>
-);
 
-export const ScanScreen = props => {
-  const globalState = React.useContext(AppContext);
-  const [isActive, setIsActive] = React.useState(true);
-  const [isVisible, setIsVisible] = React.useState(false);
+interface IState {
+  isActive: boolean;
+  isVisible: boolean;
+}
+
+const defaultState = {
+  isActive: true,
+  isVisible: false,
+};
+
+const historyAtom = atomWithStorage('DG:HISTORY', [])
+
+export const ScanScreen = (props: any) => {
+  const theme = useTheme();
+  const [state, setState] = React.useState<IState>(defaultState);
+  const [history, setHistory] = useAtom(historyAtom);
 
   const _isScanned = (item: any) => {
     Vibration.vibrate(500);
-    setIsActive(false);
     const _temp = new QrCode({
       _id: item.rawData,
       favorite: false,
       data: item.data,
     });
 
-    globalState.history === undefined
-      ? globalState.setHistory([_temp.get()])
-      : globalState.setHistory([_temp.get()].concat(globalState.history));
-    setIsVisible(true);
+    history !== undefined && setHistory([_temp.get()].concat(history));
+    setState({
+      isActive: false,
+      isVisible: true,
+    });
   };
 
   return (
     <>
-      <Appbar.Header>
-        <Appbar.Content title={getTranslation('header_title')}></Appbar.Content>
-        <Appbar.Action
-          icon="information"
-          onPress={() => props.navigation.navigate('About')}></Appbar.Action>
-      </Appbar.Header>
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <RNCamera
           // detectedImageInEvent
           captureAudio={false}
           style={styles.preview}
           barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
-          onBarCodeRead={isActive ? data => _isScanned(data) : null}
+          onBarCodeRead={state.isActive ? data => _isScanned(data) : () => {}}
           type={RNCamera.Constants.Type.back}
           flashMode={RNCamera.Constants.FlashMode.on}
           androidCameraPermissionOptions={{
@@ -64,7 +60,7 @@ export const ScanScreen = props => {
             buttonNegative: 'Cancel',
           }}>
           {({status}) => {
-            if (status !== 'READY') return <PendingView />;
+            if (status !== 'READY') return null; // <PendingView />;
             return (
               <View
                 style={{
@@ -74,20 +70,31 @@ export const ScanScreen = props => {
             );
           }}
         </RNCamera>
-        <Snackbar
-          visible={isVisible}
-          duration={3000}
-          onDismiss={() => {
-            setIsVisible(false);
-            setIsActive(true);
-          }}>
-          {globalState.history && globalState.history[0].data}
-        </Snackbar>
+
         <BarcodeMask
           showAnimatedLine={false}
           edgeRadius={15}
           maskOpacity={0.2}
         />
+
+        <Snackbar
+          theme={theme}
+          style={{ marginBottom: 100, backgroundColor: theme.colors.surface }}
+          visible={state.isVisible}
+          onDismiss={() => {}}
+          action={{
+            label: 'Close',
+            onPress: () => {
+              setState({
+                isActive: true,
+                isVisible: false,
+              });
+            },
+          }}>
+          <Text style={{color: theme.colors.onSurface}}>
+            {history.length > 0 && history[0].data}
+          </Text>
+        </Snackbar>
       </View>
     </>
   );
@@ -112,5 +119,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignSelf: 'center',
     margin: 20,
+  },
+  contentContainer: {
+    // paddingHorizontal: 24,
+  },
+  previewContainer: {
+    flex: 1,
+    flexDirection: 'row-reverse',
+    backgroundColor: 'green',
+    borderRadius: 20,
+    // marginTop: 16,
+    // overflow: 'hidden',
   },
 });

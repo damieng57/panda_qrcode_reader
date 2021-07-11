@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">qrcode</string>
+    <string name="app_name">Qrcode</string>
+    <string name="splash_logo">splash_logo</string>
+
 </resources>

@@ -1,4 +1,4 @@
-import { parseData } from '../Utils/helpers'
+import { parseData } from '../utils/helpers'
 
 export interface IQrCode {
   _id: string;
