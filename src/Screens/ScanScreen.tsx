@@ -1,14 +1,12 @@
 import * as React from 'react';
-import {View, StyleSheet, Vibration, Dimensions} from 'react-native';
+import {View, StyleSheet, Vibration, Dimensions, Linking} from 'react-native';
 import {RNCamera} from 'react-native-camera';
 import {Snackbar, Text} from 'react-native-paper';
 import {QrCode} from '../Objects/QrCode';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
-import {getTranslation} from '../utils/helpers';
+import {getTranslation, historyAtom} from '../utils/helpers';
 import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
-import { atomWithStorage } from '../hooks/useAsyncStorage'
-
 
 interface IState {
   isActive: boolean;
@@ -20,12 +18,14 @@ const defaultState = {
   isVisible: false,
 };
 
-const historyAtom = atomWithStorage('DG:HISTORY', [])
-
 export const ScanScreen = (props: any) => {
   const theme = useTheme();
-  const [state, setState] = React.useState<IState>(defaultState);
   const [history, setHistory] = useAtom(historyAtom);
+  const [state, setState] = React.useState<IState>(defaultState);
+
+  const _openURL = () => {
+    throw new Error('Function not implemented.');
+  }
 
   const _isScanned = (item: any) => {
     Vibration.vibrate(500);
@@ -35,7 +35,7 @@ export const ScanScreen = (props: any) => {
       data: item.data,
     });
 
-    history !== undefined && setHistory([_temp.get()].concat(history));
+    setHistory([_temp.get()].concat(history));
     setState({
       isActive: false,
       isVisible: true,
@@ -66,36 +66,37 @@ export const ScanScreen = (props: any) => {
                 style={{
                   flex: 1,
                   width: Dimensions.get('window').width,
-                }}></View>
+                }}>
+                <BarcodeMask
+                  showAnimatedLine={false}
+                  edgeRadius={15}
+                  maskOpacity={0.2}
+                />
+              </View>
             );
           }}
         </RNCamera>
-
-        <BarcodeMask
-          showAnimatedLine={false}
-          edgeRadius={15}
-          maskOpacity={0.2}
-        />
-
-        <Snackbar
-          theme={theme}
-          style={{ marginBottom: 100, backgroundColor: theme.colors.surface }}
-          visible={state.isVisible}
-          onDismiss={() => {}}
-          action={{
-            label: 'Close',
-            onPress: () => {
-              setState({
-                isActive: true,
-                isVisible: false,
-              });
-            },
-          }}>
-          <Text style={{color: theme.colors.onSurface}}>
-            {history.length > 0 && history[0].data}
-          </Text>
-        </Snackbar>
       </View>
+
+      <Snackbar
+        theme={theme}
+        style={{marginBottom: 100, backgroundColor: theme.colors.surface}}
+        visible={state.isVisible}
+        onDismiss={() => {}}
+        action={{
+          label: 'Close',
+          onPress: () => {
+            _openURL()
+            setState({
+              isActive: true,
+              isVisible: false,
+            });
+          },
+        }}>
+        <Text style={{color: theme.colors.onSurface}}>
+          {history.length > 0 && history[0].data}
+        </Text>
+      </Snackbar>
     </>
   );
 };
@@ -119,16 +120,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignSelf: 'center',
     margin: 20,
-  },
-  contentContainer: {
-    // paddingHorizontal: 24,
-  },
-  previewContainer: {
-    flex: 1,
-    flexDirection: 'row-reverse',
-    backgroundColor: 'green',
-    borderRadius: 20,
-    // marginTop: 16,
-    // overflow: 'hidden',
   },
 });

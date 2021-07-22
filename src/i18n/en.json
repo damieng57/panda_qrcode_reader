@@ -1,5 +1,7 @@
 {
   "header_title": "QRCode Manager",
+  "header_title_history": "History",
+  "header_title_settings": "Settings",
   "waiting": "Waiting...",
   "tab_scan": "Scan",
   "tab_history": "History",
@@ -13,7 +15,7 @@
   "alert_cancel": "CANCEL",
   "snackbar_open": "OPEN",
   "about_subtitle": "Free QRCode reader",
-  "about_text_1": "This product is completely free. No ads, no tracking and really your privacy. If you want to encourage me to continue, you can rate this app with 5 stars on the PlayStore. You can also donate a tip for the effort because I do this app on my free time.",
-  "about_text_2": "texte 2",
-  "link": "lien"
+  "about_text_1": "QrCode Manager is a completely free app, no ads, no tracking. If you like the app, please donate to encourage me to improve it. You can also rate this app with 5 five stars on PlayStore",
+  "about_text_2": "Any suggestions? Send an email:",
+  "link": "panda_free_apps@outlook.fr"
 }

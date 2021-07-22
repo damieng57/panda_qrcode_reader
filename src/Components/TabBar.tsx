@@ -102,7 +102,7 @@ export const TabBar = ({
 
 const style = StyleSheet.create({
   tabContainer: {
-    height: 80,
+    height: 64,
     position: "absolute",
     bottom: 0,
   },

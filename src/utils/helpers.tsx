@@ -1,5 +1,8 @@
 import {URL} from 'react-native-url-polyfill';
 import {getLocales} from 'react-native-localize';
+import { atomWithStorage } from './atomWithStorage'
+
+export const historyAtom = atomWithStorage('DG:HISTORY', [])
 
 const language = getLocales()[0].languageCode;
 let translation = require(`../i18n/en.json`);
@@ -22,7 +25,7 @@ export const isValidHttpUrl = (string: string): boolean => {
   return true;
 };
 
-export const getTranslation = key => {
+export const getTranslation = (key:string) => {
   return translation[key] || '';
 };
 

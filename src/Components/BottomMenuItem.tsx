@@ -19,7 +19,7 @@ export const BottomMenuItem = ({iconName, isCurrent}: Props) => {
       }}>
       <MaterialCommunityIcons
         name={iconName}
-        size={32}
+        size={24}
         style={{color: theme.colors.onSurface}}
       />
     </View>

@@ -1,8 +1,22 @@
 import * as React from 'react';
-import {View, StyleSheet, Linking, ScrollView} from 'react-native';
-import {Appbar, Paragraph, Subheading, useTheme} from 'react-native-paper';
-import {getTranslation} from '../utils/helpers';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {
+  View,
+  StyleSheet,
+  Linking,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import {
+  Appbar,
+  Paragraph,
+  Subheading,
+  useTheme,
+  Headline,
+  Text,
+} from 'react-native-paper';
+import {getTranslation as t} from '../utils/helpers';
+
 
 interface AboutScreenProps {}
 
@@ -11,30 +25,37 @@ export const AboutScreen = (props: AboutScreenProps) => {
 
   return (
     <>
-      <Appbar.Header>
-        <Appbar.Content
-          title={getTranslation('header_title')}
-          subtitle={getTranslation('header_subtitle')}></Appbar.Content>
-      </Appbar.Header>
       <ScrollView contentContainerStyle={styles.container}>
-        <Subheading style={{marginBottom: 16}}>
-          {getTranslation('about_subtitle')}
-        </Subheading>
-        <Paragraph>{getTranslation('about_text_1')}</Paragraph>
+        <Image
+          source={require('../assets/qr-code-icon.png')}
+          style={{marginTop: 16, width: 100, height: 100}}
+        />
+        <Headline style={{marginVertical: 16}}>
+          {t('about_subtitle')}
+        </Headline>
+        <Paragraph>{t('about_text_1')}</Paragraph>
         <TouchableOpacity
           onPress={() =>
             Linking.openURL('https://paypal.me/damieng57').catch(e =>
               console.log(e),
             )
-          }></TouchableOpacity>
-
-        <View
-          style={{
-            marginTop: 20,
-            width: '100%',
-            justifyContent: 'flex-start',
-          }}>
-          <Paragraph>Do you like this logo?</Paragraph>
+          }>
+          <Image
+            source={require('../assets/paypal.png')}
+            style={{marginVertical: 16, width: 200, height: 60}}
+          />
+        </TouchableOpacity>
+        <View style={{flex: 1, flexDirection: 'row', flexWrap: 'wrap'}}>
+          <Paragraph>
+            {`${t('about_text_2')} `}
+            <Paragraph
+              style={{textDecorationLine: 'underline'}}
+              onPress={() =>
+                Linking.openURL(`mailto:${t('link')}`).catch(e =>
+                  console.log(e),
+                )
+              }>{`${t('link')}`}</Paragraph>
+          </Paragraph>
         </View>
       </ScrollView>
     </>
@@ -48,6 +69,7 @@ export default AboutScreen;
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    paddingTop: 48,
     justifyContent: 'center',
     alignItems: 'center',
   },

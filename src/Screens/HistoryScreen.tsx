@@ -1,33 +1,30 @@
+import AsyncStorage from '@react-native-community/async-storage';
+import {useAtom} from 'jotai';
 import * as React from 'react';
-import {StyleSheet, FlatList, View, Share, Alert, Linking} from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {Alert, FlatList, Linking, Share, StyleSheet, View} from 'react-native';
 import {
   Appbar,
-  Surface,
-  Searchbar,
-  IconButton,
-  Switch,
-  List,
-  Subheading,
   Divider,
+  IconButton,
+  List,
+  Searchbar,
+  Subheading,
+  Surface,
 } from 'react-native-paper';
-import AsyncStorage from '@react-native-community/async-storage';
-import {getTranslation} from '../utils/helpers';
-import { useAtom } from 'jotai'
-import { useTheme } from '../theme'
-import { atomWithStorage } from '../hooks/useAsyncStorage'
- 
-const historyAtom = atomWithStorage('DG:HISTORY', [])
-
+import {SwipeRow} from 'react-native-swipe-list-view';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Drawer from '../Components/drawer';
+import {useTheme} from '../theme';
+import {getTranslation as t, historyAtom} from '../utils/helpers';
 
 export const HistoryScreen = (props: any) => {
-  const theme = useTheme()
+  const theme = useTheme();
   const [history, setHistory] = useAtom(historyAtom);
-  const [isFavorites, setIsFavorites] = React.useState();
+  const [isFavorites, setIsFavorites] = React.useState<boolean>();
   const [searchQuery, setSearchQuery] = React.useState('');
   const {colors} = useTheme();
 
-  const _onChangeSearch = () => console.log(search)
+  const _onChangeSearch = (search: string) => setSearchQuery(search);
 
   const _renderItem = (item, index) => {
     const _handlePress = async () => {
@@ -44,13 +41,13 @@ export const HistoryScreen = (props: any) => {
     };
 
     const _isFavorites = () => {
-      // const objIndex = history.map(obj => {
-      //   if (obj._id === item.item._id) {
-      //     obj.favorite = !obj.favorite;
-      //   }
-      //   return obj;
-      // });
-      // globalState.setHistory(objIndex);
+      const objIndex = history.map(obj => {
+        if (obj._id === item.item._id) {
+          obj.favorite = !obj.favorite;
+        }
+        return obj;
+      });
+      setHistory(objIndex);
     };
 
     const _isShared = async () => {
@@ -64,87 +61,54 @@ export const HistoryScreen = (props: any) => {
     };
 
     const _isDeleted = () => {
-      Alert.alert(
-        getTranslation('alert_delete_item'),
-        getTranslation('alert_delete_item_message'),
-        [
-          {
-            text: getTranslation('alert_cancel'),
-            onPress: () => {},
-          },
-          {
-            text: getTranslation('alert_ok'),
-            onPress: () => {
-              const objIndex = history.filter(
-                obj => obj._id !== item.item._id,
-              );
-              setHistory(objIndex);
-            },
-          },
-        ],
-      );
-    };
-
-    return (
-      <>
-        <List.Item
-          title={
-            <Subheading style={{fontWeight: 'bold'}}>
-              {item.item.title}
-            </Subheading>
-          }
-          description={item.item.text}
-          onPress={_handlePress}
-          left={() => <List.Icon icon={item.item.icon}></List.Icon>}
-          right={() => (
-            <View style={{flex: 0, flexDirection: 'row', alignItems: 'center'}}>
-              <IconButton
-                icon={item.item.favorite ? 'star' : 'star-outline'}
-                onPress={_isFavorites}></IconButton>
-              <IconButton icon="share-variant" onPress={_isShared}></IconButton>
-              <IconButton icon="delete" onPress={_isDeleted}></IconButton>
-            </View>
-          )}
-        />
-        <Divider />
-      </>
-    );
-  };
-
-  const _delete = () => {
-    Alert.alert(
-      getTranslation('alert_delete_list'),
-      getTranslation('alert_delete_list_message'),
-      [
+      Alert.alert(t('alert_delete_item'), t('alert_delete_item_message'), [
         {
-          text: getTranslation('alert_cancel'),
+          text: t('alert_cancel'),
           onPress: () => {},
         },
         {
-          text: getTranslation('alert_ok'),
+          text: t('alert_ok'),
           onPress: () => {
-            setHistory([]);
-            AsyncStorage.multiRemove(['QRCODE_DG::HISTORY']);
+            const objIndex = history.filter(obj => obj._id !== item.item._id);
+            setHistory(objIndex);
           },
         },
-      ],
-    );
+      ]);
+    };
+
+    return <Drawer />;
+  };
+
+  const _delete = () => {
+    Alert.alert(t('alert_delete_list'), t('alert_delete_list_message'), [
+      {
+        text: t('alert_cancel'),
+        onPress: () => {},
+      },
+      {
+        text: t('alert_ok'),
+        onPress: () => {
+          setHistory([]);
+          AsyncStorage.multiRemove(['QRCODE_DG::HISTORY']);
+        },
+      },
+    ]);
   };
 
   const _generateList = () => {
     let _temp = history;
-    // if (isFavorites) _temp = _temp.filter(item => item.favorite);
-    // if (searchQuery !== '')
-    //   _temp = _temp.filter(item =>
-    //     item.data.toLowerCase().includes(searchQuery.toLowerCase()),
-    //   );
+    if (isFavorites) _temp = _temp.filter(item => item.favorite);
+    if (searchQuery !== '')
+      _temp = _temp.filter(item =>
+        item.data.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
     return _temp;
   };
 
   return (
     <>
       <Appbar.Header>
-        <Appbar.Content title={getTranslation('header_title')}></Appbar.Content>
+        <Appbar.Content title={t('header_title_history')}></Appbar.Content>
       </Appbar.Header>
       <Surface
         style={{
@@ -156,7 +120,7 @@ export const HistoryScreen = (props: any) => {
         }}>
         <Searchbar
           style={{flex: 1}}
-          placeholder={getTranslation('search_placeholder')}
+          placeholder={t('search_placeholder')}
           onChangeText={_onChangeSearch}
           value={searchQuery}
         />
@@ -168,14 +132,13 @@ export const HistoryScreen = (props: any) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <MaterialCommunityIcons name="star" size={24} color={colors.text} />
+            <MaterialCommunityIcons
+              onPress={() => setIsFavorites(!isFavorites)}
+              name={isFavorites ? 'star-outline' : 'star'}
+              size={24}
+              color={colors.text}
+            />
           </View>
-          <Switch
-            onValueChange={() => setIsFavorites(!isFavorites)}
-            value={isFavorites}
-            theme={theme}
-            ></Switch>
-          <IconButton icon="delete" onPress={_delete}></IconButton>
         </View>
       </Surface>
       <FlatList
@@ -188,6 +151,24 @@ export const HistoryScreen = (props: any) => {
 };
 
 const styles = StyleSheet.create({
+  icon: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 64,
+    width: 36,
+  },
+  items: {
+    // flexDirection: 'row',
+    alignItems: 'center',
+    // padding: 16,
+    width: '100%',
+    flexDirection: 'row-reverse',
+    justifyContent: 'flex-end',
+    padding: 8,
+    paddingLeft: 56,
+  },
+  title: {fontSize: 12, color: 'lightgray', paddingHorizontal: 16},
+  texts: {flex: 1, paddingLeft: 56, paddingRight: 16},
   container: {
     flex: 1,
     flexDirection: 'column',
@@ -204,5 +185,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignSelf: 'center',
     margin: 20,
+  },
+
+  standalone: {
+    marginTop: 30,
+    marginBottom: 30,
+  },
+  standaloneRowFront: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  standaloneRowBack: {
+    alignItems: 'center',
+    // backgroundColor: '#8BC',
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  backTextWhite: {
+    color: '#FFF',
   },
 });
