@@ -7,6 +7,7 @@ import {
   DarkTheme as PaperDarkTheme,
 } from 'react-native-paper';
 import {useColorScheme} from 'react-native';
+import {colors} from './colors';
 
 export const useTheme = () => {
   const colorScheme = useColorScheme();
@@ -20,6 +21,7 @@ export const useTheme = () => {
             ...PaperDarkTheme.colors,
             ...NavigationDarkTheme.colors,
             accent: NavigationDarkTheme.colors.primary,
+            warning: colors.orange,
           },
         }
       : {
@@ -29,6 +31,7 @@ export const useTheme = () => {
             ...PaperDefautTheme.colors,
             ...NavigationDefaultTheme.colors,
             accent: NavigationDefaultTheme.colors.primary,
+            warning: colors.orange,
           },
         };
 

@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   ViewStyle,
+  Alert,
 } from 'react-native';
 import {
   Appbar,
@@ -17,6 +18,7 @@ import {
   TouchableRipple,
 } from 'react-native-paper';
 import {getTranslation as t} from '../utils/helpers';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import {useTheme} from '../theme';
 import {
@@ -117,42 +119,68 @@ export const SettingsScreen = (props: any) => {
   const theme = useTheme();
   const [isAnonym, setAnonym] = React.useState(false);
   const [isExpand, setExpand] = React.useState(false);
-
-  const _clearHistory = () => {
-    console.log('Clear history');
-  };
-
-  const _clearFavorites = () => {
-    console.log('Clear favorites');
-  };
+  const [isDark, setTheme] = React.useState(false);
 
   const _openPalette = () => {
     console.log('Ouvrir la palette');
     setExpand(!isExpand);
   };
 
+  const _clearFavorites = () => {
+    Alert.alert(t('alert_delete_favorites'), t('alert_delete_favorites_message'), [
+      {
+        text: t('alert_cancel'),
+        onPress: () => {},
+      },
+      {
+        text: t('alert_ok'),
+        onPress: () => {
+          AsyncStorage.multiRemove(['QRCODE_DG::FAVORITES']);
+        },
+      },
+    ]);  };
+
+  const _clearHistory = () => {
+    Alert.alert(t('alert_delete_list'), t('alert_delete_list_message'), [
+      {
+        text: t('alert_cancel'),
+        onPress: () => {},
+      },
+      {
+        text: t('alert_ok'),
+        onPress: () => {
+          AsyncStorage.multiRemove(['QRCODE_DG::HISTORY']);
+        },
+      },
+    ]);
+  };
+
   return (
     <>
       <Appbar.Header>
-        <Appbar.Content
-          title={t('header_title_settings')}></Appbar.Content>
+        <Appbar.Content title={t('header_title_settings')}></Appbar.Content>
       </Appbar.Header>
       <ScrollView
         style={{marginBottom: 50}}
         contentContainerStyle={{paddingVertical: 16}}>
         <Title style={styles.title}>HISTORIQUE</Title>
 
-        <View style={styles.items}>
-          <View style={styles.texts}>
-            <Subheading style={{color: 'white'}}>
-              Activer le mode anonyme
-            </Subheading>
-            <Text style={{color: 'lightgray'}}>
-              Les scans ne seront pas enregistrés dans l'historique
-            </Text>
-          </View>
-          <Switch value={isAnonym} onValueChange={() => setAnonym(!isAnonym)} />
-        </View>
+        <TouchableRipple style={styles.items} onPress={() => setAnonym(!isAnonym)}>
+          <>
+            <View style={styles.texts}>
+              <Subheading style={{color: 'white'}}>
+                Activer le mode anonyme
+              </Subheading>
+              <Text style={{color: 'lightgray'}}>
+                Les scans ne seront pas enregistrés dans l'historique
+              </Text>
+            </View>
+            <Switch
+              value={isAnonym}
+              onValueChange={() => setAnonym(!isAnonym)}
+            />
+          </>
+        </TouchableRipple>
 
         <View style={styles.items}>
           <TouchableRipple style={styles.texts} onPress={() => _clearHistory()}>
@@ -205,15 +233,17 @@ export const SettingsScreen = (props: any) => {
 
         <Title style={styles.title}>THEME</Title>
 
-        <View style={styles.items}>
+        <TouchableRipple style={styles.items} onPress={() => setTheme(!isDark)}>
+          <>
           <View style={styles.texts}>
             <Subheading style={{color: 'white'}}>Mode sombre</Subheading>
             <Text style={{color: 'lightgray'}}>
               Choisir d'activer ou de désactiver le mode sombre
             </Text>
           </View>
-          <Switch value={isAnonym} onValueChange={() => setAnonym(!isAnonym)} />
-        </View>
+          <Switch value={isDark} onValueChange={() => setTheme(!isDark)} />
+          </>
+        </TouchableRipple>
 
         <View style={[styles.items, {flexDirection: 'column'}]}>
           <View style={styles.texts}>
@@ -249,14 +279,14 @@ const styles = StyleSheet.create({
   items: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingRight: 16
   },
   title: {fontSize: 12, color: 'lightgray', paddingHorizontal: 16},
   container: {
     flex: 1,
     flexDirection: 'column',
   },
-  texts: {flex: 1, paddingLeft: 56, paddingRight: 16},
+  texts: {flex: 1, padding: 16, paddingLeft: 72, paddingRight: 16},
   preview: {
     flex: 1,
     justifyContent: 'flex-end',

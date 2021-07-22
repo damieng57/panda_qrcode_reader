@@ -7,16 +7,8 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import {
-  Appbar,
-  Paragraph,
-  Subheading,
-  useTheme,
-  Headline,
-  Text,
-} from 'react-native-paper';
+import {Paragraph, useTheme, Headline} from 'react-native-paper';
 import {getTranslation as t} from '../utils/helpers';
-
 
 interface AboutScreenProps {}
 
@@ -30,9 +22,7 @@ export const AboutScreen = (props: AboutScreenProps) => {
           source={require('../assets/qr-code-icon.png')}
           style={{marginTop: 16, width: 100, height: 100}}
         />
-        <Headline style={{marginVertical: 16}}>
-          {t('about_subtitle')}
-        </Headline>
+        <Headline style={{marginVertical: 16}}>{t('about_subtitle')}</Headline>
         <Paragraph>{t('about_text_1')}</Paragraph>
         <TouchableOpacity
           onPress={() =>

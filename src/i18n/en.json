@@ -17,5 +17,7 @@
   "about_subtitle": "Free QRCode reader",
   "about_text_1": "QrCode Manager is a completely free app, no ads, no tracking. If you like the app, please donate to encourage me to improve it. You can also rate this app with 5 five stars on PlayStore",
   "about_text_2": "Any suggestions? Send an email:",
-  "link": "panda_free_apps@outlook.fr"
+  "link": "panda_free_apps@outlook.fr",
+  "alert_delete_favorites": "Delete favorites",
+  "alert_delete_favorites_message": "Are you sure you want to clear your favorties list?"
 }

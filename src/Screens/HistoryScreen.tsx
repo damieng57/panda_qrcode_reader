@@ -1,19 +1,13 @@
-import AsyncStorage from '@react-native-community/async-storage';
 import {useAtom} from 'jotai';
 import * as React from 'react';
-import {Alert, FlatList, Linking, Share, StyleSheet, View} from 'react-native';
+import {Alert, FlatList, StyleSheet, View} from 'react-native';
 import {
   Appbar,
-  Divider,
-  IconButton,
-  List,
   Searchbar,
-  Subheading,
   Surface,
 } from 'react-native-paper';
-import {SwipeRow} from 'react-native-swipe-list-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Drawer from '../Components/drawer';
+import Drawer from '../Components/Drawer';
 import {useTheme} from '../theme';
 import {getTranslation as t, historyAtom} from '../utils/helpers';
 
@@ -27,19 +21,6 @@ export const HistoryScreen = (props: any) => {
   const _onChangeSearch = (search: string) => setSearchQuery(search);
 
   const _renderItem = (item, index) => {
-    const _handlePress = async () => {
-      // Checking if the link is supported for links with custom URL scheme.
-      const supported = await Linking.canOpenURL(item.item.data);
-
-      if (supported) {
-        // Opening the link with some app, if the URL scheme is "http" the web link should be opened
-        // by some browser in the mobile
-        await Linking.openURL(item.item.data);
-      } else {
-        alert(`${item.item.data}`);
-      }
-    };
-
     const _isFavorites = () => {
       const objIndex = history.map(obj => {
         if (obj._id === item.item._id) {
@@ -48,16 +29,6 @@ export const HistoryScreen = (props: any) => {
         return obj;
       });
       setHistory(objIndex);
-    };
-
-    const _isShared = async () => {
-      try {
-        const result = await Share.share({
-          message: item.item.data,
-        });
-      } catch (error) {
-        alert(error.message);
-      }
     };
 
     const _isDeleted = () => {
@@ -75,24 +46,7 @@ export const HistoryScreen = (props: any) => {
         },
       ]);
     };
-
-    return <Drawer />;
-  };
-
-  const _delete = () => {
-    Alert.alert(t('alert_delete_list'), t('alert_delete_list_message'), [
-      {
-        text: t('alert_cancel'),
-        onPress: () => {},
-      },
-      {
-        text: t('alert_ok'),
-        onPress: () => {
-          setHistory([]);
-          AsyncStorage.multiRemove(['QRCODE_DG::HISTORY']);
-        },
-      },
-    ]);
+    return <Drawer item={item} isFavorites={_isFavorites} isDeleted={_isDeleted} />;
   };
 
   const _generateList = () => {
@@ -134,7 +88,7 @@ export const HistoryScreen = (props: any) => {
             }}>
             <MaterialCommunityIcons
               onPress={() => setIsFavorites(!isFavorites)}
-              name={isFavorites ? 'star-outline' : 'star'}
+              name={isFavorites ? 'star' : 'star-outline'}
               size={24}
               color={colors.text}
             />

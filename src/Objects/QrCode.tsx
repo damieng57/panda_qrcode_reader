@@ -17,9 +17,11 @@ export class QrCode implements IQrCode {
 
   constructor(value: any) {
     const _parsed = parseData(value.data);
+    const _date = Date.now();
 
     const _temp = {
-      _id: value._id + Date.now(),
+      _id: value._id + _date,
+      date: _date,
       data: value.data,
       favorite: value.favorite,
       icon: _parsed[0],

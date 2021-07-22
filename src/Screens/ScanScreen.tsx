@@ -4,7 +4,7 @@ import {RNCamera} from 'react-native-camera';
 import {Snackbar, Text} from 'react-native-paper';
 import {QrCode} from '../Objects/QrCode';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
-import {getTranslation, historyAtom} from '../utils/helpers';
+import {getTranslation as t, historyAtom} from '../utils/helpers';
 import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
 
@@ -32,6 +32,7 @@ export const ScanScreen = (props: any) => {
     const _temp = new QrCode({
       _id: item.rawData,
       favorite: false,
+      date: Date.now(),
       data: item.data,
     });
 
