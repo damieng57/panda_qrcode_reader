@@ -1,19 +1,23 @@
 import * as React from 'react';
 import {StyleSheet, Platform, StatusBar} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
 import {Provider as PaperProvider} from 'react-native-paper';
 import SplashScreen from 'react-native-splash-screen';
 import {Provider} from 'jotai';
 import {BottomMenu} from './Components/BottomMenu';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import { useTheme } from "./theme";
+import {useTheme} from './theme';
+import {DetailsScreen} from './Screens/DetailsScreen';
+
+const Stack = createStackNavigator();
 
 export default function App() {
   React.useEffect(() => {
     SplashScreen.hide();
   });
 
-  const theme = useTheme()
+  const theme = useTheme();
 
   return (
     <Provider>
@@ -21,7 +25,10 @@ export default function App() {
         <NavigationContainer theme={theme}>
           {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
           <SafeAreaProvider>
-            <BottomMenu />
+            <Stack.Navigator screenOptions={{header: () => null}}>
+              <Stack.Screen name="main" component={BottomMenu} />
+              <Stack.Screen name="details" component={DetailsScreen} />
+            </Stack.Navigator>
           </SafeAreaProvider>
         </NavigationContainer>
       </PaperProvider>

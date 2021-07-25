@@ -1,8 +1,15 @@
 import {URL} from 'react-native-url-polyfill';
 import {getLocales} from 'react-native-localize';
 import { atomWithStorage } from './atomWithStorage'
+import { ISettings } from '../types';
 
-export const historyAtom = atomWithStorage('DG:HISTORY', [])
+export const historyAtom = atomWithStorage('QRCODE:HISTORY', [])
+export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
+  isAnonym: false,
+  isDarkMode: true,
+  accentColor: 'red',
+  maxItems: 100,
+})
 
 const language = getLocales()[0].languageCode;
 let translation = require(`../i18n/en.json`);

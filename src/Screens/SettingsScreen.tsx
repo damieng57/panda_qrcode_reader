@@ -17,7 +17,7 @@ import {
   Divider,
   TouchableRipple,
 } from 'react-native-paper';
-import {getTranslation as t} from '../utils/helpers';
+import {getTranslation as t, settingsAtom} from '../utils/helpers';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import {useTheme} from '../theme';
@@ -55,6 +55,7 @@ import {
   blueGrey300,
   grey300,
 } from '../theme/colors';
+import {useAtom} from 'jotai';
 
 export interface ITouchableColor {
   size?: number;
@@ -117,42 +118,48 @@ export const TouchableColor = (props: ITouchableColor) => {
 
 export const SettingsScreen = (props: any) => {
   const theme = useTheme();
+  const [settings, setSettings] = useAtom(settingsAtom);
   const [isAnonym, setAnonym] = React.useState(false);
-  const [isExpand, setExpand] = React.useState(false);
-  const [isDark, setTheme] = React.useState(false);
+  const [isDarkMode, setTheme] = React.useState(true);
+  const [maxItems, setMaxItems] = React.useState(100);
+  const [accentColor, setAccentColor] = React.useState('red');
 
-  const _openPalette = () => {
-    console.log('Ouvrir la palette');
-    setExpand(!isExpand);
+  React.useEffect(() => {
+    setSettings({
+      ...settings,
+      isAnonym,
+      isDarkMode,
+      maxItems,
+      accentColor,
+    });
+  }, [isAnonym, isDarkMode, maxItems, accentColor]);
+
+  const _clear = (element: string) => {
+    AsyncStorage.multiRemove([`QRCODE_DG::${element}`]);
+  };
+
+  const _showAlert = (title: string, message: string) => {
+    Alert.alert(title, message, [
+      {
+        text: t('alert_cancel'),
+        onPress: () => {},
+      },
+      {
+        text: t('alert_ok'),
+        onPress: () => _clear('FAVORITES'),
+      },
+    ]);
   };
 
   const _clearFavorites = () => {
-    Alert.alert(t('alert_delete_favorites'), t('alert_delete_favorites_message'), [
-      {
-        text: t('alert_cancel'),
-        onPress: () => {},
-      },
-      {
-        text: t('alert_ok'),
-        onPress: () => {
-          AsyncStorage.multiRemove(['QRCODE_DG::FAVORITES']);
-        },
-      },
-    ]);  };
+    _showAlert(
+      t('alert_delete_favorites'),
+      t('alert_delete_favorites_message'),
+    );
+  };
 
   const _clearHistory = () => {
-    Alert.alert(t('alert_delete_list'), t('alert_delete_list_message'), [
-      {
-        text: t('alert_cancel'),
-        onPress: () => {},
-      },
-      {
-        text: t('alert_ok'),
-        onPress: () => {
-          AsyncStorage.multiRemove(['QRCODE_DG::HISTORY']);
-        },
-      },
-    ]);
+    _showAlert(t('alert_delete_list'), t('alert_delete_list_message'));
   };
 
   return (
@@ -165,7 +172,9 @@ export const SettingsScreen = (props: any) => {
         contentContainerStyle={{paddingVertical: 16}}>
         <Title style={styles.title}>HISTORIQUE</Title>
 
-        <TouchableRipple style={styles.items} onPress={() => setAnonym(!isAnonym)}>
+        <TouchableRipple
+          style={styles.items}
+          onPress={() => setAnonym(!isAnonym)}>
           <>
             <View style={styles.texts}>
               <Subheading style={{color: 'white'}}>
@@ -220,6 +229,8 @@ export const SettingsScreen = (props: any) => {
             </Text>
           </View>
           <TextInput
+            keyboardType='numeric'
+            onChangeText={(value: string) => setMaxItems(parseInt(value, 10))}
             style={{
               minWidth: 36,
               height: 36,
@@ -233,15 +244,20 @@ export const SettingsScreen = (props: any) => {
 
         <Title style={styles.title}>THEME</Title>
 
-        <TouchableRipple style={styles.items} onPress={() => setTheme(!isDark)}>
+        <TouchableRipple
+          style={styles.items}
+          onPress={() => setTheme(!isDarkMode)}>
           <>
-          <View style={styles.texts}>
-            <Subheading style={{color: 'white'}}>Mode sombre</Subheading>
-            <Text style={{color: 'lightgray'}}>
-              Choisir d'activer ou de désactiver le mode sombre
-            </Text>
-          </View>
-          <Switch value={isDark} onValueChange={() => setTheme(!isDark)} />
+            <View style={styles.texts}>
+              <Subheading style={{color: 'white'}}>Mode sombre</Subheading>
+              <Text style={{color: 'lightgray'}}>
+                Choisir d'activer ou de désactiver le mode sombre
+              </Text>
+            </View>
+            <Switch
+              value={isDarkMode}
+              onValueChange={() => setTheme(!isDarkMode)}
+            />
           </>
         </TouchableRipple>
 
@@ -261,7 +277,7 @@ export const SettingsScreen = (props: any) => {
                 (color: string, index: number): JSX.Element => (
                   <TouchableColor
                     key={index}
-                    onPress={() => {}}
+                    onPress={() => setAccentColor(color)}
                     color={color}
                     size={30}
                     style={{marginHorizontal: 5}}></TouchableColor>
@@ -279,7 +295,7 @@ const styles = StyleSheet.create({
   items: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 16
+    paddingRight: 16,
   },
   title: {fontSize: 12, color: 'lightgray', paddingHorizontal: 16},
   container: {

@@ -1,11 +1,6 @@
 {
-  "header_title": "QRCode Manager",
   "header_title_history": "History",
   "header_title_settings": "Settings",
-  "waiting": "Waiting...",
-  "tab_scan": "Scan",
-  "tab_history": "History",
-  "tab_about": "About",
   "search_placeholder": "Search",
   "alert_delete_item": "Delete this item",
   "alert_delete_item_message": "Are you sure you want delete this item? It will be also remove from your favorties.",
@@ -13,11 +8,14 @@
   "alert_delete_list_message": "Are you sure you want to clear this list? All your items will be delete. Your favorites will be deleted too.",
   "alert_ok": "OK",
   "alert_cancel": "CANCEL",
-  "snackbar_open": "OPEN",
   "about_subtitle": "Free QRCode reader",
   "about_text_1": "QrCode Manager is a completely free app, no ads, no tracking. If you like the app, please donate to encourage me to improve it. You can also rate this app with 5 five stars on PlayStore",
   "about_text_2": "Any suggestions? Send an email:",
   "link": "panda_free_apps@outlook.fr",
   "alert_delete_favorites": "Delete favorites",
-  "alert_delete_favorites_message": "Are you sure you want to clear your favorties list?"
+  "alert_delete_favorites_message": "Are you sure you want to clear your favorties list?",
+  "header_title_details": "Details",
+  "mode_anonyme_banner_message": "Anonymous mode activated. No QrCode will be saved in the history.",
+  "permission_camera": "Permission to use camera",
+  "permission_camera_message": "We need your permission to use the camera."
 }

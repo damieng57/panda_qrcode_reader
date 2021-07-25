@@ -1,11 +1,6 @@
 {
-  "header_title": "Gestionnaire de QRCode",
   "header_title_history": "Historique",
   "header_title_settings": "Paramètres",
-  "waiting": "Patientez...",
-  "tab_scan": "Scanner",
-  "tab_history": "Historique",
-  "tab_about": "A Propos",
   "search_placeholder": "Rechercher",
   "alert_delete_item": "Effacer cet élément",
   "alert_delete_item_message": "Etes-vous certain de vouloir supprimer cet élément? Il sera supprimé de la liste et de vos favoris.",
@@ -13,11 +8,14 @@
   "alert_delete_list_message": "Etes-vous certain de vouloir supprimer cette liste? Tous les éléments seront supprimés, y compris les favoris.",
   "alert_ok": "OK",
   "alert_cancel": "ANNULER",
-  "snackbar_open": "OUVRIR",
   "about_subtitle": "Lecteur de QRCode gratuit",
   "about_text_1": "QrCode Manager est une application totalement gratuite, sans publicité et sans traçage. Si vous aimez l'application, faites un don pour m'encourager à l'améliorer",
   "about_text_2": "Des suggestions? Envoyer un message à l'adresse mail suivante:",
   "link": "panda_free_apps@outlook.fr",
   "alert_delete_favorites": "Effacer vos favoris",
-  "alert_delete_favorites_message": "Etes-vous certain de vouloir effacer votre liste de favoris?"
+  "alert_delete_favorites_message": "Etes-vous certain de vouloir effacer votre liste de favoris?",
+  "header_title_details": "Details",
+  "mode_anonyme_banner_message": "Mode anonyme activé. Aucun QrCode ne sera enregistré dans l'historique de l'application.",
+  "permission_camera": "Permission pour utiliser la caméra",
+  "permission_camera_message": "Nous avons besoin de votre permission pour utiliser la caméra."
 }
