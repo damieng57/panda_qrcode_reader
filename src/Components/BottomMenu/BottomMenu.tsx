@@ -4,10 +4,10 @@ import {
   BottomTabBarProps,
 } from '@react-navigation/bottom-tabs';
 import {TabBar} from './TabBar';
-import {ScanScreen} from '../Screens/ScanScreen';
-import {HistoryScreen} from '../Screens/HistoryScreen';
-import {AboutScreen} from '../Screens/AboutScreen';
-import {SettingsScreen} from '../Screens/SettingsScreen';
+import {ScanScreen} from '../../Screens/ScanScreen';
+import {HistoryScreen} from '../../Screens/HistoryScreen';
+import {AboutScreen} from '../../Screens/AboutScreen';
+import {SettingsScreen} from '../../Screens/SettingsScreen';
 import {View} from 'react-native';
 
 export const BottomMenu = () => {

@@ -6,22 +6,25 @@ import {
   DefaultTheme as PaperDefautTheme,
   DarkTheme as PaperDarkTheme,
 } from 'react-native-paper';
-import {useColorScheme} from 'react-native';
-import {colors} from './colors';
+import {indigo300, orange300} from './colors';
+import {settingsAtom} from '../utils/helpers';
+import { useAtom } from 'jotai';
+import { ISettings } from '../types';
+
 
 export const useTheme = () => {
-  const colorScheme = useColorScheme();
+  const [settings] = useAtom<ISettings>(settingsAtom);
 
   const theme =
-    colorScheme === 'dark'
+  settings?.isDarkMode === 'dark'
       ? {
           ...PaperDarkTheme,
           ...NavigationDarkTheme,
           colors: {
             ...PaperDarkTheme.colors,
             ...NavigationDarkTheme.colors,
-            accent: NavigationDarkTheme.colors.primary,
-            warning: colors.orange,
+            accent: indigo300,
+            warning: orange300,
           },
         }
       : {
@@ -30,8 +33,8 @@ export const useTheme = () => {
           colors: {
             ...PaperDefautTheme.colors,
             ...NavigationDefaultTheme.colors,
-            accent: NavigationDefaultTheme.colors.primary,
-            warning: colors.orange,
+            accent: indigo300,
+            warning: orange300,
           },
         };
 

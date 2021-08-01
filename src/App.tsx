@@ -5,7 +5,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {Provider as PaperProvider} from 'react-native-paper';
 import SplashScreen from 'react-native-splash-screen';
 import {Provider} from 'jotai';
-import {BottomMenu} from './Components/BottomMenu';
+import {BottomMenu} from './Components/BottomMenu/BottomMenu';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useTheme} from './theme';
 import {DetailsScreen} from './Screens/DetailsScreen';
@@ -13,12 +13,11 @@ import {DetailsScreen} from './Screens/DetailsScreen';
 const Stack = createStackNavigator();
 
 export default function App() {
+  const theme = useTheme();
+
   React.useEffect(() => {
     SplashScreen.hide();
   });
-
-  const theme = useTheme();
-
   return (
     <Provider>
       <PaperProvider theme={theme}>

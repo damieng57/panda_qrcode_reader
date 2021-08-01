@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {ScrollView, StyleSheet, ViewStyle} from 'react-native';
-import {Appbar, Title, Divider, Paragraph} from 'react-native-paper';
+import {Appbar, Title, Paragraph} from 'react-native-paper';
 import {getTranslation as t} from '../utils/helpers';
 
 import {useTheme} from '../theme';

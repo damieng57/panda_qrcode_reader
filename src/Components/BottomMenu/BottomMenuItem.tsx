@@ -1,15 +1,14 @@
 import React from 'react';
 import {View} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useTheme} from '../theme';
+import {indigo300} from '../../theme/colors'
 
 type Props = {
   iconName: string;
   isCurrent?: boolean;
 };
 
-export const BottomMenuItem = ({iconName, isCurrent}: Props) => {
-  const theme = useTheme();
+export const BottomMenuItem = ({iconName}: Props) => {
   return (
     <View
       style={{
@@ -20,7 +19,7 @@ export const BottomMenuItem = ({iconName, isCurrent}: Props) => {
       <MaterialCommunityIcons
         name={iconName}
         size={24}
-        style={{color: theme.colors.onSurface}}
+        color={indigo300}
       />
     </View>
   );

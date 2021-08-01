@@ -5,9 +5,10 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "start": "react-native start",
+    "start": "react-native start --reset-cache",
     "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "killpackager": "sh lsof -n -i4TCP:8081 | sed '1 d' | awk '{print $2}' | xargs kill -9"
   },
   "dependencies": {
     "@nartc/react-native-barcode-mask": "^1.2.0",
@@ -16,11 +17,11 @@
     "@react-navigation/bottom-tabs": "^5.11.11",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.5",
-    "jotai": "^1.1.0",
+    "jotai": "^1.2.2",
     "lodash-core": "^4.17.19",
     "react": "17.0.1",
     "react-intl": "^5.20.4",
-    "react-native": "0.64.0",
+    "react-native": "0.64.2",
     "react-native-camera": "^3.43.3",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-localize": "^2.0.2",
@@ -33,6 +34,7 @@
     "react-native-splash-screen": "^3.2.0",
     "react-native-swipe-list-view": "^3.2.9",
     "react-native-url-polyfill": "^1.3.0",
+    "react-native-uuid": "^2.0.1",
     "react-native-vector-icons": "^8.1.0"
   },
   "devDependencies": {
@@ -45,6 +47,7 @@
     "@types/react-test-renderer": "^16.9.2",
     "babel-jest": "^26.6.3",
     "eslint": "^7.14.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "jest": "^26.6.3",
     "metro-react-native-babel-preset": "^0.64.0",
     "react-test-renderer": "17.0.1",

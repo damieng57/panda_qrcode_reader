@@ -255,6 +255,37 @@ export const grey900 = "#212121";
 export const black = "#000000";
 export const white = "#ffffff";
 
-export const colors = {
-  orange: orange300  
-}
+export const palette = [
+  red300,
+  redA200,
+  pink300,
+  pinkA200,
+  purple300,
+  purpleA200,
+  deepPurple300,
+  indigo300,
+  blue300,
+  lightBlue300,
+  lightBlueA200,
+  cyan300,
+  cyanA200,
+  teal300,
+  tealA200,
+  green300,
+  greenA400,
+  lightGreen300,
+  lightGreenA200,
+  lime300,
+  limeA200,
+  yellow300,
+  yellowA200,
+  amber300,
+  amberA200,
+  orange300,
+  orangeA200,
+  deepOrange300,
+  deepOrangeA200,
+  brown300,
+  blueGrey300,
+  grey300,
+];

@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from 'react';
 import {
   View,
   TouchableOpacity,
   Dimensions,
   Animated,
   StyleSheet,
-} from "react-native";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { BottomMenuItem } from "./BottomMenuItem";
-import { useTheme } from "../theme";
+} from 'react-native';
+import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
+import {BottomMenuItem} from './BottomMenuItem';
+import {useTheme} from '../../theme';
 
-export const TabBar = ({
-  state,
-  descriptors,
-  navigation,
-}: BottomTabBarProps) => {
+export const TabBar = ({state, descriptors, navigation}: BottomTabBarProps) => {
   const theme = useTheme()
   const [translateValue] = useState(new Animated.Value(0));
-  const totalWidth = Dimensions.get("window").width;
+  const totalWidth = Dimensions.get('window').width;
   const tabWidth = totalWidth / state.routes.length;
-  
+
   const animateSlider = (index: number) => {
     Animated.spring(translateValue, {
       toValue: index * tabWidth,
@@ -31,23 +27,27 @@ export const TabBar = ({
   useEffect(() => {
     animateSlider(state.index);
   }, [state.index]);
-  
+
   return (
-    <View style={[style.tabContainer, { width: totalWidth, backgroundColor: theme.colors.surface }]}>
-      <View style={{ flexDirection: "row" }}>
+    <View
+      style={[
+        style.tabContainer,
+        {width: totalWidth, backgroundColor: theme.colors.surface},
+      ]}>
+      <View style={{flexDirection: 'row'}}>
         <Animated.View
           style={[
             style.slider,
             {
-              transform: [{ translateX: translateValue }],
+              transform: [{translateX: translateValue}],
               width: tabWidth,
-              backgroundColor: theme.colors.primary
+              backgroundColor: theme.colors.accent,
             },
           ]}
         />
 
         {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
+          const {options} = descriptors[route.key];
           const label =
             options.tabBarLabel !== undefined
               ? options.tabBarLabel
@@ -59,7 +59,7 @@ export const TabBar = ({
 
           const onPress = () => {
             const event = navigation.emit({
-              type: "tabPress",
+              type: 'tabPress',
               target: route.key,
               canPreventDefault: true,
             });
@@ -73,7 +73,7 @@ export const TabBar = ({
 
           const onLongPress = () => {
             navigation.emit({
-              type: "tabLongPress",
+              type: 'tabLongPress',
               target: route.key,
             });
           };
@@ -85,9 +85,8 @@ export const TabBar = ({
               testID={options.tabBarTestID}
               onPress={onPress}
               onLongPress={onLongPress}
-              style={{ flex: 1 }}
-              key={index}
-            >
+              style={{flex: 1}}
+              key={index}>
               <BottomMenuItem
                 iconName={label.toString()}
                 isCurrent={isFocused}
@@ -103,12 +102,12 @@ export const TabBar = ({
 const style = StyleSheet.create({
   tabContainer: {
     height: 64,
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
   },
   slider: {
     height: 5,
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
   },

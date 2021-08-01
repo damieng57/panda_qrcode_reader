@@ -7,37 +7,42 @@ import {
   Linking,
   TouchableOpacity,
 } from 'react-native';
-import {RNCamera} from 'react-native-camera';
+import {Barcode, RNCamera} from 'react-native-camera';
 import {Text} from 'react-native-paper';
-import {QrCode} from '../Objects/QrCode';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
-import {getTranslation as t, historyAtom, settingsAtom} from '../utils/helpers';
+import {
+  getTranslation as t,
+  historyAtom,
+  settingsAtom,
+  createQrCode,
+} from '../utils/helpers';
 import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {PendingView} from '../Components/PendingView';
-import {ISettings} from '../types';
 
 interface IState {
   isActive: boolean;
   isVisible: boolean;
+  barcode?: Barcode;
 }
 
 const defaultState = {
   isActive: true,
   isVisible: false,
+  barcode: undefined,
 };
 
-export const ScanScreen = (props: any) => {
-  const theme = useTheme();
-  const [history, setHistory] = useAtom(historyAtom);
-  const [settings] = useAtom<ISettings>(settingsAtom);
+export const ScanScreen = (props: any & IState) => {
   const [state, setState] = React.useState<IState>(defaultState);
+  const [history, setHistory] = useAtom(historyAtom);
+  const [settings] = useAtom(settingsAtom);
+  const theme = useTheme();
 
   const _init = () => {
     setState({
       isVisible: false,
       isActive: true,
+      barcode: undefined,
     });
   };
 
@@ -60,25 +65,29 @@ export const ScanScreen = (props: any) => {
     }
   }, [history]);
 
-  const _isScanned = (item: any) => {
-    Vibration.vibrate(500);
-    const _temp = new QrCode({
-      _id: item.rawData,
-      favorite: false,
-      date: Date.now(),
-      data: item.data,
-    });
+  const _isScanned = React.useCallback(
+    (item: any) => {
+      if (!settings?.isAnonym && state.isActive) {
+        Vibration.vibrate(500);
+        setState({
+          isActive: false,
+          isVisible: true,
+          barcode: item,
+        });
+      }
+    },
+    [state],
+  );
 
-    settings.isAnonym && setHistory([_temp.get()].concat(history));
-    setState({
-      isActive: false,
-      isVisible: true,
-    });
-  };
+  React.useEffect(() => {
+    if (!state.isActive && state.barcode) {
+      setHistory([createQrCode(state.barcode, false)].concat(history));
+    }
+  }, [state.isActive]);
 
   return (
     <>
-      {settings.isAnonym && (
+      {settings?.isAnonym && (
         <View
           style={[
             styles.bannerAnonym,
@@ -87,10 +96,7 @@ export const ScanScreen = (props: any) => {
           <MaterialCommunityIcons
             name="alert-outline"
             size={24}
-            style={[
-              styles.iconBannerAnonym,
-              {color: theme.colors.background},
-            ]}></MaterialCommunityIcons>
+            style={[styles.iconBannerAnonym]}></MaterialCommunityIcons>
           <Text style={{color: theme.colors.background}}>
             {t('mode_anonyme_banner_message')}
           </Text>
@@ -102,7 +108,7 @@ export const ScanScreen = (props: any) => {
           captureAudio={false}
           style={styles.preview}
           barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
-          onBarCodeRead={state.isActive ? data => _isScanned(data) : () => {}}
+          onBarCodeRead={data => _isScanned(data)}
           type={RNCamera.Constants.Type.back}
           flashMode={RNCamera.Constants.FlashMode.on}
           androidCameraPermissionOptions={{
@@ -113,7 +119,7 @@ export const ScanScreen = (props: any) => {
           }}>
           {({status}) => {
             if (status !== RNCamera.Constants.CameraStatus.READY) {
-              return <PendingView />;
+              return null;
             }
             return (
               <View
@@ -147,7 +153,7 @@ export const ScanScreen = (props: any) => {
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
-              {history.length > 0 && history[0].data}
+              {history?.length > 0 && history[0].data}
             </Text>
           </TouchableOpacity>
           <MaterialCommunityIcons
@@ -185,10 +191,14 @@ export const styles = StyleSheet.create({
     marginRight: 8,
   },
   bannerAnonym: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
     padding: 16,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1,
   },
   preview: {
     flex: 1,

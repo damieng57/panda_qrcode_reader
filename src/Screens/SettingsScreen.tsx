@@ -19,42 +19,8 @@ import {
 } from 'react-native-paper';
 import {getTranslation as t, settingsAtom} from '../utils/helpers';
 import AsyncStorage from '@react-native-community/async-storage';
-
+import {palette} from '../theme/colors';
 import {useTheme} from '../theme';
-import {
-  red300,
-  redA200,
-  pink300,
-  pinkA200,
-  purple300,
-  purpleA200,
-  deepPurple300,
-  indigo300,
-  blue300,
-  lightBlue300,
-  lightBlueA200,
-  cyan300,
-  cyanA200,
-  teal300,
-  tealA200,
-  green300,
-  greenA400,
-  lightGreen300,
-  lightGreenA200,
-  lime300,
-  limeA200,
-  yellow300,
-  yellowA200,
-  amber300,
-  amberA200,
-  orange300,
-  orangeA200,
-  deepOrange300,
-  deepOrangeA200,
-  brown300,
-  blueGrey300,
-  grey300,
-} from '../theme/colors';
 import {useAtom} from 'jotai';
 
 export interface ITouchableColor {
@@ -64,49 +30,15 @@ export interface ITouchableColor {
   onPress: () => void;
 }
 
-const colors = [
-  red300,
-  redA200,
-  pink300,
-  pinkA200,
-  purple300,
-  purpleA200,
-  deepPurple300,
-  indigo300,
-  blue300,
-  lightBlue300,
-  lightBlueA200,
-  cyan300,
-  cyanA200,
-  teal300,
-  tealA200,
-  green300,
-  greenA400,
-  lightGreen300,
-  lightGreenA200,
-  lime300,
-  limeA200,
-  yellow300,
-  yellowA200,
-  amber300,
-  amberA200,
-  orange300,
-  orangeA200,
-  deepOrange300,
-  deepOrangeA200,
-  brown300,
-  blueGrey300,
-  grey300,
-];
-
 export const TouchableColor = (props: ITouchableColor) => {
   const {size, style, onPress} = props;
+  const theme = useTheme();
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[
         {
-          backgroundColor: props.color || 'red',
+          backgroundColor: props.color || theme.colors.accent,
           borderRadius: (size && size / 2) || 15,
           height: size || 30,
           width: size || 30,
@@ -122,17 +54,15 @@ export const SettingsScreen = (props: any) => {
   const [isAnonym, setAnonym] = React.useState(false);
   const [isDarkMode, setTheme] = React.useState(true);
   const [maxItems, setMaxItems] = React.useState(100);
-  const [accentColor, setAccentColor] = React.useState('red');
 
   React.useEffect(() => {
     setSettings({
       ...settings,
       isAnonym,
-      isDarkMode,
+      isDarkMode: isDarkMode ? 'dark' : 'light',
       maxItems,
-      accentColor,
     });
-  }, [isAnonym, isDarkMode, maxItems, accentColor]);
+  }, [isAnonym, isDarkMode, maxItems]);
 
   const _clear = (element: string) => {
     AsyncStorage.multiRemove([`QRCODE_DG::${element}`]);
@@ -164,29 +94,30 @@ export const SettingsScreen = (props: any) => {
 
   return (
     <>
-      <Appbar.Header>
+      <Appbar.Header style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.Content title={t('header_title_settings')}></Appbar.Content>
       </Appbar.Header>
       <ScrollView
-        style={{marginBottom: 50}}
+        style={{marginBottom: 50, backgroundColor: theme.colors.surface}}
         contentContainerStyle={{paddingVertical: 16}}>
-        <Title style={styles.title}>HISTORIQUE</Title>
+        <Title style={[styles.title, {color: theme.colors.onSurface}]}>HISTORIQUE</Title>
 
         <TouchableRipple
           style={styles.items}
           onPress={() => setAnonym(!isAnonym)}>
           <>
             <View style={styles.texts}>
-              <Subheading style={{color: 'white'}}>
+              <Subheading style={{color: theme.colors.onSurface}}>
                 Activer le mode anonyme
               </Subheading>
-              <Text style={{color: 'lightgray'}}>
+              <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
                 Les scans ne seront pas enregistrés dans l'historique
               </Text>
             </View>
             <Switch
               value={isAnonym}
               onValueChange={() => setAnonym(!isAnonym)}
+              color={settings.accentColor}
             />
           </>
         </TouchableRipple>
@@ -194,10 +125,10 @@ export const SettingsScreen = (props: any) => {
         <View style={styles.items}>
           <TouchableRipple style={styles.texts} onPress={() => _clearHistory()}>
             <>
-              <Subheading style={{color: 'white'}}>
+              <Subheading style={{color: theme.colors.onSurface}}>
                 Effacer l'historique
               </Subheading>
-              <Text style={{color: 'lightgray'}}>
+              <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
                 Pour effacer l'intégralité de l'historique
               </Text>
             </>
@@ -209,10 +140,10 @@ export const SettingsScreen = (props: any) => {
             style={styles.texts}
             onPress={() => _clearFavorites()}>
             <>
-              <Subheading style={{color: 'white'}}>
+              <Subheading style={{color: theme.colors.onSurface}}>
                 Effacer les favoris
               </Subheading>
-              <Text style={{color: 'lightgray'}}>
+              <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
                 Pour effacer tous vos favoris
               </Text>
             </>
@@ -221,15 +152,15 @@ export const SettingsScreen = (props: any) => {
 
         <View style={styles.items}>
           <View style={styles.texts}>
-            <Subheading style={{color: 'white'}}>
+            <Subheading style={{color: theme.colors.onSurface}}>
               Taille de l'historique
             </Subheading>
-            <Text style={{color: 'lightgray'}}>
+            <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
               Définir la taille de l'historique (100 éléments max.)
             </Text>
           </View>
           <TextInput
-            keyboardType='numeric'
+            keyboardType="numeric"
             onChangeText={(value: string) => setMaxItems(parseInt(value, 10))}
             style={{
               minWidth: 36,
@@ -242,50 +173,53 @@ export const SettingsScreen = (props: any) => {
 
         <Divider style={{backgroundColor: 'gray', height: 1}}></Divider>
 
-        <Title style={styles.title}>THEME</Title>
+        <Title style={[styles.title, {color: theme.colors.onSurface}]}>THEME</Title>
 
         <TouchableRipple
           style={styles.items}
           onPress={() => setTheme(!isDarkMode)}>
           <>
             <View style={styles.texts}>
-              <Subheading style={{color: 'white'}}>Mode sombre</Subheading>
-              <Text style={{color: 'lightgray'}}>
+              <Subheading style={{color: theme.colors.onSurface}}>Mode sombre</Subheading>
+              <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
                 Choisir d'activer ou de désactiver le mode sombre
               </Text>
             </View>
             <Switch
               value={isDarkMode}
               onValueChange={() => setTheme(!isDarkMode)}
+              color={settings.accentColor}
             />
           </>
         </TouchableRipple>
 
-        <View style={[styles.items, {flexDirection: 'column'}]}>
-          <View style={styles.texts}>
-            <Subheading style={{color: 'white'}}>
-              Couleur d'accentuation
-            </Subheading>
-            <Text style={{color: 'lightgray'}}>
-              Choisir une couleur d'accentuation
-            </Text>
-            <ScrollView
-              horizontal
-              style={{marginTop: 16}}
-              showsHorizontalScrollIndicator={false}>
-              {colors.map(
-                (color: string, index: number): JSX.Element => (
-                  <TouchableColor
-                    key={index}
-                    onPress={() => setAccentColor(color)}
-                    color={color}
-                    size={30}
-                    style={{marginHorizontal: 5}}></TouchableColor>
-                ),
-              )}
-            </ScrollView>
+        {__DEV__ && (
+          <View style={[styles.items, {flexDirection: 'column'}]}>
+            <View style={styles.texts}>
+              <Subheading style={{color: theme.colors.onSurface}}>
+                Couleur d'accentuation
+              </Subheading>
+              <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
+                Choisir une couleur d'accentuation
+              </Text>
+              <ScrollView
+                horizontal
+                style={{marginTop: 16}}
+                showsHorizontalScrollIndicator={false}>
+                {palette.map(
+                  (color: string, index: number): JSX.Element => (
+                    <TouchableColor
+                      key={index}
+                      onPress={() => console.log('change color')}
+                      color={color}
+                      size={30}
+                      style={{marginHorizontal: 5}}></TouchableColor>
+                  ),
+                )}
+              </ScrollView>
+            </View>
           </View>
-        </View>
+        )}
       </ScrollView>
     </>
   );
@@ -297,7 +231,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingRight: 16,
   },
-  title: {fontSize: 12, color: 'lightgray', paddingHorizontal: 16},
+  title: {fontSize: 12, paddingHorizontal: 16},
   container: {
     flex: 1,
     flexDirection: 'column',

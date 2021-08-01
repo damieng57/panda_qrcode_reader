@@ -62,3 +62,4 @@ buck-out/
 .vscode
 .kanbn
 .history
+*.lock

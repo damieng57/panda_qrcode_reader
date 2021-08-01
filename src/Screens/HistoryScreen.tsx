@@ -12,11 +12,10 @@ import {useTheme} from '../theme';
 import {getTranslation as t, historyAtom} from '../utils/helpers';
 
 export const HistoryScreen = (props: any) => {
-  const theme = useTheme();
   const [history, setHistory] = useAtom(historyAtom);
   const [isFavorites, setIsFavorites] = React.useState<boolean>();
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const {colors} = useTheme();
+  const [searchQuery, setSearchQuery] = React.useState<string>('');
+  const theme = useTheme();
 
   const _onChangeSearch = (search: string) => setSearchQuery(search);
 
@@ -61,7 +60,7 @@ export const HistoryScreen = (props: any) => {
 
   return (
     <>
-      <Appbar.Header>
+      <Appbar.Header style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.Content title={t('header_title_history')}></Appbar.Content>
       </Appbar.Header>
       <Surface
@@ -90,7 +89,7 @@ export const HistoryScreen = (props: any) => {
               onPress={() => setIsFavorites(!isFavorites)}
               name={isFavorites ? 'star' : 'star-outline'}
               size={24}
-              color={colors.text}
+              color={theme.colors.onSurface}
             />
           </View>
         </View>
