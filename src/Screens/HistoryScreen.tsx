@@ -1,13 +1,9 @@
 import {useAtom} from 'jotai';
 import * as React from 'react';
 import {Alert, FlatList, StyleSheet, View} from 'react-native';
-import {
-  Appbar,
-  Searchbar,
-  Surface,
-} from 'react-native-paper';
+import {Appbar, Searchbar, Surface, Divider} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Drawer from '../Components/Drawer';
+import Drawer, {ITEM_HEIGHT} from '../Components/Drawer';
 import {useTheme} from '../theme';
 import {getTranslation as t, historyAtom} from '../utils/helpers';
 
@@ -19,10 +15,13 @@ export const HistoryScreen = (props: any) => {
 
   const _onChangeSearch = (search: string) => setSearchQuery(search);
 
-  const _renderItem = (item, index) => {
+  const _handleChangeCurrentList = () => setIsFavorites(!isFavorites);
+
+  const _renderItem = (data: any) => {
+    // Action to add or remove Item in the favorite list
     const _isFavorites = () => {
       const objIndex = history.map(obj => {
-        if (obj._id === item.item._id) {
+        if (obj && obj._id === data.item._id) {
           obj.favorite = !obj.favorite;
         }
         return obj;
@@ -30,6 +29,7 @@ export const HistoryScreen = (props: any) => {
       setHistory(objIndex);
     };
 
+    // Action when you press Delete in the Drawer
     const _isDeleted = () => {
       Alert.alert(t('alert_delete_item'), t('alert_delete_item_message'), [
         {
@@ -39,13 +39,21 @@ export const HistoryScreen = (props: any) => {
         {
           text: t('alert_ok'),
           onPress: () => {
-            const objIndex = history.filter(obj => obj._id !== item.item._id);
+            const objIndex = history.filter(
+              obj => obj && obj._id !== data.item._id,
+            );
             setHistory(objIndex);
           },
         },
       ]);
     };
-    return <Drawer item={item} isFavorites={_isFavorites} isDeleted={_isDeleted} />;
+    return (
+      <Drawer
+        item={data.item}
+        isFavorites={_isFavorites}
+        isDeleted={_isDeleted}
+      />
+    );
   };
 
   const _generateList = () => {
@@ -60,7 +68,7 @@ export const HistoryScreen = (props: any) => {
 
   return (
     <>
-      <Appbar.Header style={{ backgroundColor: theme.colors.surface }}>
+      <Appbar.Header style={{backgroundColor: theme.colors.surface}}>
         <Appbar.Content title={t('header_title_history')}></Appbar.Content>
       </Appbar.Header>
       <Surface
@@ -86,7 +94,7 @@ export const HistoryScreen = (props: any) => {
               justifyContent: 'center',
             }}>
             <MaterialCommunityIcons
-              onPress={() => setIsFavorites(!isFavorites)}
+              onPress={_handleChangeCurrentList}
               name={isFavorites ? 'star' : 'star-outline'}
               size={24}
               color={theme.colors.onSurface}
@@ -95,9 +103,18 @@ export const HistoryScreen = (props: any) => {
         </View>
       </Surface>
       <FlatList
+        style={{marginBottom: 50}}
         keyExtractor={(_item, index) => index.toString()}
-        renderItem={(item, index) => _renderItem(item, index)}
+        renderItem={(item): JSX.Element => _renderItem(item)}
         data={_generateList()}
+        getItemLayout={(data, index) => ({
+          length: ITEM_HEIGHT,
+          offset: ITEM_HEIGHT * index,
+          index,
+        })}
+        ItemSeparatorComponent={() => (
+          <Divider style={{backgroundColor: theme.colors.border}} />
+        )}
       />
     </>
   );

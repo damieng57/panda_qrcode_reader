@@ -24,7 +24,7 @@ export const DetailsScreen = (props: any) => {
         style={{marginBottom: 50}}
         contentContainerStyle={{padding: 16}}>
         {/* TODO: Type must be dynamic */}
-        <Title style={styles.title}>TYPE: email</Title>
+        <Title style={styles.title}>{t('details_type_title')} {props.route.params._type}</Title>
 
         <Paragraph>{props.route.params}</Paragraph>
       </ScrollView>
@@ -68,7 +68,6 @@ const styles = StyleSheet.create({
   },
   standaloneRowBack: {
     alignItems: 'center',
-    // backgroundColor: '#8BC',
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',

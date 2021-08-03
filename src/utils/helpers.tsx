@@ -4,11 +4,9 @@ import {getLocales} from 'react-native-localize';
 import {atomWithStorage} from './atomWithStorage';
 import {IQrCodeDecoration, ISettings, IQrCode} from '../types';
 import uuid from 'react-native-uuid';
-import {Atom, atom} from 'jotai';
 
 // Jotai Store
 export const historyAtom = atomWithStorage<IQrCode[]>('QRCODE:HISTORY', []);
-export const favoritesAtom = atomWithStorage<IQrCode[]>('QRCODE:FAVORITES', []);
 export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
   isAnonym: false,
   isDarkMode: 'dark',
@@ -16,20 +14,13 @@ export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
   maxItems: 100,
 });
 
-// export const historyAtom = atom<IQrCode[]>({ default: [] });
-// export const favoritesAtom = atom<IQrCode[]>([]);
-// export const settingsAtom = atom<ISettings>({
-//   isAnonym: false,
-//   isDarkMode: 'dark',
-//   accentColor: undefined,
-//   maxItems: 100,
-// });
-
 export const createQrCode = (element: Barcode, favorite: boolean): IQrCode => ({
   // uuid.v4 return a string without options
   // @ts-expect-error
   _id: uuid.v4(),
   date: Date.now(),
+  type: element.type,
+  _type: getInternalType(element),
   data: element.data,
   favorite: favorite,
   decoration: parseData(element),
@@ -57,93 +48,113 @@ export const isValidHttpUrl = (string: string): boolean => {
   return true;
 };
 
-export const getTranslation = (key: string) => {
-  return translation[key] || '';
+export const getTranslation = (key: string | undefined): string => {
+  if (!key) return '';
+  return translation[key];
 };
 
-export const parseData = (data: Barcode): IQrCodeDecoration | undefined => {
-  if (!data.type) return;
+export const getInternalType = (item: Barcode) => {
+  const type = item.data.split(':');
+  if (type[0].toUpperCase() === 'BEGIN') return type[0].toUpperCase();
+  return type[1].toUpperCase();
+};
 
-  switch (data.type) {
+export const parseData = (item: Barcode): IQrCodeDecoration | undefined => {
+  if (!item.type) return;
+
+  switch (getInternalType(item) || item.type) {
     case 'EMAIL':
+    case 'MATMSG':
       return {
         icon: 'email',
-        title: 'email',
+        title: 'email_title',
+        text: 'email_text',
       };
     case 'PHONE':
       return {
         icon: 'phone',
-        title: 'phone',
+        title: 'phone_title',
+        text: 'phone_text',
       };
     case 'CALENDAR_EVENT':
       return {
         icon: 'calendar',
-        title: 'calendar',
+        title: 'calendar_title',
+        text: 'calendar_text',
       };
     case 'DRIVER_LICENSE':
       return {
         icon: 'card-account-details-outline',
-        title: 'driver-licence',
+        title: 'driver_licence_title',
+        text: 'driver_licence_text',
       };
     case 'GEO':
       return {
         icon: 'map-outline',
-        title: 'map',
+        title: 'map_title',
+        text: 'map_text',
       };
     case 'SMS':
       return {
         icon: 'message-text-outline',
-        title: 'message-text-outline',
+        title: 'message_text_outline_title',
+        text: 'message_text_outline_text',
       };
+    case 'VCARD':
     case 'CONTACT_INFO':
       return {
         icon: 'card-account-details-outline',
-        title: 'card-account-details-outline',
+        title: 'card_account_details_outline_title',
+        text: 'card_account_details_outline_text',
       };
     case 'WIFI':
       return {
         icon: 'wifi',
-        title: 'wifi',
+        title: 'wifi_title',
+        text: 'wifi_text',
       };
     case 'TEXT':
       return {
-        icon: 'text',
-        title: 'text',
+        icon: 'text-box-outline',
+        title: 'text_title',
+        text: 'text_text',
       };
 
     case 'ISBN':
       return {
-        icon: 'isbn',
-        title: 'isbn',
+        icon: 'book-outline',
+        title: 'isbn_title',
+        text: 'isbn_text',
       };
 
     case 'PRODUCT':
       return {
-        icon: 'product',
-        title: 'product',
+        icon: 'lightbulb-outline',
+        title: 'product_title',
+        text: 'product_text',
       };
     default:
-      // Probably an URL or Other type not handle by default
-      // with RNCamera
-      return extractTypeFromData(data);
+      // Probably an URL or Other type not handle by default with RNCamera
+      return extractTypeFromData(item);
   }
 };
 function extractTypeFromData(item: Barcode): IQrCodeDecoration | undefined {
   if (typeof item.data !== 'string') return;
   const type = item.data.split(':')[0].toUpperCase();
 
-  console.log(type);
   // TODO: images, music, video, pdf, text and more social network
   switch (type) {
     case 'BITCOIN':
       return {
         icon: 'bitcoin',
-        title: 'bitcoin',
+        title: 'bitcoin_title',
+        text: 'bitcoin_text',
       };
     case 'LITECOIN':
       return {
         icon: 'bitcoin',
-        title: 'bitcoin',
+        title: 'bitcoin_title',
+        text: 'bitcoin_text',
       };
     case 'HTTP':
     case 'HTTPS':
@@ -152,37 +163,37 @@ function extractTypeFromData(item: Barcode): IQrCodeDecoration | undefined {
         return {
           icon: 'twitter',
           title: url.hostname,
-          text: 'twitter-link',
+          text: 'twitter_link',
         };
       if (url.hostname.toLowerCase().includes('facebook'))
         return {
           icon: 'facebook',
           title: url.hostname,
-          text: 'facebook-link',
+          text: 'facebook_link',
         };
       if (url.hostname.toLowerCase().includes('instagram'))
         return {
           icon: 'instagram',
           title: url.hostname,
-          text: 'instagram-link',
+          text: 'instagram_link',
         };
       if (url.hostname.toLowerCase().includes('pinterest'))
         return {
           icon: 'pinterest',
           title: url.hostname,
-          text: 'pinterest-link',
+          text: 'pinterest_link',
         };
       if (url.hostname.toLowerCase().includes('linkedin'))
         return {
           icon: 'linkedin',
           title: url.hostname,
-          text: 'linkedin-link',
+          text: 'linkedin_link',
         };
     default:
       return {
         icon: 'link',
         title: item.data,
-        text: 'link',
+        text: 'url_link',
       };
   }
 }

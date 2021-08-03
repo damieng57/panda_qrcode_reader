@@ -17,8 +17,7 @@ import {
   Divider,
   TouchableRipple,
 } from 'react-native-paper';
-import {getTranslation as t, settingsAtom} from '../utils/helpers';
-import AsyncStorage from '@react-native-community/async-storage';
+import {getTranslation as t, historyAtom, settingsAtom} from '../utils/helpers';
 import {palette} from '../theme/colors';
 import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
@@ -51,6 +50,7 @@ export const TouchableColor = (props: ITouchableColor) => {
 export const SettingsScreen = (props: any) => {
   const theme = useTheme();
   const [settings, setSettings] = useAtom(settingsAtom);
+  const [_, setHistory] = useAtom(historyAtom);
   const [isAnonym, setAnonym] = React.useState(false);
   const [isDarkMode, setTheme] = React.useState(true);
   const [maxItems, setMaxItems] = React.useState(100);
@@ -65,7 +65,7 @@ export const SettingsScreen = (props: any) => {
   }, [isAnonym, isDarkMode, maxItems]);
 
   const _clear = (element: string) => {
-    AsyncStorage.multiRemove([`QRCODE_DG::${element}`]);
+    setHistory([]);
   };
 
   const _showAlert = (title: string, message: string) => {
@@ -94,13 +94,15 @@ export const SettingsScreen = (props: any) => {
 
   return (
     <>
-      <Appbar.Header style={{ backgroundColor: theme.colors.surface }}>
+      <Appbar.Header style={{backgroundColor: theme.colors.surface}}>
         <Appbar.Content title={t('header_title_settings')}></Appbar.Content>
       </Appbar.Header>
       <ScrollView
         style={{marginBottom: 50, backgroundColor: theme.colors.surface}}
         contentContainerStyle={{paddingVertical: 16}}>
-        <Title style={[styles.title, {color: theme.colors.onSurface}]}>HISTORIQUE</Title>
+        <Title style={[styles.title, {color: theme.colors.onSurface}]}>
+          {t('history_settings_title')}
+        </Title>
 
         <TouchableRipple
           style={styles.items}
@@ -108,16 +110,16 @@ export const SettingsScreen = (props: any) => {
           <>
             <View style={styles.texts}>
               <Subheading style={{color: theme.colors.onSurface}}>
-                Activer le mode anonyme
+                {t('settings_anonym_mode')}
               </Subheading>
               <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
-                Les scans ne seront pas enregistrés dans l'historique
+                {t('settings_anonym_mode_description')}
               </Text>
             </View>
             <Switch
               value={isAnonym}
               onValueChange={() => setAnonym(!isAnonym)}
-              color={settings.accentColor}
+              color={settings?.accentColor}
             />
           </>
         </TouchableRipple>
@@ -126,10 +128,10 @@ export const SettingsScreen = (props: any) => {
           <TouchableRipple style={styles.texts} onPress={() => _clearHistory()}>
             <>
               <Subheading style={{color: theme.colors.onSurface}}>
-                Effacer l'historique
+                {t('settings_clear_history')}
               </Subheading>
               <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
-                Pour effacer l'intégralité de l'historique
+                {t('settings_clear_history_description')}
               </Text>
             </>
           </TouchableRipple>
@@ -141,10 +143,10 @@ export const SettingsScreen = (props: any) => {
             onPress={() => _clearFavorites()}>
             <>
               <Subheading style={{color: theme.colors.onSurface}}>
-                Effacer les favoris
+                {t('settings_clear_favorites')}
               </Subheading>
               <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
-                Pour effacer tous vos favoris
+                {t('settings_clear_favorites_description')}
               </Text>
             </>
           </TouchableRipple>
@@ -153,72 +155,74 @@ export const SettingsScreen = (props: any) => {
         <View style={styles.items}>
           <View style={styles.texts}>
             <Subheading style={{color: theme.colors.onSurface}}>
-              Taille de l'historique
+              {t('settings_history_size')}
             </Subheading>
             <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
-              Définir la taille de l'historique (100 éléments max.)
+              {t('settings_history_size_description')}
             </Text>
           </View>
           <TextInput
             keyboardType="numeric"
+            placeholder={settings?.maxItems.toString()}
             onChangeText={(value: string) => setMaxItems(parseInt(value, 10))}
             style={{
               minWidth: 36,
               height: 36,
-              backgroundColor: 'white',
               marginRight: 16,
             }}
           />
         </View>
-
-        <Divider style={{backgroundColor: 'gray', height: 1}}></Divider>
-
-        <Title style={[styles.title, {color: theme.colors.onSurface}]}>THEME</Title>
-
-        <TouchableRipple
-          style={styles.items}
-          onPress={() => setTheme(!isDarkMode)}>
-          <>
-            <View style={styles.texts}>
-              <Subheading style={{color: theme.colors.onSurface}}>Mode sombre</Subheading>
-              <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
-                Choisir d'activer ou de désactiver le mode sombre
-              </Text>
-            </View>
-            <Switch
-              value={isDarkMode}
-              onValueChange={() => setTheme(!isDarkMode)}
-              color={settings.accentColor}
-            />
-          </>
-        </TouchableRipple>
-
         {__DEV__ && (
-          <View style={[styles.items, {flexDirection: 'column'}]}>
-            <View style={styles.texts}>
-              <Subheading style={{color: theme.colors.onSurface}}>
-                Couleur d'accentuation
-              </Subheading>
-              <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
-                Choisir une couleur d'accentuation
-              </Text>
-              <ScrollView
-                horizontal
-                style={{marginTop: 16}}
-                showsHorizontalScrollIndicator={false}>
-                {palette.map(
-                  (color: string, index: number): JSX.Element => (
-                    <TouchableColor
-                      key={index}
-                      onPress={() => console.log('change color')}
-                      color={color}
-                      size={30}
-                      style={{marginHorizontal: 5}}></TouchableColor>
-                  ),
-                )}
-              </ScrollView>
+          <>
+            <Divider style={{backgroundColor: 'gray', height: 1}}></Divider>
+            <Title style={[styles.title, {color: theme.colors.onSurface}]}>
+              {t('settings_theme_title')}
+            </Title>
+            <TouchableRipple
+              style={styles.items}
+              onPress={() => setTheme(!isDarkMode)}>
+              <>
+                <View style={styles.texts}>
+                  <Subheading style={{color: theme.colors.onSurface}}>
+                    {t('settings_dark_mode')}
+                  </Subheading>
+                  <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
+                    {t('settings_dark_mode_description')}
+                  </Text>
+                </View>
+                <Switch
+                  value={isDarkMode}
+                  onValueChange={() => setTheme(!isDarkMode)}
+                  color={settings?.accentColor}
+                />
+              </>
+            </TouchableRipple>
+            <View style={[styles.items, {flexDirection: 'column'}]}>
+              <View style={styles.texts}>
+                <Subheading style={{color: theme.colors.onSurface}}>
+                  {t('settings_accent_color')}
+                </Subheading>
+                <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
+                  {t('settings_accent_color_description')}
+                </Text>
+                <ScrollView
+                  horizontal
+                  style={{marginTop: 16}}
+                  showsHorizontalScrollIndicator={false}>
+                  {palette.map(
+                    (color: string, index: number): JSX.Element => (
+                      <TouchableColor
+                        key={index}
+                        onPress={() => console.log('change color')}
+                        color={color}
+                        size={30}
+                        style={{marginHorizontal: 5}}></TouchableColor>
+                    ),
+                  )}
+                </ScrollView>
+              </View>
             </View>
-          </View>
+          </>
         )}
       </ScrollView>
     </>

@@ -46,10 +46,10 @@ export const ScanScreen = (props: any & IState) => {
     });
   };
 
-  const _openURL = React.useCallback(async () => {
-    const url = history.length > 0 && history[0].data;
-
+  const _openURL = React.useCallback(async () => {    
     try {
+      const url = state.barcode?.data;
+      if (!url) return;
       // Checking if the link is supported for links with custom URL scheme.
       const supported = await Linking.canOpenURL(url);
 
@@ -58,12 +58,12 @@ export const ScanScreen = (props: any & IState) => {
         // by some browser in the mobile
         await Linking.openURL(url);
       } else {
-        props.navigation.navigate('details', history[0].data);
+        props.navigation.navigate('details', state.barcode?.data);
       }
     } catch (error) {
       console.warn(error);
     }
-  }, [history]);
+  }, [state]);
 
   const _isScanned = React.useCallback(
     (item: any) => {
@@ -81,7 +81,7 @@ export const ScanScreen = (props: any & IState) => {
 
   React.useEffect(() => {
     if (!state.isActive && state.barcode) {
-      setHistory([createQrCode(state.barcode, false)].concat(history));
+      setHistory([createQrCode(state.barcode, false)].concat(history).slice(0, settings.maxItems || 100));
     }
   }, [state.isActive]);
 
@@ -153,7 +153,7 @@ export const ScanScreen = (props: any & IState) => {
               ]}
               numberOfLines={1}
               ellipsizeMode="tail">
-              {history?.length > 0 && history[0].data}
+              {state.barcode?.data}
             </Text>
           </TouchableOpacity>
           <MaterialCommunityIcons

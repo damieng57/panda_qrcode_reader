@@ -52,8 +52,6 @@ export const AboutScreen = (props: AboutScreenProps) => {
   );
 };
 
-// <a href="https://www.vecteezy.com/free-vector/qr-code-icon">Qr Code Icon Vectors by Vecteezy</a>
-
 export default AboutScreen;
 
 const styles = StyleSheet.create({

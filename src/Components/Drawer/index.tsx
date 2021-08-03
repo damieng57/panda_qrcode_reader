@@ -1,36 +1,47 @@
-import React, {Component} from 'react';
-import {Linking, Share, StyleSheet, View} from 'react-native';
-import {Divider, IconButton, List, Subheading} from 'react-native-paper';
+import React from 'react';
+import {Alert, Linking, Share, StyleSheet, View} from 'react-native';
+import {IconButton, List, Subheading, Text} from 'react-native-paper';
 import {SwipeRow} from 'react-native-swipe-list-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useTheme} from '../../theme';
+import {IQrCode} from '../../types';
+import fromUnixTime from 'date-fns/fromUnixTime';
+import {getTranslation as t} from '../../utils/helpers';
 
-const Drawer = (props: any) => {
+export interface IProps {
+  item: IQrCode;
+  isFavorites: () => void;
+  isDeleted: () => void;
+}
+
+export const ITEM_HEIGHT = 64
+
+const Drawer = React.memo((props: IProps) => {
   const theme = useTheme();
-  const {isFavorites, isDeleted, item} = props;
-  const [isFavorites2, setIsFavorites] = React.useState<boolean>();
+  const {item, isFavorites, isDeleted} = props;
   const {colors} = useTheme();
+  if (!item) return null;
 
   const _handlePress = async () => {
     // Checking if the link is supported for links with custom URL scheme.
-    const supported = await Linking.canOpenURL(item.item.data);
+    const supported = await Linking.canOpenURL(item.data);
 
     if (supported) {
       // Opening the link with some app, if the URL scheme is "http" the web link should be opened
       // by some browser in the mobile
-      await Linking.openURL(item.item.data);
+      await Linking.openURL(item.data);
     } else {
-      alert(`${item.item.data}`);
+      Alert.alert(`${item.data}`);
     }
   };
 
   const _isShared = async () => {
     try {
-      const result = await Share.share({
-        message: item.item.data,
+      await Share.share({
+        message: item.data,
       });
     } catch (error) {
-      alert(error.message);
+      Alert.alert(error.message);
     }
   };
 
@@ -39,21 +50,29 @@ const Drawer = (props: any) => {
       <SwipeRow leftOpenValue={120} rightOpenValue={-60}>
         <View style={styles.standaloneRowBack}>
           <View style={{flexDirection: 'row'}}>
-              <IconButton
-                style={{backgroundColor: theme.colors.primary, borderRadius: 0, height: 80, width: 60, margin: 0}}
-                icon={item.item.favorite ? 'star' : 'star-outline'}
-                onPress={isFavorites}></IconButton>
             <IconButton
-                style={{backgroundColor: theme.colors.warning, borderRadius: 0, height: 80, width: 60, margin: 0}}
-                icon="share-variant"
+              style={[
+                styles.favoriteIcon,
+                {backgroundColor: theme.colors.primary},
+              ]}
+              icon={item.favorite ? 'star' : 'star-outline'}
+              onPress={isFavorites}></IconButton>
+            <IconButton
+              style={[
+                styles.shareIcon,
+                {backgroundColor: theme.colors.warning},
+              ]}
+              icon="share-variant"
               onPress={_isShared}></IconButton>
           </View>
           <View>
             <IconButton
               icon="delete"
               onPress={isDeleted}
-              style={{backgroundColor: theme.colors.error, borderRadius: 0, height: 80, width: 60, margin: 0}}
-              ></IconButton>
+              style={[
+                styles.deleteIcon,
+                {backgroundColor: theme.colors.error},
+              ]}></IconButton>
           </View>
         </View>
         <List.Item
@@ -63,16 +82,22 @@ const Drawer = (props: any) => {
           ]}
           title={
             <Subheading style={{fontWeight: 'bold'}}>
-              {item.item.title}
+              {item.decoration?.title}
             </Subheading>
           }
-          description={item.item.text}
+          right={() => (
+            <Text style={{opacity: 0.8, marginRight: 6}}>
+              {`${t('added')}  ${fromUnixTime(
+                item.date / 1000,
+              ).toLocaleDateString()}`}
+            </Text>
+          )}
+          description={t(item.decoration?.text)}
           onPress={_handlePress}
           left={() => (
             <View style={styles.icon}>
               <MaterialCommunityIcons
-                onPress={() => setIsFavorites(!isFavorites)}
-                name={isFavorites2 ? 'star-outline' : 'star'}
+                name={item.decoration ? item.decoration?.icon : 'link'}
                 size={24}
                 color={colors.text}
               />
@@ -80,11 +105,9 @@ const Drawer = (props: any) => {
           )}
         />
       </SwipeRow>
-
-      <Divider style={{backgroundColor: theme.colors.border}} />
     </>
   );
-};
+});
 
 export default Drawer;
 
@@ -92,13 +115,11 @@ const styles = StyleSheet.create({
   icon: {
     justifyContent: 'center',
     alignItems: 'center',
-    height: 64,
+    height: ITEM_HEIGHT,
     width: 36,
   },
   items: {
-    // flexDirection: 'row',
     alignItems: 'center',
-    // padding: 16,
     width: '100%',
     flexDirection: 'row-reverse',
     justifyContent: 'flex-end',
@@ -135,12 +156,29 @@ const styles = StyleSheet.create({
   },
   standaloneRowBack: {
     alignItems: 'center',
-    // backgroundColor: '#8BC',
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   backTextWhite: {
     color: '#FFF',
+  },
+  favoriteIcon: {
+    borderRadius: 0,
+    height: ITEM_HEIGHT,
+    width: 60,
+    margin: 0,
+  },
+  shareIcon: {
+    borderRadius: 0,
+    height: ITEM_HEIGHT,
+    width: 60,
+    margin: 0,
+  },
+  deleteIcon: {
+    borderRadius: 0,
+    height: ITEM_HEIGHT,
+    width: 60,
+    margin: 0,
   },
 });

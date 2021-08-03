@@ -16,7 +16,7 @@ export const useTheme = () => {
   const [settings] = useAtom<ISettings>(settingsAtom);
 
   const theme =
-  settings?.isDarkMode === 'dark'
+  settings?.isDarkMode !== 'light'
       ? {
           ...PaperDarkTheme,
           ...NavigationDarkTheme,

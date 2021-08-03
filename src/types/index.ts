@@ -7,6 +7,8 @@ export interface ISettings {
 
 export interface IQrCode {
   _id: string;
+  type: string;
+  _type: string;
   data: any;
   favorite: boolean;
   date: number;
