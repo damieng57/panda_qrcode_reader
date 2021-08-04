@@ -14,7 +14,7 @@ export interface IProps {
   isDeleted: () => void;
 }
 
-export const ITEM_HEIGHT = 64
+export const ITEM_HEIGHT = 64;
 
 const Drawer = React.memo((props: IProps) => {
   const theme = useTheme();
@@ -47,9 +47,12 @@ const Drawer = React.memo((props: IProps) => {
 
   return (
     <>
-      <SwipeRow leftOpenValue={120} rightOpenValue={-60}>
+      <SwipeRow
+        leftOpenValue={120}
+        rightOpenValue={-60}
+        style={{height: ITEM_HEIGHT}}>
         <View style={styles.standaloneRowBack}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{flexDirection: 'row', flex: 1}}>
             <IconButton
               style={[
                 styles.favoriteIcon,
@@ -82,15 +85,20 @@ const Drawer = React.memo((props: IProps) => {
           ]}
           title={
             <Subheading style={{fontWeight: 'bold'}}>
-              {item.decoration?.title}
+              {item.decoration?.title}{' '}
             </Subheading>
           }
           right={() => (
-            <Text style={{opacity: 0.8, marginRight: 6}}>
-              {`${t('added')}  ${fromUnixTime(
-                item.date / 1000,
-              ).toLocaleDateString()}`}
-            </Text>
+            <View
+              style={{
+                justifyContent: 'center',
+                marginHorizontal: 6,
+              }}>
+              <Text style={{opacity: 0.8}}>{`${t('added')}`}</Text>
+              <Text style={{opacity: 0.8}}>
+                {`${fromUnixTime(item.date / 1000).toLocaleDateString()}`}
+              </Text>
+            </View>
           )}
           description={t(item.decoration?.text)}
           onPress={_handlePress}
@@ -151,12 +159,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   standaloneRowFront: {
-    alignItems: 'center',
+    // alignItems: 'center',
     justifyContent: 'center',
+    height: ITEM_HEIGHT,
   },
   standaloneRowBack: {
     alignItems: 'center',
-    flex: 1,
+    // flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
