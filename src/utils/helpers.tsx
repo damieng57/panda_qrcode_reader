@@ -14,7 +14,7 @@ export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
   maxItems: 100,
 });
 
-export const createQrCode = (element: Barcode, favorite: boolean): IQrCode => ({
+export const formatQrCode = (element: Barcode, favorite: boolean): IQrCode => ({
   _id: new ObjectId(),
   date: new Date(),
   type: element.type,

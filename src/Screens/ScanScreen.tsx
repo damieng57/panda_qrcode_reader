@@ -15,6 +15,7 @@ import {
   historyAtom,
   settingsAtom,
   createQrCode,
+  formatQrCode,
 } from '../utils/helpers';
 import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
@@ -51,8 +52,7 @@ export const ScanScreen = (props: any & IState) => {
 
   React.useEffect(() => {
     if (!state.isActive && state.barcode) {
-      createQrCode()
-      // addQrCode(createQrCode(state.barcode, false));
+      createQrCode(formatQrCode(state.barcode, false));
     }
   }, [state.barcode, state.isActive]);
 

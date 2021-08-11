@@ -1,20 +1,10 @@
-import {useAtom} from 'jotai';
 import * as React from 'react';
 import {Alert, FlatList, StyleSheet, View} from 'react-native';
-import {Appbar, Searchbar, Surface, Divider, Text} from 'react-native-paper';
+import {Appbar, Searchbar, Surface, Divider} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Drawer, {ITEM_HEIGHT} from '../Components/Drawer';
 import {useTheme} from '../theme';
 import {getTranslation as t} from '../utils/helpers';
-import {
-  qrCodeActions,
-  getRealmInstance,
-  openRealmInstance,
-  getAllQrCodes,
-  realmSchemaConfiguration,
-} from '../storage/realm';
-import {DecorationSchema, QrCodeSchema} from '../storage/realm/models/models';
-import Realm from 'realm';
 import { useQrCodes } from '../Providers/QrCodes';
 
 export const HistoryScreen = (props: any) => {

@@ -1,8 +1,8 @@
 import React, {useContext, useState, useEffect, useRef} from 'react';
 import Realm from 'realm';
-import {realmSchemaConfiguration} from '../storage/realm';
+import { realmSchemaConfiguration } from '../storage/realm';
 import {QrCodeSchema} from '../storage/realm/models/models';
-import {ObjectId} from 'bson';
+import { IQrCode } from '../types';
 
 const QrCodesContext = React.createContext(null);
 
@@ -38,26 +38,14 @@ const QrCodesProvider = ({children}) => {
     };
   }, []);
 
-  const createQrCode = newQrCodeName => {
+  const createQrCode = (newQrCode: IQrCode) => {
     const realm = realmRef.current;
+    console.log(newQrCode)
     realm.write(() => {
       // Create a new task in the same partition -- that is, in the same project.
       realm.create(
         'QrCode',
-        new QrCodeSchema({
-          _id: new ObjectId(),
-          _type: '',
-          type: '',
-          data: '',
-          favorite: false,
-          date: new Date(),
-          decoration: {
-            icon: 'wifi',
-            title: 'Wifi',
-            text: 'Wifi',
-          },
-          qrCode: '',
-        }),
+        newQrCode,
       );
     });
   };
@@ -81,11 +69,11 @@ const QrCodesProvider = ({children}) => {
 // provides the tasks of the TasksProvider's project and various functions to
 // create, update, and delete the tasks in that project.
 const useQrCodes = () => {
-  const qrCodes = useContext(QrCodesContext);
-  if (qrCodes == null) {
-    throw new Error('useQrCodes() called outside of a QrCodesProvider?'); // an alert is not placed because this is an error for the developer not the user
-  }
-  return qrCodes;
-};
-
-export {QrCodesProvider, useQrCodes};
+    const qrCodes = useContext(QrCodesContext);
+    if (qrCodes == null) {
+      throw new Error("useQrCodes() called outside of a QrCodesProvider?"); // an alert is not placed because this is an error for the developer not the user
+    }
+    return qrCodes;
+  };
+  
+  export { QrCodesProvider, useQrCodes };
