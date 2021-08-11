@@ -5,7 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Drawer, {ITEM_HEIGHT} from '../Components/Drawer';
 import {useTheme} from '../theme';
 import {getTranslation as t} from '../utils/helpers';
-import { useQrCodes } from '../Providers/QrCodes';
+import { useQrCodes } from '../realm/Provider';
 
 export const HistoryScreen = (props: any) => {
   const { qrCodes } = useQrCodes();

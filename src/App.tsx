@@ -9,12 +9,7 @@ import {BottomMenu} from './Components/BottomMenu/BottomMenu';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useTheme} from './theme';
 import {DetailsScreen} from './Screens/DetailsScreen';
-import VersionInfo from 'react-native-version-info';
-import {QrCodesProvider} from './Providers/QrCodes';
-
-console.log(VersionInfo.appVersion);
-console.log(VersionInfo.buildVersion);
-console.log(VersionInfo.bundleIdentifier);
+import {QrCodesProvider} from './realm/Provider';
 
 const Stack = createStackNavigator();
 

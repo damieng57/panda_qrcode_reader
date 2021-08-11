@@ -12,16 +12,13 @@ import {Text} from 'react-native-paper';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
 import {
   getTranslation as t,
-  historyAtom,
   settingsAtom,
-  createQrCode,
   formatQrCode,
 } from '../utils/helpers';
 import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {addQrCode} from '../storage/realm';
-import { useQrCodes } from '../Providers/QrCodes';
+import {useQrCodes} from '../realm/Provider';
 
 interface IState {
   isActive: boolean;
@@ -39,8 +36,7 @@ export const ScanScreen = (props: any & IState) => {
   const [state, setState] = React.useState<IState>(defaultState);
   const [settings] = useAtom(settingsAtom);
   const theme = useTheme();
-
-  const { qrCodes, createQrCode } = useQrCodes();
+  const {_, createQrCode} = useQrCodes();
 
   const _init = () => {
     setState({

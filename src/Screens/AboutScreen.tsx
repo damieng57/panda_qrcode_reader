@@ -7,14 +7,11 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import {Paragraph, useTheme, Headline} from 'react-native-paper';
+import {Paragraph, Headline, Text} from 'react-native-paper';
 import {getTranslation as t} from '../utils/helpers';
+import VersionInfo from 'react-native-version-info';
 
-interface AboutScreenProps {}
-
-export const AboutScreen = (props: AboutScreenProps) => {
-  const {colors} = useTheme();
-
+export const AboutScreen = () => {
   return (
     <>
       <ScrollView contentContainerStyle={styles.container}>
@@ -48,6 +45,12 @@ export const AboutScreen = (props: AboutScreenProps) => {
           </Paragraph>
         </View>
       </ScrollView>
+      <Text
+        style={{
+          marginBottom: 75,
+          alignSelf: 'flex-end',
+          marginRight: 5,
+        }}>{`Version: ${VersionInfo.appVersion} Build: ${VersionInfo.buildVersion}`}</Text>
     </>
   );
 };

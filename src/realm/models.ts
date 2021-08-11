@@ -1,7 +1,7 @@
 // Realm scheams
 import Realm from 'realm';
 import {ObjectId} from 'bson';
-import {IQrCode, IQrCodeDecoration} from '../../../types';
+import {IQrCode, IQrCodeDecoration} from '../types';
 
 /**
  * Decoration

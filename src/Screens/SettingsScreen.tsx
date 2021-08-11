@@ -29,6 +29,7 @@ export interface ITouchableColor {
   onPress: () => void;
 }
 
+// TODO: Component to change accent color
 export const TouchableColor = (props: ITouchableColor) => {
   const {size, style, onPress} = props;
   const theme = useTheme();
