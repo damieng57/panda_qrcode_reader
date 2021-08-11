@@ -3,7 +3,7 @@ import {URL} from 'react-native-url-polyfill';
 import {getLocales} from 'react-native-localize';
 import {atomWithStorage} from './atomWithStorage';
 import {IQrCodeDecoration, ISettings, IQrCode} from '../types';
-import uuid from 'react-native-uuid';
+import {ObjectId} from 'bson'
 
 // Jotai Store
 export const historyAtom = atomWithStorage<IQrCode[]>('QRCODE:HISTORY', []);
@@ -15,16 +15,14 @@ export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
 });
 
 export const createQrCode = (element: Barcode, favorite: boolean): IQrCode => ({
-  // uuid.v4 return a string without options
-  // @ts-expect-error
-  _id: uuid.v4(),
-  date: Date.now(),
+  _id: new ObjectId(),
+  date: new Date(),
   type: element.type,
   _type: getInternalType(element),
   data: element.data,
   favorite: favorite,
   decoration: parseData(element),
-  qrcode: {},
+  qrCode: '',
 });
 
 const language = getLocales()[0].languageCode;

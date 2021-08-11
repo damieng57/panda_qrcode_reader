@@ -1,21 +1,32 @@
 import {useAtom} from 'jotai';
 import * as React from 'react';
 import {Alert, FlatList, StyleSheet, View} from 'react-native';
-import {Appbar, Searchbar, Surface, Divider} from 'react-native-paper';
+import {Appbar, Searchbar, Surface, Divider, Text} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Drawer, {ITEM_HEIGHT} from '../Components/Drawer';
 import {useTheme} from '../theme';
-import {getTranslation as t, historyAtom} from '../utils/helpers';
+import {getTranslation as t} from '../utils/helpers';
+import {
+  qrCodeActions,
+  getRealmInstance,
+  openRealmInstance,
+  getAllQrCodes,
+  realmSchemaConfiguration,
+} from '../storage/realm';
+import {DecorationSchema, QrCodeSchema} from '../storage/realm/models/models';
+import Realm from 'realm';
+import { useQrCodes } from '../Providers/QrCodes';
 
 export const HistoryScreen = (props: any) => {
-  const [history, setHistory] = useAtom(historyAtom);
+  const { qrCodes } = useQrCodes();
+
+  const [history, setHistory] = React.useState([]); // useAtom(historyAtom);
   const [isFavorites, setIsFavorites] = React.useState<boolean>();
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const theme = useTheme();
 
-  const _onChangeSearch = (search: string) => setSearchQuery(search);
-
-  const _handleChangeCurrentList = () => setIsFavorites(!isFavorites);
+  const _onChangeSearch = (search: string) => {}; // setSearchQuery(search);
+  const _handleChangeCurrentList = () => {}; // setIsFavorites(!isFavorites);
 
   const _renderItem = (data: any) => {
     // Action to add or remove Item in the favorite list
@@ -26,7 +37,7 @@ export const HistoryScreen = (props: any) => {
         }
         return obj;
       });
-      setHistory(objIndex);
+      // setHistory(objIndex);
     };
 
     // Action when you press Delete in the Drawer
@@ -42,11 +53,13 @@ export const HistoryScreen = (props: any) => {
             const objIndex = history.filter(
               obj => obj && obj._id !== data.item._id,
             );
-            setHistory(objIndex);
+            // setHistory(objIndex);
           },
         },
       ]);
     };
+
+    console.log(data.item)
     return (
       <Drawer
         item={data.item}
@@ -56,15 +69,15 @@ export const HistoryScreen = (props: any) => {
     );
   };
 
-  const _generateList = () => {
-    let _temp = history;
-    if (isFavorites) _temp = _temp.filter(item => item.favorite);
-    if (searchQuery !== '')
-      _temp = _temp.filter(item =>
-        item.data.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    return _temp;
-  };
+  // const _generateList = () => {
+  //   let _temp = history;
+  //   if (isFavorites) _temp = _temp.filter(item => item.favorite);
+  //   if (searchQuery !== '')
+  //     _temp = _temp.filter(item =>
+  //       item.data.toLowerCase().includes(searchQuery.toLowerCase()),
+  //     );
+  //   return _temp;
+  // };
 
   return (
     <>
@@ -106,7 +119,7 @@ export const HistoryScreen = (props: any) => {
         style={{marginBottom: 50}}
         keyExtractor={(_item, index) => index.toString()}
         renderItem={(item): JSX.Element => _renderItem(item)}
-        data={_generateList()}
+        data={qrCodes}
         getItemLayout={(data, index) => ({
           length: ITEM_HEIGHT,
           offset: ITEM_HEIGHT * index,

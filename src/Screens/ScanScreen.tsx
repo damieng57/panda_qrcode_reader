@@ -19,6 +19,8 @@ import {
 import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {addQrCode} from '../storage/realm';
+import { useQrCodes } from '../Providers/QrCodes';
 
 interface IState {
   isActive: boolean;
@@ -34,9 +36,10 @@ const defaultState = {
 
 export const ScanScreen = (props: any & IState) => {
   const [state, setState] = React.useState<IState>(defaultState);
-  const [history, setHistory] = useAtom(historyAtom);
   const [settings] = useAtom(settingsAtom);
   const theme = useTheme();
+
+  const { qrCodes, createQrCode } = useQrCodes();
 
   const _init = () => {
     setState({
@@ -46,7 +49,14 @@ export const ScanScreen = (props: any & IState) => {
     });
   };
 
-  const _openURL = React.useCallback(async () => {    
+  React.useEffect(() => {
+    if (!state.isActive && state.barcode) {
+      createQrCode()
+      // addQrCode(createQrCode(state.barcode, false));
+    }
+  }, [state.barcode, state.isActive]);
+
+  const _openURL = React.useCallback(async () => {
     try {
       const url = state.barcode?.data;
       if (!url) return;
@@ -78,12 +88,6 @@ export const ScanScreen = (props: any & IState) => {
     },
     [state],
   );
-
-  React.useEffect(() => {
-    if (!state.isActive && state.barcode) {
-      setHistory([createQrCode(state.barcode, false)].concat(history).slice(0, settings.maxItems || 100));
-    }
-  }, [state.isActive]);
 
   return (
     <>

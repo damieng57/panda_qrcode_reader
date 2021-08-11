@@ -1,3 +1,5 @@
+import {ObjectId} from 'bson';
+
 export interface ISettings {
   isAnonym: boolean;
   isDarkMode: string;
@@ -6,14 +8,14 @@ export interface ISettings {
 }
 
 export interface IQrCode {
-  _id: string;
+  _id: string | ObjectId;
   type: string;
   _type: string;
   data: any;
   favorite: boolean;
-  date: number;
-  decoration?: IQrCodeDecoration;
-  qrcode: any;
+  date: Date;
+  decoration?: IQrCodeDecoration | string;
+  qrCode?: string;
 }
 
 export interface IQrCodeDecoration {
@@ -21,5 +23,3 @@ export interface IQrCodeDecoration {
   icon: string;
   text?: string;
 }
-
-export interface IHistory {}

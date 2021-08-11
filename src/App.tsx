@@ -9,6 +9,12 @@ import {BottomMenu} from './Components/BottomMenu/BottomMenu';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useTheme} from './theme';
 import {DetailsScreen} from './Screens/DetailsScreen';
+import VersionInfo from 'react-native-version-info';
+import {QrCodesProvider} from './Providers/QrCodes';
+
+console.log(VersionInfo.appVersion);
+console.log(VersionInfo.buildVersion);
+console.log(VersionInfo.bundleIdentifier);
 
 const Stack = createStackNavigator();
 
@@ -24,10 +30,12 @@ export default function App() {
         <NavigationContainer theme={theme}>
           {Platform.OS === 'ios' && <StatusBar barStyle="light-content" />}
           <SafeAreaProvider>
-            <Stack.Navigator screenOptions={{header: () => null}}>
-              <Stack.Screen name="main" component={BottomMenu} />
-              <Stack.Screen name="details" component={DetailsScreen} />
-            </Stack.Navigator>
+            <QrCodesProvider>
+              <Stack.Navigator screenOptions={{header: () => null}}>
+                <Stack.Screen name="main" component={BottomMenu} />
+                <Stack.Screen name="details" component={DetailsScreen} />
+              </Stack.Navigator>
+            </QrCodesProvider>
           </SafeAreaProvider>
         </NavigationContainer>
       </PaperProvider>
