@@ -21,6 +21,7 @@ import {getTranslation as t, historyAtom, settingsAtom} from '../utils/helpers';
 import {palette} from '../theme/colors';
 import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
+import {useQrCodes} from '../realm/Provider';
 
 export interface ITouchableColor {
   size?: number;
@@ -51,10 +52,10 @@ export const TouchableColor = (props: ITouchableColor) => {
 export const SettingsScreen = (props: any) => {
   const theme = useTheme();
   const [settings, setSettings] = useAtom(settingsAtom);
-  const [_, setHistory] = useAtom(historyAtom);
   const [isAnonym, setAnonym] = React.useState(false);
   const [isDarkMode, setTheme] = React.useState(true);
   const [maxItems, setMaxItems] = React.useState(100);
+  const {deleteAllQrCodes, deleteAllFavoritesQrCodes} = useQrCodes();
 
   React.useEffect(() => {
     setSettings({
@@ -65,11 +66,12 @@ export const SettingsScreen = (props: any) => {
     });
   }, [isAnonym, isDarkMode, maxItems]);
 
-  const _clear = (element: string) => {
-    setHistory([]);
+  const _clear = (type: string) => {
+    if (type === 'FAVORITES') deleteAllFavoritesQrCodes();
+    if (type === 'HISTORY') deleteAllQrCodes();
   };
 
-  const _showAlert = (title: string, message: string) => {
+  const _showAlert = (title: string, message: string, type: string) => {
     Alert.alert(title, message, [
       {
         text: t('alert_cancel'),
@@ -77,7 +79,7 @@ export const SettingsScreen = (props: any) => {
       },
       {
         text: t('alert_ok'),
-        onPress: () => _clear('FAVORITES'),
+        onPress: () => _clear(type),
       },
     ]);
   };
@@ -86,11 +88,16 @@ export const SettingsScreen = (props: any) => {
     _showAlert(
       t('alert_delete_favorites'),
       t('alert_delete_favorites_message'),
+      'FAVORITES',
     );
   };
 
   const _clearHistory = () => {
-    _showAlert(t('alert_delete_list'), t('alert_delete_list_message'));
+    _showAlert(
+      t('alert_delete_list'),
+      t('alert_delete_list_message'),
+      'HISTORY',
+    );
   };
 
   return (
@@ -153,26 +160,6 @@ export const SettingsScreen = (props: any) => {
           </TouchableRipple>
         </View>
 
-        <View style={styles.items}>
-          <View style={styles.texts}>
-            <Subheading style={{color: theme.colors.onSurface}}>
-              {t('settings_history_size')}
-            </Subheading>
-            <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
-              {t('settings_history_size_description')}
-            </Text>
-          </View>
-          <TextInput
-            keyboardType="numeric"
-            placeholder={settings?.maxItems.toString()}
-            onChangeText={(value: string) => setMaxItems(parseInt(value, 10))}
-            style={{
-              minWidth: 36,
-              height: 36,
-              marginRight: 16,
-            }}
-          />
-        </View>
         {__DEV__ && (
           <>
             <Divider style={{backgroundColor: 'gray', height: 1}}></Divider>

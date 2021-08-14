@@ -2,6 +2,7 @@ import React, {useContext, useState, useEffect, useRef} from 'react';
 import Realm from 'realm';
 import {IQrCode} from '../types';
 import {DecorationSchema, QrCodeSchema} from './models';
+import {ObjectId} from 'bson';
 
 export const message = (
   status: string = 'undefined',
@@ -17,7 +18,7 @@ export const message = (
 
 export const realmSchemaConfiguration = {
   schema: [QrCodeSchema, DecorationSchema],
-  schemaVersion: 8,
+  schemaVersion: 1,
 };
 
 const QrCodesContext = React.createContext(null);
@@ -37,10 +38,10 @@ const QrCodesProvider = ({children}: IProps) => {
   useEffect(() => {
     // open a realm for this particular project
     Realm.open(realmSchemaConfiguration).then(realm => {
+      // @ts-ignore
       realmRef.current = realm;
 
       const qrCodes = realm.objects('QrCode');
-      // let sortedQrCodes = syncQrCodes.sorted("name");
       setQrCodes([...qrCodes]);
       qrCodes.addListener(() => {
         setQrCodes([...qrCodes]);
@@ -59,7 +60,8 @@ const QrCodesProvider = ({children}: IProps) => {
   }, []);
 
   const createQrCode = (newQrCode: IQrCode) => {
-    const realm = realmRef.current;
+    // @ts-ignore
+    const realm: Realm = realmRef.current;
 
     try {
       if (realm === null) return;
@@ -72,14 +74,33 @@ const QrCodesProvider = ({children}: IProps) => {
     }
   };
 
-  const deleteAllQrCode = () => {
-    const realm = realmRef.current;
+  const updateQrCode = (_id: ObjectId) => {
+    // @ts-ignore
+    const realm: Realm = realmRef.current;
+
+    try {
+      if (realm === null) return;
+      realm.write(() => {
+        // Get a qrCode to update.
+        const qrCode = realm.objectForPrimaryKey('QrCode', _id);
+        // Update some properties on the instance.
+        // These changes are saved to the realm.
+        qrCode.favorite = !qrCode.favorite;
+      });
+    } catch (error) {
+      return message('error', 'Cannot create QrCode', error);
+    }
+  };
+
+  const deleteAllQrCodes = () => {
+    // @ts-ignore
+    const realm: Realm = realmRef.current;
 
     try {
       if (realm === null) return;
       realm.write(() => {
         // Create a new task in the same partition -- that is, in the same project.
-        realm.deleteAll('QrCode');
+        realm.delete(realm.objects('QrCode'));
       });
     } catch (error) {
       return message('error', 'Cannot clear the QrCode elements', error);
@@ -87,7 +108,8 @@ const QrCodesProvider = ({children}: IProps) => {
   };
 
   const deleteQrCode = (qrcode: IQrCode) => {
-    const realm = realmRef.current;
+    // @ts-ignore
+    const realm: Realm = realmRef.current;
 
     try {
       if (realm === null) return;
@@ -100,6 +122,56 @@ const QrCodesProvider = ({children}: IProps) => {
     }
   };
 
+  const deleteAllFavoritesQrCodes = () => {
+    // @ts-ignore
+    const realm: Realm = realmRef.current;
+
+    try {
+      if (realm === null) return;
+      realm.write(() => {
+        // Find qrCodes which are favorites.
+        const qrCodes = realm.objects("QrCode").filtered('favorite == true');
+        // Loop through to update.
+        qrCodes.map((qrCode) => {
+          // Give all puppies to Ali.
+          qrCode.favorite = false;
+        });
+
+      });
+    } catch (error) {
+      return message('error', 'Cannot clear the QrCode elements', error);
+    }
+  };
+
+  const filterQrCodes = (criteria: string = '', favorite: boolean = false) => {
+    // @ts-ignore
+    const realm: Realm = realmRef.current;
+
+    try {
+      let filteredQrCodes: any = [];
+      if (favorite) {
+        filteredQrCodes = realm
+          .objects('QrCode')
+          .filtered(
+            'data CONTAINS[c] $0 && favorite == $1',
+            criteria,
+            favorite,
+          );
+      } else {
+        filteredQrCodes = realm
+          .objects('QrCode')
+          .filtered(
+            'data CONTAINS[c] $0',
+            criteria,
+            favorite,
+          );
+      }
+      setQrCodes([...filteredQrCodes]);
+    } catch (error) {
+      return message('error', 'Cannot filters these QrCodes', error);
+    }
+  };
+
   // Render the children within the TaskContext's provider. The value contains
   // everything that should be made available to descendants that use the
   // useTasks hook.
@@ -107,8 +179,11 @@ const QrCodesProvider = ({children}: IProps) => {
     <QrCodesContext.Provider
       value={{
         createQrCode,
-        deleteAllQrCode,
+        updateQrCode,
+        deleteAllQrCodes,
+        deleteAllFavoritesQrCodes,
         deleteQrCode,
+        filterQrCodes,
         qrCodes,
       }}>
       {children}

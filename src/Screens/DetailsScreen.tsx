@@ -15,6 +15,8 @@ export interface ITouchableColor {
 export const DetailsScreen = (props: any) => {
   const theme = useTheme();
 
+  console.log(props.route.params)
+
   return (
     <>
       <Appbar.Header>
@@ -26,7 +28,7 @@ export const DetailsScreen = (props: any) => {
         {/* TODO: Type must be dynamic */}
         <Title style={styles.title}>{t('details_type_title')} {props.route.params._type}</Title>
 
-        <Paragraph>{props.route.params}</Paragraph>
+        <Paragraph>{props.route.params.data}</Paragraph>
       </ScrollView>
     </>
   );

@@ -6,6 +6,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {useTheme} from '../../theme';
 import {IQrCode} from '../../types';
 import fromUnixTime from 'date-fns/fromUnixTime';
+import {format} from 'date-fns';
 import {getTranslation as t} from '../../utils/helpers';
 
 export interface IProps {
@@ -85,7 +86,7 @@ const Drawer = React.memo((props: IProps) => {
           ]}
           title={
             <Subheading style={{fontWeight: 'bold'}}>
-              {item.decoration?.title}{' '}
+              {item.decoration?.title}
             </Subheading>
           }
           right={() => (
@@ -96,7 +97,7 @@ const Drawer = React.memo((props: IProps) => {
               }}>
               <Text style={{opacity: 0.8}}>{`${t('added')}`}</Text>
               <Text style={{opacity: 0.8}}>
-                {`${fromUnixTime(item.date / 1000).toLocaleDateString()}`}
+                {`${format(fromUnixTime(item.date / 1000), 'dd/MM/yyyy')}`}
               </Text>
             </View>
           )}

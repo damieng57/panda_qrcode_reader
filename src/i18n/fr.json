@@ -60,5 +60,6 @@
   "settings_dark_mode": "Mode sombre",
   "settings_dark_mode_description": "Choisir d'activer ou de désactiver le mode sombre",
   "settings_accent_color": "Couleur d'accentuation",
-  "settings_accent_color_description": "Choisir une couleur d'accentuation"
+  "settings_accent_color_description": "Choisir une couleur d'accentuation",
+  "details_type_title": "TYPE:"
 }

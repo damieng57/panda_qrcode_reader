@@ -8,26 +8,19 @@ import {getTranslation as t} from '../utils/helpers';
 import { useQrCodes } from '../realm/Provider';
 
 export const HistoryScreen = (props: any) => {
-  const { qrCodes } = useQrCodes();
-
-  const [history, setHistory] = React.useState([]); // useAtom(historyAtom);
+  const { qrCodes, filterQrCodes, deleteQrCode, updateQrCode } = useQrCodes();
   const [isFavorites, setIsFavorites] = React.useState<boolean>();
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const theme = useTheme();
 
-  const _onChangeSearch = (search: string) => {}; // setSearchQuery(search);
-  const _handleChangeCurrentList = () => {}; // setIsFavorites(!isFavorites);
+  const _onChangeSearch = (search: string) => setSearchQuery(search);
+  const _handleChangeCurrentList = () => setIsFavorites(!isFavorites);
 
   const _renderItem = (data: any) => {
     // Action to add or remove Item in the favorite list
-    const _isFavorites = () => {
-      const objIndex = history.map(obj => {
-        if (obj && obj._id === data.item._id) {
-          obj.favorite = !obj.favorite;
-        }
-        return obj;
-      });
-      // setHistory(objIndex);
+    const _isFavorite = () => {
+      // Update favorites in the list
+      updateQrCode(data.item._id)
     };
 
     // Action when you press Delete in the Drawer
@@ -39,35 +32,23 @@ export const HistoryScreen = (props: any) => {
         },
         {
           text: t('alert_ok'),
-          onPress: () => {
-            const objIndex = history.filter(
-              obj => obj && obj._id !== data.item._id,
-            );
-            // setHistory(objIndex);
-          },
-        },
+          onPress: () => deleteQrCode(data.item)
+        }
       ]);
     };
 
-    console.log(data.item)
     return (
       <Drawer
         item={data.item}
-        isFavorites={_isFavorites}
+        isFavorites={_isFavorite}
         isDeleted={_isDeleted}
       />
     );
   };
 
-  // const _generateList = () => {
-  //   let _temp = history;
-  //   if (isFavorites) _temp = _temp.filter(item => item.favorite);
-  //   if (searchQuery !== '')
-  //     _temp = _temp.filter(item =>
-  //       item.data.toLowerCase().includes(searchQuery.toLowerCase()),
-  //     );
-  //   return _temp;
-  // };
+  React.useEffect(() => {
+    filterQrCodes(searchQuery, isFavorites)
+  }, [searchQuery, isFavorites])
 
   return (
     <>

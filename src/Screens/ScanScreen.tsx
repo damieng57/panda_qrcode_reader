@@ -19,36 +19,40 @@ import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQrCodes} from '../realm/Provider';
+import { IQrCode } from '../types';
 
 interface IState {
   isActive: boolean;
   isVisible: boolean;
   barcode?: Barcode;
+  current?: IQrCode;
 }
 
 const defaultState = {
   isActive: true,
   isVisible: false,
   barcode: undefined,
+  current: undefined,
 };
 
 export const ScanScreen = (props: any & IState) => {
   const [state, setState] = React.useState<IState>(defaultState);
   const [settings] = useAtom(settingsAtom);
   const theme = useTheme();
-  const {_, createQrCode} = useQrCodes();
+  const {createQrCode} = useQrCodes();
 
   const _init = () => {
     setState({
       isVisible: false,
       isActive: true,
       barcode: undefined,
+      current: undefined,
     });
   };
 
   React.useEffect(() => {
     if (!state.isActive && state.barcode) {
-      createQrCode(formatQrCode(state.barcode, false));
+      createQrCode(state.current);
     }
   }, [state.barcode, state.isActive]);
 
@@ -64,7 +68,7 @@ export const ScanScreen = (props: any & IState) => {
         // by some browser in the mobile
         await Linking.openURL(url);
       } else {
-        props.navigation.navigate('details', state.barcode?.data);
+        props.navigation.navigate('details', state.current);
       }
     } catch (error) {
       console.warn(error);
@@ -79,6 +83,7 @@ export const ScanScreen = (props: any & IState) => {
           isActive: false,
           isVisible: true,
           barcode: item,
+          current: formatQrCode(item, false)
         });
       }
     },
