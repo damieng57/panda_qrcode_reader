@@ -15,7 +15,7 @@
   "alert_delete_favorites": "Effacer vos favoris",
   "alert_delete_favorites_message": "Etes-vous certain de vouloir effacer votre liste de favoris?",
   "header_title_details": "Details",
-  "mode_anonyme_banner_message": "Mode anonyme activé. Aucun QrCode ne sera enregistré dans l'historique de l'application.",
+  "mode_anonyme_banner_message": "Mode sans historique activé. Aucun QrCode ne sera enregistré dans l'historique de l'application.",
   "permission_camera": "Permission pour utiliser la caméra",
   "permission_camera_message": "Nous avons besoin de votre permission pour utiliser la caméra.",
   "added": "Ajouté le",
@@ -48,7 +48,7 @@
   "linkedin_link": "Lien Linkedin",
   "url_link": "Lien vers site Internet",
   "history_settings_title": "HISTORIQUE",
-  "settings_anonym_mode": "Activer le mode anonyme",
+  "settings_anonym_mode": "Activer le mode sans historique",
   "settings_anonym_mode_description": "Les scans ne seront pas enregistrés dans l'historique",
   "settings_clear_history": "Effacer l'historique",
   "settings_clear_history_description": "Pour effacer l'intégralité de l'historique",
@@ -61,5 +61,7 @@
   "settings_dark_mode_description": "Choisir d'activer ou de désactiver le mode sombre",
   "settings_accent_color": "Couleur d'accentuation",
   "settings_accent_color_description": "Choisir une couleur d'accentuation",
-  "details_type_title": "TYPE:"
+  "details_type_title": "TYPE:",
+  "settings_open_url_auto_description": "Quand une url est detecter, ouvrir automatiquement le navigateur",
+  "settings_open_url_auto": "Ouvrir les urls automatiquement"
 }

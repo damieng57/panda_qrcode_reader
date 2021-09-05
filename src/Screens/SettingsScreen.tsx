@@ -10,15 +10,12 @@ import {
 import {
   Appbar,
   Switch,
-  TextInput,
   Text,
   Subheading,
   Title,
-  Divider,
   TouchableRipple,
 } from 'react-native-paper';
-import {getTranslation as t, historyAtom, settingsAtom} from '../utils/helpers';
-import {palette} from '../theme/colors';
+import {getTranslation as t, settingsAtom} from '../utils/helpers';
 import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
 import {useQrCodes} from '../realm/Provider';
@@ -52,19 +49,19 @@ export const TouchableColor = (props: ITouchableColor) => {
 export const SettingsScreen = (props: any) => {
   const theme = useTheme();
   const [settings, setSettings] = useAtom(settingsAtom);
-  const [isAnonym, setAnonym] = React.useState(false);
-  const [isDarkMode, setTheme] = React.useState(true);
-  const [maxItems, setMaxItems] = React.useState(100);
+  const [isAnonym, setAnonym] = React.useState(settings?.isAnonym || false);
+  const [openUrlAuto, setOpenUrlAuto] = React.useState(settings?.openUrlAuto || false);
+  const [maxItems] = React.useState(100);
   const {deleteAllQrCodes, deleteAllFavoritesQrCodes} = useQrCodes();
 
   React.useEffect(() => {
     setSettings({
       ...settings,
       isAnonym,
-      isDarkMode: isDarkMode ? 'dark' : 'light',
       maxItems,
+      openUrlAuto,
     });
-  }, [isAnonym, isDarkMode, maxItems]);
+  }, [isAnonym, maxItems, openUrlAuto]);
 
   const _clear = (type: string) => {
     if (type === 'FAVORITES') deleteAllFavoritesQrCodes();
@@ -160,58 +157,25 @@ export const SettingsScreen = (props: any) => {
           </TouchableRipple>
         </View>
 
-        {__DEV__ && (
-          <>
-            <Divider style={{backgroundColor: 'gray', height: 1}}></Divider>
-            <Title style={[styles.title, {color: theme.colors.onSurface}]}>
-              {t('settings_theme_title')}
-            </Title>
-            <TouchableRipple
-              style={styles.items}
-              onPress={() => setTheme(!isDarkMode)}>
-              <>
-                <View style={styles.texts}>
-                  <Subheading style={{color: theme.colors.onSurface}}>
-                    {t('settings_dark_mode')}
-                  </Subheading>
-                  <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
-                    {t('settings_dark_mode_description')}
-                  </Text>
-                </View>
-                <Switch
-                  value={isDarkMode}
-                  onValueChange={() => setTheme(!isDarkMode)}
-                  color={settings?.accentColor}
-                />
-              </>
-            </TouchableRipple>
-            <View style={[styles.items, {flexDirection: 'column'}]}>
+        <View style={styles.items}>
+          <TouchableRipple style={styles.items} onPress={() => setOpenUrlAuto(!openUrlAuto)}>
+            <>
               <View style={styles.texts}>
                 <Subheading style={{color: theme.colors.onSurface}}>
-                  {t('settings_accent_color')}
+                  {t('settings_open_url_auto')}
                 </Subheading>
                 <Text style={{color: theme.colors.onSurface, opacity: 0.8}}>
-                  {t('settings_accent_color_description')}
+                  {t('settings_open_url_auto_description')}
                 </Text>
-                <ScrollView
-                  horizontal
-                  style={{marginTop: 16}}
-                  showsHorizontalScrollIndicator={false}>
-                  {palette.map(
-                    (color: string, index: number): JSX.Element => (
-                      <TouchableColor
-                        key={index}
-                        onPress={() => console.log('change color')}
-                        color={color}
-                        size={30}
-                        style={{marginHorizontal: 5}}></TouchableColor>
-                    ),
-                  )}
-                </ScrollView>
               </View>
-            </View>
-          </>
-        )}
+              <Switch
+                value={openUrlAuto}
+                onValueChange={() => setOpenUrlAuto(!openUrlAuto)}
+                color={settings?.accentColor}
+              />
+            </>
+          </TouchableRipple>
+        </View>
       </ScrollView>
     </>
   );

@@ -19,6 +19,7 @@ export default function App() {
   React.useEffect(() => {
     SplashScreen.hide();
   });
+
   return (
     <Provider>
       <PaperProvider theme={theme}>

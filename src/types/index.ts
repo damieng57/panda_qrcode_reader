@@ -5,6 +5,7 @@ export interface ISettings {
   isDarkMode: string;
   accentColor?: string;
   maxItems: number;
+  openUrlAuto: boolean;
 }
 
 export interface IQrCode {

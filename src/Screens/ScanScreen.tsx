@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {Barcode, RNCamera} from 'react-native-camera';
-import {Text} from 'react-native-paper';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
 import {
   getTranslation as t,
@@ -19,7 +18,10 @@ import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQrCodes} from '../realm/Provider';
-import { IQrCode } from '../types';
+import {IQrCode} from '../types';
+import {Snackbar, Text} from 'react-native-paper';
+
+const MAX_LENGHT_SNACKBAR = 60;
 
 interface IState {
   isActive: boolean;
@@ -75,6 +77,14 @@ export const ScanScreen = (props: any & IState) => {
     }
   }, [state]);
 
+  const _formatTextSnackBar = (text: string): string => {
+    if (!text) return '';
+    if (text.length > MAX_LENGHT_SNACKBAR) {
+      return text.slice(0, MAX_LENGHT_SNACKBAR - 3) + '...';
+    }
+    return text;
+  };
+
   const _isScanned = React.useCallback(
     (item: any) => {
       if (!settings?.isAnonym && state.isActive) {
@@ -83,7 +93,7 @@ export const ScanScreen = (props: any & IState) => {
           isActive: false,
           isVisible: true,
           barcode: item,
-          current: formatQrCode(item, false)
+          current: formatQrCode(item, false),
         });
       }
     },
@@ -142,32 +152,22 @@ export const ScanScreen = (props: any & IState) => {
           }}
         </RNCamera>
       </View>
-      {state.isVisible && (
-        <View
-          style={[
-            styles.snackbarContainer,
-            {backgroundColor: theme.colors.surface},
-          ]}>
-          <TouchableOpacity onPress={() => _openURL()}>
-            <Text
-              style={[
-                styles.snackbarText,
-                {
-                  color: theme.colors.onSurface,
-                },
-              ]}
-              numberOfLines={1}
-              ellipsizeMode="tail">
-              {state.barcode?.data}
-            </Text>
-          </TouchableOpacity>
-          <MaterialCommunityIcons
-            color={theme.colors.onSurface}
-            name="close"
-            size={24}
-            onPress={() => _init()}></MaterialCommunityIcons>
-        </View>
-      )}
+      <Snackbar
+        visible={state.isVisible}
+        onDismiss={() => _init()}
+        style={{marginBottom: 80, borderRadius: 5}}
+        action={{
+          label: (
+            <MaterialCommunityIcons
+              color={theme.colors.accent}
+              name="close"
+              size={24}
+              onPress={() => _init()}></MaterialCommunityIcons>
+          ),
+          onPress: () => _openURL(),
+        }}>
+        {_formatTextSnackBar(state.barcode?.data)}
+      </Snackbar>
     </>
   );
 };
@@ -199,11 +199,12 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    padding: 16,
+    padding: 12,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
+    width: '100%'
   },
   preview: {
     flex: 1,

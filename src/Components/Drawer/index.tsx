@@ -1,13 +1,13 @@
 import React from 'react';
 import {Alert, Linking, Share, StyleSheet, View} from 'react-native';
 import {IconButton, List, Subheading, Text} from 'react-native-paper';
-import {SwipeRow} from 'react-native-swipe-list-view';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useTheme} from '../../theme';
 import {IQrCode} from '../../types';
 import fromUnixTime from 'date-fns/fromUnixTime';
 import {format} from 'date-fns';
 import {getTranslation as t} from '../../utils/helpers';
+import { useNavigation } from '@react-navigation/native';
 
 export interface IProps {
   item: IQrCode;
@@ -17,24 +17,77 @@ export interface IProps {
 
 export const ITEM_HEIGHT = 64;
 
-const Drawer = React.memo((props: IProps) => {
+export const DrawerFront = React.memo((props: IProps) => {
   const theme = useTheme();
-  const {item, isFavorites, isDeleted} = props;
-  const {colors} = useTheme();
+  const navigation = useNavigation();
+  const {item} = props;
   if (!item) return null;
 
   const _handlePress = async () => {
     // Checking if the link is supported for links with custom URL scheme.
     const supported = await Linking.canOpenURL(item.data);
 
-    if (supported) {
-      // Opening the link with some app, if the URL scheme is "http" the web link should be opened
-      // by some browser in the mobile
-      await Linking.openURL(item.data);
-    } else {
-      Alert.alert(`${item.data}`);
+    try {
+      if (supported) {
+        // Opening the link with some app, if the URL scheme is "http" the web link should be opened
+        // by some browser in the mobile
+        await Linking.openURL(item.data);
+      } else {
+        navigation.navigate('details', item);
+      }
+    } catch (error) {
+      console.warn(error);
     }
   };
+
+  return (
+    <List.Item
+      style={[
+        styles.standaloneRowFront,
+        {backgroundColor: theme.colors.surface},
+      ]}
+      title={
+        <Subheading style={{fontWeight: 'bold', color: theme.colors.text}}>
+          {item.decoration?.title}
+        </Subheading>
+      }
+      right={() => (
+        <View
+          style={{
+            justifyContent: 'center',
+            marginHorizontal: 6,
+          }}>
+          <Text style={{opacity: 0.8, color: theme.colors.text}}>{`${t(
+            'added',
+          )}`}</Text>
+          <Text style={{opacity: 0.8, color: theme.colors.text}}>
+            {`${format(fromUnixTime(item.date / 1000), 'dd/MM/yyyy')}`}
+          </Text>
+        </View>
+      )}
+      description={() => (
+        <Text style={{opacity: 0.8, color: theme.colors.text}}>
+          {t(item.decoration?.text)}
+        </Text>
+      )}
+      onPress={_handlePress}
+      left={() => (
+        <View style={styles.icon}>
+          <MaterialCommunityIcons
+            name={item.decoration ? item.decoration?.icon : 'link'}
+            size={24}
+            color={theme.colors.text}
+          />
+        </View>
+      )}
+    />
+  );
+});
+
+export const DrawerBack = React.memo((props: IProps) => {
+  const theme = useTheme();
+  const {item, isFavorites, isDeleted} = props;
+  if (!item) return null;
 
   const _isShared = async () => {
     try {
@@ -47,78 +100,39 @@ const Drawer = React.memo((props: IProps) => {
   };
 
   return (
-    <>
-      <SwipeRow
-        leftOpenValue={120}
-        rightOpenValue={-60}
-        style={{height: ITEM_HEIGHT}}>
-        <View style={styles.standaloneRowBack}>
-          <View style={{flexDirection: 'row', flex: 1}}>
-            <IconButton
-              style={[
-                styles.favoriteIcon,
-                {backgroundColor: theme.colors.primary},
-              ]}
-              icon={item.favorite ? 'star' : 'star-outline'}
-              onPress={isFavorites}></IconButton>
-            <IconButton
-              style={[
-                styles.shareIcon,
-                {backgroundColor: theme.colors.warning},
-              ]}
-              icon="share-variant"
-              onPress={_isShared}></IconButton>
-          </View>
-          <View>
-            <IconButton
-              icon="delete"
-              onPress={isDeleted}
-              style={[
-                styles.deleteIcon,
-                {backgroundColor: theme.colors.error},
-              ]}></IconButton>
-          </View>
-        </View>
-        <List.Item
+    <View style={styles.standaloneRowBack}>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          backgroundColor: theme.colors.warning,
+        }}>
+        <IconButton
+          style={[styles.favoriteIcon, {backgroundColor: theme.colors.primary}]}
+          icon={item.favorite ? 'star' : 'star-outline'}
+          onPress={isFavorites}></IconButton>
+        <IconButton
+          style={[styles.shareIcon, {backgroundColor: theme.colors.warning}]}
+          icon="share-variant"
+          onPress={_isShared}></IconButton>
+      </View>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.colors.error,
+          flexDirection: 'row-reverse',
+        }}>
+        <IconButton
+          icon="delete"
+          onPress={isDeleted}
           style={[
-            styles.standaloneRowFront,
-            {backgroundColor: theme.colors.surface},
-          ]}
-          title={
-            <Subheading style={{fontWeight: 'bold'}}>
-              {item.decoration?.title}
-            </Subheading>
-          }
-          right={() => (
-            <View
-              style={{
-                justifyContent: 'center',
-                marginHorizontal: 6,
-              }}>
-              <Text style={{opacity: 0.8}}>{`${t('added')}`}</Text>
-              <Text style={{opacity: 0.8}}>
-                {`${format(fromUnixTime(item.date / 1000), 'dd/MM/yyyy')}`}
-              </Text>
-            </View>
-          )}
-          description={t(item.decoration?.text)}
-          onPress={_handlePress}
-          left={() => (
-            <View style={styles.icon}>
-              <MaterialCommunityIcons
-                name={item.decoration ? item.decoration?.icon : 'link'}
-                size={24}
-                color={colors.text}
-              />
-            </View>
-          )}
-        />
-      </SwipeRow>
-    </>
+            styles.deleteIcon,
+            {backgroundColor: theme.colors.error},
+          ]}></IconButton>
+      </View>
+    </View>
   );
 });
-
-export default Drawer;
 
 const styles = StyleSheet.create({
   icon: {
@@ -169,6 +183,7 @@ const styles = StyleSheet.create({
     // flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    height: ITEM_HEIGHT,
   },
   backTextWhite: {
     color: '#FFF',

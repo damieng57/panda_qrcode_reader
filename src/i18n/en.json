@@ -15,7 +15,7 @@
   "alert_delete_favorites": "Delete favorites",
   "alert_delete_favorites_message": "Are you sure you want to clear your favorties list?",
   "header_title_details": "Details",
-  "mode_anonyme_banner_message": "Anonymous mode activated. No QrCode will be saved in the history.",
+  "mode_anonyme_banner_message": "No history mode activated. No QrCode will be saved in the history.",
   "permission_camera": "Permission to use camera",
   "permission_camera_message": "We need your permission to use the camera.",
   "added": "Added",
@@ -48,7 +48,7 @@
   "linkedin_link": "Linkedin link",
   "url_link": "Internet link",
   "history_settings_title": "HISTORY",
-  "settings_anonym_mode": "Active anonymous mode",
+  "settings_anonym_mode": "Active no history mode",
   "settings_anonym_mode_description": "Codes will not be stored in the app",
   "settings_clear_history": "Clear history",
   "settings_clear_history_description": "Clear all the items history",
@@ -61,5 +61,7 @@
   "settings_dark_mode_description": "Choose light or dark mode",
   "settings_accent_color": "Accent color",
   "settings_accent_color_description": "Choose an accent color for the app",
-  "details_type_title": "TYPE:"
+  "details_type_title": "TYPE:",
+  "settings_open_url_auto_description": "When an url is detected, the browser will be opened",
+  "settings_open_url_auto": "Open url automatically"
 }

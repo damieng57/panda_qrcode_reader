@@ -14,9 +14,6 @@ export interface ITouchableColor {
 
 export const DetailsScreen = (props: any) => {
   const theme = useTheme();
-
-  console.log(props.route.params)
-
   return (
     <>
       <Appbar.Header>

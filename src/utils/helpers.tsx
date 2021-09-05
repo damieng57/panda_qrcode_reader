@@ -6,12 +6,12 @@ import {IQrCodeDecoration, ISettings, IQrCode} from '../types';
 import {ObjectId} from 'bson'
 
 // Jotai Store
-export const historyAtom = atomWithStorage<IQrCode[]>('QRCODE:HISTORY', []);
 export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
   isAnonym: false,
   isDarkMode: 'dark',
   accentColor: undefined,
   maxItems: 100,
+  openUrlAuto: false,
 });
 
 export const formatQrCode = (element: Barcode, favorite: boolean): IQrCode => ({
@@ -53,13 +53,12 @@ export const getTranslation = (key: string | undefined): string => {
 
 export const getInternalType = (item: Barcode) => {
   const type = item.data.split(':');
-  if (type[0].toUpperCase() === 'BEGIN') return type[0].toUpperCase();
-  return type[1].toUpperCase();
+  if (type[0].toUpperCase() === 'BEGIN') return type[1].toUpperCase();
+  return type[0].toUpperCase();
 };
 
 export const parseData = (item: Barcode): IQrCodeDecoration | undefined => {
   if (!item.type) return;
-
   switch (getInternalType(item) || item.type) {
     case 'EMAIL':
     case 'MATMSG':
@@ -99,6 +98,8 @@ export const parseData = (item: Barcode): IQrCodeDecoration | undefined => {
         text: 'message_text_outline_text',
       };
     case 'VCARD':
+    case 'VCARD\nVERSION':
+    case 'VCARD VERSION':
     case 'CONTACT_INFO':
       return {
         icon: 'card-account-details-outline',

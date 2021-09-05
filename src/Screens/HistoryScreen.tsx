@@ -1,26 +1,31 @@
 import * as React from 'react';
-import {Alert, FlatList, StyleSheet, View} from 'react-native';
-import {Appbar, Searchbar, Surface, Divider} from 'react-native-paper';
+import {Alert, View} from 'react-native';
+import {Searchbar, Surface, Divider, Appbar} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Drawer, {ITEM_HEIGHT} from '../Components/Drawer';
+import {ITEM_HEIGHT, DrawerBack, DrawerFront} from '../Components/Drawer';
 import {useTheme} from '../theme';
 import {getTranslation as t} from '../utils/helpers';
-import { useQrCodes } from '../realm/Provider';
+import {useQrCodes} from '../realm/Provider';
+import {SwipeListView} from 'react-native-swipe-list-view';
 
-export const HistoryScreen = (props: any) => {
-  const { qrCodes, filterQrCodes, deleteQrCode, updateQrCode } = useQrCodes();
+export const HistoryScreen = () => {
+  const theme = useTheme();
+  const {qrCodes, filterQrCodes, deleteQrCode, updateQrCode} = useQrCodes();
   const [isFavorites, setIsFavorites] = React.useState<boolean>();
   const [searchQuery, setSearchQuery] = React.useState<string>('');
-  const theme = useTheme();
 
   const _onChangeSearch = (search: string) => setSearchQuery(search);
   const _handleChangeCurrentList = () => setIsFavorites(!isFavorites);
 
-  const _renderItem = (data: any) => {
+  const _renderItem = (data: any, color?: string) => {
+    return <DrawerFront item={data.item} color={color} />;
+  };
+
+  const _renderHiddenItem = (data: any, color?: string) => {
     // Action to add or remove Item in the favorite list
     const _isFavorite = () => {
       // Update favorites in the list
-      updateQrCode(data.item._id)
+      updateQrCode(data.item._id);
     };
 
     // Action when you press Delete in the Drawer
@@ -32,23 +37,24 @@ export const HistoryScreen = (props: any) => {
         },
         {
           text: t('alert_ok'),
-          onPress: () => deleteQrCode(data.item)
-        }
+          onPress: () => deleteQrCode(data.item),
+        },
       ]);
     };
 
     return (
-      <Drawer
+      <DrawerBack
         item={data.item}
         isFavorites={_isFavorite}
         isDeleted={_isDeleted}
+        color={color}
       />
     );
   };
 
   React.useEffect(() => {
-    filterQrCodes(searchQuery, isFavorites)
-  }, [searchQuery, isFavorites])
+    filterQrCodes(searchQuery, isFavorites);
+  }, [searchQuery, isFavorites]);
 
   return (
     <>
@@ -62,9 +68,10 @@ export const HistoryScreen = (props: any) => {
           justifyContent: 'space-between',
           paddingHorizontal: 16,
           paddingVertical: 8,
+          backgroundColor: theme.colors.surface,
         }}>
         <Searchbar
-          style={{flex: 1}}
+          style={{flex: 1, color: theme.colors.surface, borderRadius: 5}}
           placeholder={t('search_placeholder')}
           onChangeText={_onChangeSearch}
           value={searchQuery}
@@ -86,10 +93,16 @@ export const HistoryScreen = (props: any) => {
           </View>
         </View>
       </Surface>
-      <FlatList
-        style={{marginBottom: 50}}
+      <SwipeListView
+        leftOpenValue={120}
+        stopLeftSwipe={180}
+        rightOpenValue={-60}
+        stopRightSwipe={-180}
+        useFlatList={true}
+        style={{marginBottom: 60}}
         keyExtractor={(_item, index) => index.toString()}
-        renderItem={(item): JSX.Element => _renderItem(item)}
+        renderItem={(data, rowMap) => _renderItem(data)}
+        renderHiddenItem={(data, rowMap) => _renderHiddenItem(data)}
         data={qrCodes}
         getItemLayout={(data, index) => ({
           length: ITEM_HEIGHT,
@@ -103,60 +116,3 @@ export const HistoryScreen = (props: any) => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  icon: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 64,
-    width: 36,
-  },
-  items: {
-    // flexDirection: 'row',
-    alignItems: 'center',
-    // padding: 16,
-    width: '100%',
-    flexDirection: 'row-reverse',
-    justifyContent: 'flex-end',
-    padding: 8,
-    paddingLeft: 56,
-  },
-  title: {fontSize: 12, color: 'lightgray', paddingHorizontal: 16},
-  texts: {flex: 1, paddingLeft: 56, paddingRight: 16},
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-  preview: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  capture: {
-    flex: 0,
-    borderRadius: 5,
-    padding: 15,
-    paddingHorizontal: 20,
-    alignSelf: 'center',
-    margin: 20,
-  },
-
-  standalone: {
-    marginTop: 30,
-    marginBottom: 30,
-  },
-  standaloneRowFront: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  standaloneRowBack: {
-    alignItems: 'center',
-    // backgroundColor: '#8BC',
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  backTextWhite: {
-    color: '#FFF',
-  },
-});
