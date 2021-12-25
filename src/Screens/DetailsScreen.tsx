@@ -1,9 +1,8 @@
 import * as React from 'react';
-import {ScrollView, StyleSheet, ViewStyle} from 'react-native';
-import {Appbar, Title, Paragraph} from 'react-native-paper';
+import {ScrollView, ViewStyle} from 'react-native';
 import {getTranslation as t} from '../utils/helpers';
 
-import {useTheme} from '../theme';
+import {HStack, Text} from 'native-base';
 
 export interface ITouchableColor {
   size?: number;
@@ -13,65 +12,34 @@ export interface ITouchableColor {
 }
 
 export const DetailsScreen = (props: any) => {
-  const theme = useTheme();
   return (
     <>
-      <Appbar.Header>
-        <Appbar.Content title={t('header_title_details')}></Appbar.Content>
-      </Appbar.Header>
+      {/* Header */}
+      <HStack
+        bg="#6200ee"
+        px="1"
+        py="3"
+        justifyContent="space-between"
+        alignItems="center">
+        <HStack space="4" alignItems="center">
+          <Text px="4" color="white" fontSize="20" fontWeight="bold">
+            {t('header_title_history')}
+          </Text>
+        </HStack>
+      </HStack>
+      {/* End of Header */}
       <ScrollView
         style={{marginBottom: 50}}
         contentContainerStyle={{padding: 16}}>
         {/* TODO: Type must be dynamic */}
-        <Title style={styles.title}>{t('details_type_title')} {props.route.params._type}</Title>
+        <Text px="4" color="white" fontSize="28" fontWeight="bold">
+          {t('details_type_title')} {props.route.params._type}
+        </Text>
 
-        <Paragraph>{props.route.params.data}</Paragraph>
+        <Text px="4" color="white" fontSize="16" fontWeight="bold">
+          {props.route.params.data}
+        </Text>
       </ScrollView>
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  items: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingRight: 16,
-  },
-  title: {fontSize: 12, color: 'lightgray'},
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-  texts: {flex: 1, padding: 16, paddingLeft: 72, paddingRight: 16},
-  preview: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  capture: {
-    flex: 0,
-    borderRadius: 5,
-    padding: 15,
-    paddingHorizontal: 20,
-    alignSelf: 'center',
-    margin: 20,
-  },
-
-  standalone: {
-    marginTop: 30,
-    marginBottom: 30,
-  },
-  standaloneRowFront: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  standaloneRowBack: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  backTextWhite: {
-    color: '#FFF',
-  },
-});

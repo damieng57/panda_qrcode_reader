@@ -1,12 +1,20 @@
 import * as React from 'react';
-import {Alert, View} from 'react-native';
-import {Searchbar, Surface, Divider, Appbar} from 'react-native-paper';
+import {Alert} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ITEM_HEIGHT, DrawerBack, DrawerFront} from '../Components/Drawer';
 import {useTheme} from '../theme';
 import {getTranslation as t} from '../utils/helpers';
 import {useQrCodes} from '../realm/Provider';
-import {SwipeListView} from 'react-native-swipe-list-view';
+import {
+  VStack,
+  HStack,
+  IconButton,
+  Icon,
+  Text,
+  Divider,
+  Input,
+  FlatList
+} from 'native-base';
 
 export const HistoryScreen = () => {
   const theme = useTheme();
@@ -58,51 +66,86 @@ export const HistoryScreen = () => {
 
   return (
     <>
-      <Appbar.Header style={{backgroundColor: theme.colors.surface}}>
-        <Appbar.Content title={t('header_title_history')}></Appbar.Content>
-      </Appbar.Header>
-      <Surface
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingHorizontal: 16,
-          paddingVertical: 8,
-          backgroundColor: theme.colors.surface,
-        }}>
-        <Searchbar
-          style={{flex: 1, color: theme.colors.surface, borderRadius: 5}}
-          placeholder={t('search_placeholder')}
-          onChangeText={_onChangeSearch}
-          value={searchQuery}
-        />
-        <View
-          style={{flexDirection: 'row', alignItems: 'center', paddingLeft: 16}}>
-          <View
-            style={{
-              height: 60,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <MaterialCommunityIcons
-              onPress={_handleChangeCurrentList}
-              name={isFavorites ? 'star' : 'star-outline'}
-              size={24}
-              color={theme.colors.onSurface}
+      <VStack>
+
+        {/* Header */}
+        <HStack
+          bg="#6200ee"
+          px="1"
+          py="3"
+          justifyContent="space-between"
+          alignItems="center">
+          <HStack space="4" alignItems="center">
+            <Text px="4" color="white" fontSize="20" fontWeight="bold">
+              {t('header_title_history')}
+            </Text>
+          </HStack>
+          <HStack space="2">
+            <IconButton
+              icon={
+                <Icon
+                  as={
+                    <MaterialCommunityIcons
+                      name={isFavorites ? 'star' : 'star-outline'}
+                    />
+                  }
+                  size="sm"
+                  color="white"
+                />
+              }
             />
-          </View>
-        </View>
-      </Surface>
-      <SwipeListView
-        leftOpenValue={120}
-        stopLeftSwipe={180}
-        rightOpenValue={-60}
-        stopRightSwipe={-180}
-        useFlatList={true}
+            <IconButton
+              icon={
+                <Icon
+                  as={<MaterialCommunityIcons name="magnify" />}
+                  color="white"
+                  size="sm"
+                />
+              }
+            />
+            <IconButton
+              icon={
+                <Icon
+                  as={<MaterialCommunityIcons name="dots" />}
+                  size="sm"
+                  color="white"
+                />
+              }
+            />
+          </HStack>
+        </HStack>
+        {/* End of Header */}
+
+        {/* Searchbar */}
+        <HStack>
+          <VStack p="4" width="100%" space={5} alignItems="center">
+            <Input
+              placeholder={t('search_placeholder')}
+              onChangeText={_onChangeSearch}
+              value={searchQuery}
+              borderRadius="50"
+              py="3"
+              px="1"
+              fontSize="14"
+              InputLeftElement={
+                <Icon
+                  m="2"
+                  ml="3"
+                  size="6"
+                  color="gray.400"
+                  as={<MaterialCommunityIcons name="magnify" />}
+                />
+              }
+            />
+          </VStack>
+        </HStack>
+        {/* End of searchbar */}
+      </VStack>
+
+      <FlatList
         style={{marginBottom: 60}}
         keyExtractor={(_item, index) => index.toString()}
         renderItem={(data, rowMap) => _renderItem(data)}
-        renderHiddenItem={(data, rowMap) => _renderHiddenItem(data)}
         data={qrCodes}
         getItemLayout={(data, index) => ({
           length: ITEM_HEIGHT,

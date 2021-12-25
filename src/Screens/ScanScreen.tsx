@@ -1,12 +1,5 @@
 import * as React from 'react';
-import {
-  View,
-  StyleSheet,
-  Vibration,
-  Dimensions,
-  Linking,
-  TouchableOpacity,
-} from 'react-native';
+import {Vibration, Linking} from 'react-native';
 import {Barcode, RNCamera} from 'react-native-camera';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
 import {
@@ -14,12 +7,10 @@ import {
   settingsAtom,
   formatQrCode,
 } from '../utils/helpers';
-import {useTheme} from '../theme';
 import {useAtom} from 'jotai';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQrCodes} from '../realm/Provider';
 import {IQrCode} from '../types';
-import {Snackbar, Text} from 'react-native-paper';
+import {VStack, HStack, Alert, Text, Box, useToast} from 'native-base';
 
 const MAX_LENGHT_SNACKBAR = 60;
 
@@ -40,7 +31,7 @@ const defaultState = {
 export const ScanScreen = (props: any & IState) => {
   const [state, setState] = React.useState<IState>(defaultState);
   const [settings] = useAtom(settingsAtom);
-  const theme = useTheme();
+  const toast = useToast();
   const {createQrCode} = useQrCodes();
 
   const _init = () => {
@@ -61,7 +52,9 @@ export const ScanScreen = (props: any & IState) => {
   const _openURL = React.useCallback(async () => {
     try {
       const url = state.barcode?.data;
-      if (!url) return;
+      if (!url) {
+        return null;
+      }
       // Checking if the link is supported for links with custom URL scheme.
       const supported = await Linking.canOpenURL(url);
 
@@ -89,11 +82,17 @@ export const ScanScreen = (props: any & IState) => {
     (item: any) => {
       if (!settings?.isAnonym && state.isActive) {
         Vibration.vibrate(500);
+
         setState({
           isActive: false,
           isVisible: true,
           barcode: item,
           current: formatQrCode(item, false),
+        });
+        toast.show({
+          description: _formatTextSnackBar(item?.data || '').slice(0, 47).concat('...'),
+          isClosable: true,
+          onCloseComplete: _init,
         });
       }
     },
@@ -102,26 +101,39 @@ export const ScanScreen = (props: any & IState) => {
 
   return (
     <>
+      {/* Infobar - anonymous mode */}
       {settings?.isAnonym && (
-        <View
-          style={[
-            styles.bannerAnonym,
-            {backgroundColor: theme.colors.warning},
-          ]}>
-          <MaterialCommunityIcons
-            name="alert-outline"
-            size={24}
-            style={[styles.iconBannerAnonym]}></MaterialCommunityIcons>
-          <Text style={{color: theme.colors.background}}>
-            {t('mode_anonyme_banner_message')}
-          </Text>
-        </View>
+        <Alert w="100%" status="warning" borderRadius={0}>
+          <VStack space={1} flexShrink={1} w="100%">
+            <HStack
+              flexShrink={1}
+              space={2}
+              alignItems="center"
+              justifyContent="space-between">
+              <HStack flexShrink={1} space={2} alignItems="center">
+                <Text
+                  fontSize="md"
+                  fontWeight="medium"
+                  _dark={{
+                    color: 'coolGray.800',
+                  }}>
+                  {t('mode_anonyme_banner_message')}
+                </Text>
+              </HStack>
+            </HStack>
+          </VStack>
+        </Alert>
       )}
-      <View style={styles.container}>
+      {/* End of infobar - anonymous mode */}
+      <Box flex={1}>
         <RNCamera
           // detectedImageInEvent
           captureAudio={false}
-          style={styles.preview}
+          style={{
+            flex: 1,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
           barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
           onBarCodeRead={data => _isScanned(data)}
           type={RNCamera.Constants.Type.back}
@@ -137,78 +149,15 @@ export const ScanScreen = (props: any & IState) => {
               return null;
             }
             return (
-              <View
-                style={{
-                  flex: 1,
-                  width: Dimensions.get('window').width,
-                }}>
-                <BarcodeMask
-                  showAnimatedLine={false}
-                  edgeRadius={15}
-                  maskOpacity={0.2}
-                />
-              </View>
+              <BarcodeMask
+                showAnimatedLine={false}
+                edgeRadius={15}
+                maskOpacity={0.2}
+              />
             );
           }}
         </RNCamera>
-      </View>
-      <Snackbar
-        visible={state.isVisible}
-        onDismiss={() => _init()}
-        style={{marginBottom: 80, borderRadius: 5}}
-        action={{
-          label: (
-            <MaterialCommunityIcons
-              color={theme.colors.accent}
-              name="close"
-              size={24}
-              onPress={() => _init()}></MaterialCommunityIcons>
-          ),
-          onPress: () => _openURL(),
-        }}>
-        {_formatTextSnackBar(state.barcode?.data)}
-      </Snackbar>
+      </Box>
     </>
   );
 };
-
-export const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  snackbarText: {
-    textAlignVertical: 'center',
-  },
-  snackbarContainer: {
-    height: 50,
-    flexDirection: 'row',
-    position: 'absolute',
-    bottom: 64,
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-  },
-  iconBannerAnonym: {
-    width: 24,
-    marginRight: 8,
-  },
-  bannerAnonym: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    padding: 12,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-    width: '100%'
-  },
-  preview: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-});
