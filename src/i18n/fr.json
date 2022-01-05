@@ -1,4 +1,8 @@
 {
+  "bottom_menu_scanner": "Scan",
+  "bottom_menu_about": "A Propos",
+  "bottom_menu_history": "Historique",
+  "bottom_menu_settings": "Réglages",
   "header_title_history": "Historique",
   "header_title_settings": "Paramètres",
   "search_placeholder": "Rechercher",

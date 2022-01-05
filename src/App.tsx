@@ -1,20 +1,24 @@
 import * as React from 'react';
-import {StyleSheet, Platform} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {Provider as PaperProvider} from 'react-native-paper';
 import SplashScreen from 'react-native-splash-screen';
 import {Provider} from 'jotai';
 import {BottomMenu} from './Components/BottomMenu/BottomMenu';
-import {useTheme} from './theme';
 import {DetailsScreen} from './Screens/DetailsScreen';
 import {QrCodesProvider} from './realm/Provider';
-import {NativeBaseProvider, Box, StatusBar} from 'native-base';
+import {NativeBaseProvider, extendTheme} from 'native-base';
+
+// Define the config
+const config = {
+  useSystemColorMode: false,
+  initialColorMode: 'dark',
+};
 
 const Stack = createStackNavigator();
 
 export default function App() {
-  const theme = useTheme();
+  const customTheme = extendTheme({config});
 
   React.useEffect(() => {
     SplashScreen.hide();
@@ -22,17 +26,15 @@ export default function App() {
 
   return (
     <Provider>
-      <NativeBaseProvider>
-        <PaperProvider theme={theme}>
-          <NavigationContainer theme={theme}>
-            <QrCodesProvider>
-              <Stack.Navigator screenOptions={{header: () => null}}>
-                <Stack.Screen name="main" component={BottomMenu} />
-                <Stack.Screen name="details" component={DetailsScreen} />
-              </Stack.Navigator>
-            </QrCodesProvider>
-          </NavigationContainer>
-        </PaperProvider>
+      <NativeBaseProvider theme={customTheme}>
+        <NavigationContainer>
+          <QrCodesProvider>
+            <Stack.Navigator screenOptions={{header: () => null}}>
+              <Stack.Screen name="main" component={BottomMenu} />
+              <Stack.Screen name="details" component={DetailsScreen} />
+            </Stack.Navigator>
+          </QrCodesProvider>
+        </NavigationContainer>
       </NativeBaseProvider>
     </Provider>
   );

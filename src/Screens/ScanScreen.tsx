@@ -10,7 +10,7 @@ import {
 import {useAtom} from 'jotai';
 import {useQrCodes} from '../realm/Provider';
 import {IQrCode} from '../types';
-import {VStack, HStack, Alert, Text, Box, useToast} from 'native-base';
+import {VStack, HStack, Alert, Text, Box, useToast, useColorModeValue} from 'native-base';
 
 const MAX_LENGHT_SNACKBAR = 60;
 
@@ -100,7 +100,8 @@ export const ScanScreen = (props: any & IState) => {
   );
 
   return (
-    <>
+    <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
+
       {/* Infobar - anonymous mode */}
       {settings?.isAnonym && (
         <Alert w="100%" status="warning" borderRadius={0}>
@@ -158,6 +159,6 @@ export const ScanScreen = (props: any & IState) => {
           }}
         </RNCamera>
       </Box>
-    </>
+    </Box>
   );
 };

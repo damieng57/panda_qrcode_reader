@@ -1,8 +1,7 @@
 import * as React from 'react';
 import {ScrollView, ViewStyle} from 'react-native';
 import {getTranslation as t} from '../utils/helpers';
-
-import {HStack, Text} from 'native-base';
+import {HStack, Text, Box, useColorModeValue} from 'native-base';
 
 export interface ITouchableColor {
   size?: number;
@@ -13,7 +12,7 @@ export interface ITouchableColor {
 
 export const DetailsScreen = (props: any) => {
   return (
-    <>
+    <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
       {/* Header */}
       <HStack
         bg="#6200ee"
@@ -40,6 +39,6 @@ export const DetailsScreen = (props: any) => {
           {props.route.params.data}
         </Text>
       </ScrollView>
-    </>
+    </Box>
   );
 };

@@ -41,12 +41,14 @@ const QrCodesProvider = ({children}: IProps) => {
       // @ts-ignore
       realmRef.current = realm;
 
-      const qrCodes = realm.objects('QrCode').sorted(true);
+      const qrCodes = realm.objects('QrCode') //.sorted(true) doesn't work;
       setQrCodes([...qrCodes]);
       qrCodes.addListener(() => {
         setQrCodes([...qrCodes]);
       });
-    });
+    }).catch(
+      e => console.error(e)
+    );
 
     return () => {
       // cleanup function

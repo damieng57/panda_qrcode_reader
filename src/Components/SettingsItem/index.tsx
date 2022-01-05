@@ -19,23 +19,26 @@ export const SettingsItem = (props: IProps) => {
       onPress={() => {}}
       useForeground
       background={TouchableNativeFeedback.Ripple('white', false)}>
-      <Box py={4} paddingLeft={12} paddingRight={4}>
-        <HStack>
-          <VStack flex={1}>
-            <Heading color="white" size={'xs'}>
-              {title}
-            </Heading>
-            <Text color="white">{description}</Text>
-          </VStack>
-          {hasSwitch && (
-            <Switch
-              isChecked={isChecked}
-              onToggle={onPress}
-              color={switchColor}
-            />
-          )}
-        </HStack>
-      </Box>
+      <HStack
+        flex="1"
+        paddingLeft={12}
+        paddingRight={6}
+        height={24}
+        alignItems={'center'}>
+        <VStack flex={1}>
+          <Heading color="white" size={'xs'}>
+            {title}
+          </Heading>
+          <Text color="white">{description}</Text>
+        </VStack>
+        {hasSwitch && (
+          <Switch
+            isChecked={isChecked}
+            onToggle={onPress}
+            color={switchColor}
+          />
+        )}
+      </HStack>
     </TouchableNativeFeedback>
   );
 };

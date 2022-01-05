@@ -3,7 +3,7 @@ import {ViewStyle, Alert} from 'react-native';
 import {getTranslation as t, settingsAtom} from '../utils/helpers';
 import {useAtom} from 'jotai';
 import {useQrCodes} from '../realm/Provider';
-import {Heading, Text, HStack, ScrollView} from 'native-base';
+import {Box, Heading, ScrollView, useColorModeValue} from 'native-base';
 import {SettingsItem} from '../Components/SettingsItem';
 
 export interface ITouchableColor {
@@ -74,24 +74,9 @@ export const SettingsScreen = (props: any) => {
   };
 
   return (
-    <>
-      {/* Header */}
-      <HStack
-        bg="#6200ee"
-        px="1"
-        py="3"
-        justifyContent="space-between"
-        alignItems="center">
-        <HStack space="4" alignItems="center">
-          <Text px="4" color="white" fontSize="20" fontWeight="bold">
-            {t('header_title_settings')}
-          </Text>
-        </HStack>
-      </HStack>
-      {/* End of Header */}
-
+    <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
       <ScrollView>
-        <Heading color="white" size={'xs'}>
+        <Heading size={'xs'} p={3}>
           {t('history_settings_title')}
         </Heading>
 
@@ -133,6 +118,6 @@ export const SettingsScreen = (props: any) => {
         />
         {/* End of set open url */}
       </ScrollView>
-    </>
+    </Box>
   );
 };
