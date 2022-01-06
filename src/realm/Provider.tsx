@@ -41,7 +41,7 @@ const QrCodesProvider = ({children}: IProps) => {
       // @ts-ignore
       realmRef.current = realm;
 
-      const qrCodes = realm.objects('QrCode') //.sorted(true) doesn't work;
+      const qrCodes = realm.objects('QrCode').sorted('date', true);
       setQrCodes([...qrCodes]);
       qrCodes.addListener(() => {
         setQrCodes([...qrCodes]);
@@ -124,7 +124,7 @@ const QrCodesProvider = ({children}: IProps) => {
     }
   };
 
-  const deleteAllFavoritesQrCodes = () => {
+  const clearAllFavoritesQrCodes = () => {
     // @ts-ignore
     const realm: Realm = realmRef.current;
 
@@ -135,7 +135,7 @@ const QrCodesProvider = ({children}: IProps) => {
         const qrCodes = realm.objects("QrCode").filtered('favorite == true');
         // Loop through to update.
         qrCodes.map((qrCode) => {
-          // Give all puppies to Ali.
+          // All favorites to false.
           qrCode.favorite = false;
         });
 
@@ -183,7 +183,7 @@ const QrCodesProvider = ({children}: IProps) => {
         createQrCode,
         updateQrCode,
         deleteAllQrCodes,
-        deleteAllFavoritesQrCodes,
+        clearAllFavoritesQrCodes,
         deleteQrCode,
         filterQrCodes,
         qrCodes,

@@ -16,7 +16,7 @@ export const SettingsItem = (props: IProps) => {
     props;
   return (
     <TouchableNativeFeedback
-      onPress={() => {}}
+      onPress={onPress}
       useForeground
       background={TouchableNativeFeedback.Ripple('white', false)}>
       <HStack

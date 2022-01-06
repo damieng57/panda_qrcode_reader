@@ -12,14 +12,14 @@ import {
   Box,
   useColorModeValue,
 } from 'native-base';
+import { AppBar } from '../Components/AppBar';
 
 export const AboutScreen = () => {
   return (
     <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
+      <AppBar title={t('bottom_menu_about')} />
+
       <ScrollView>
-      <Heading size={'xs'} p={3}>
-          {t('bottom_menu_about').toUpperCase()}
-        </Heading>
         <VStack flex="1" alignItems={'center'} p={6}>
           <Image
             source={require('../assets/qr-code-icon.png')}

@@ -10,7 +10,17 @@ import {
 import {useAtom} from 'jotai';
 import {useQrCodes} from '../realm/Provider';
 import {IQrCode} from '../types';
-import {VStack, HStack, Alert, Text, Box, useToast, useColorModeValue} from 'native-base';
+import {
+  VStack,
+  HStack,
+  Alert,
+  Text,
+  Box,
+  useToast,
+  useColorModeValue,
+  Icon,
+} from 'native-base';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const MAX_LENGHT_SNACKBAR = 60;
 
@@ -67,6 +77,8 @@ export const ScanScreen = (props: any & IState) => {
       }
     } catch (error) {
       console.warn(error);
+    } finally {
+      _init();
     }
   }, [state]);
 
@@ -89,11 +101,15 @@ export const ScanScreen = (props: any & IState) => {
           barcode: item,
           current: formatQrCode(item, false),
         });
-        toast.show({
-          description: _formatTextSnackBar(item?.data || '').slice(0, 47).concat('...'),
-          isClosable: true,
-          onCloseComplete: _init,
-        });
+        settings.openUrlAuto
+          ? _openURL()
+          : toast.show({
+              description: _formatTextSnackBar(item?.data || '')
+                .slice(0, 47)
+                .concat('...'),
+              isClosable: true,
+              onCloseComplete: _init,
+            });
       }
     },
     [state],
@@ -101,19 +117,22 @@ export const ScanScreen = (props: any & IState) => {
 
   return (
     <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
-
       {/* Infobar - anonymous mode */}
       {settings?.isAnonym && (
         <Alert w="100%" status="warning" borderRadius={0}>
           <VStack space={1} flexShrink={1} w="100%">
-            <HStack
-              flexShrink={1}
-              space={2}
-              alignItems="center"
-              justifyContent="space-between">
+            <HStack flexShrink={1} space={2} alignItems="center">
+              <Icon
+                mr="3"
+                size="5"
+                _dark={{
+                  color: 'coolGray.800',
+                }}
+                as={<MaterialCommunityIcons name="alert-outline" />}
+              />
               <HStack flexShrink={1} space={2} alignItems="center">
                 <Text
-                  fontSize="md"
+                  fontSize="sm"
                   fontWeight="medium"
                   _dark={{
                     color: 'coolGray.800',

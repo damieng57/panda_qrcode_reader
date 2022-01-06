@@ -1,6 +1,6 @@
 import * as React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {ITEM_HEIGHT, DrawerFront} from '../Components/Drawer';
+import {ITEM_HEIGHT, Item} from '../Components/Item';
 import {getTranslation as t} from '../utils/helpers';
 import {useQrCodes} from '../realm/Provider';
 import {
@@ -16,18 +16,24 @@ import {
 
 export const HistoryScreen = () => {
   const {qrCodes, filterQrCodes, deleteQrCode, updateQrCode} = useQrCodes();
-  const [isFavorites, setIsFavorites] = React.useState<boolean>();
+  const [showFavorites, setShowFavorites] = React.useState<boolean>();
   const [searchQuery, setSearchQuery] = React.useState<string>('');
 
   const _onChangeSearch = (search: string) => setSearchQuery(search);
 
-  const _renderItem = (data: any, color?: string) => {
-    return <DrawerFront item={data.item} color={color} />;
+  const _renderItem = (data: any) => {
+    return (
+      <Item
+        item={data.item}
+        onFavorite={updateQrCode}
+        onDelete={deleteQrCode}
+      />
+    );
   };
 
   React.useEffect(() => {
-    filterQrCodes(searchQuery, isFavorites);
-  }, [searchQuery, isFavorites]);
+    filterQrCodes(searchQuery, showFavorites);
+  }, [searchQuery, showFavorites]);
 
   return (
     <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
@@ -55,7 +61,7 @@ export const HistoryScreen = () => {
             <Icon
               mr="3"
               size="5"
-              color="gray.500"
+              color="gray.400"
               as={<MaterialCommunityIcons name="close" />}
               onPress={() => setSearchQuery('')}
             />
@@ -63,25 +69,18 @@ export const HistoryScreen = () => {
         />
         <HStack alignItems="center">
           <IconButton
-          marginLeft={2}
+            marginLeft={2}
             icon={
               <Icon
                 as={
                   <MaterialCommunityIcons
-                    name={isFavorites ? 'star' : 'star-outline'}
+                    name={showFavorites ? 'star' : 'star-outline'}
                   />
                 }
                 size="sm"
               />
             }
-          />
-          <IconButton
-            icon={
-              <Icon
-                as={<MaterialCommunityIcons name="dots-vertical" />}
-                size="sm"
-              />
-            }
+            onPress={() => setShowFavorites(!showFavorites)}
           />
         </HStack>
       </HStack>
