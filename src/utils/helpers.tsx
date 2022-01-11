@@ -12,6 +12,8 @@ export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
   accentColor: undefined,
   maxItems: 100,
   openUrlAuto: false,
+  showFavorites: false,
+  criteria: '',
 });
 
 export const formatQrCode = (element: Barcode, favorite: boolean): IQrCode => ({

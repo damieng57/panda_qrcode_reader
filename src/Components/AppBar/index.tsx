@@ -1,6 +1,5 @@
 import * as React from 'react';
-import {HStack, Icon, IconButton, Text} from 'native-base';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {HStack, Text} from 'native-base';
 
 interface IProps {
   title: string;

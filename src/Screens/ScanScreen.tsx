@@ -22,7 +22,7 @@ import {
 } from 'native-base';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const MAX_LENGHT_SNACKBAR = 60;
+const MAX_LENGHT_SNACKBAR = 57;
 
 interface IState {
   isActive: boolean;
@@ -59,30 +59,34 @@ export const ScanScreen = (props: any & IState) => {
     }
   }, [state.barcode, state.isActive]);
 
-  const _openURL = React.useCallback(async () => {
-    try {
-      const url = state.barcode?.data;
-      if (!url) {
-        return null;
-      }
-      // Checking if the link is supported for links with custom URL scheme.
-      const supported = await Linking.canOpenURL(url);
+  const _openURL = React.useCallback(
+    async (item: IQrCode) => {
+      try {
+        const url = item?.data;
+        if (!url) {
+          return null;
+        }
+        // Checking if the link is supported for links with custom URL scheme.
+        const supported = await Linking.canOpenURL(url);
 
-      if (supported) {
-        // Opening the link with some app, if the URL scheme is "http" the web link should be opened
-        // by some browser in the mobile
-        await Linking.openURL(url);
-      } else {
-        props.navigation.navigate('details', state.current);
+        if (supported) {
+          // Opening the link with some app, if the URL scheme is "http" the web link should be opened
+          // by some browser in the mobile
+          await Linking.openURL(url);
+        } else {
+          props.navigation.navigate('details', state.current);
+        }
+      } catch (error) {
+        console.warn(error);
+      } finally {
+        setTimeout(_init(), 2000);
       }
-    } catch (error) {
-      console.warn(error);
-    } finally {
-      _init();
-    }
-  }, [state]);
+    },
+    [state],
+  );
 
   const _formatTextSnackBar = (text: string): string => {
+    // TODO: Improve using Dimensions of the screen
     if (!text) return '';
     if (text.length > MAX_LENGHT_SNACKBAR) {
       return text.slice(0, MAX_LENGHT_SNACKBAR - 3) + '...';
@@ -101,14 +105,14 @@ export const ScanScreen = (props: any & IState) => {
           barcode: item,
           current: formatQrCode(item, false),
         });
+
         settings.openUrlAuto
-          ? _openURL()
+          ? _openURL(item)
           : toast.show({
-              description: _formatTextSnackBar(item?.data || '')
-                .slice(0, 47)
-                .concat('...'),
+              description: _formatTextSnackBar(item?.data || ''),
               isClosable: true,
               onCloseComplete: _init,
+              style: {marginHorizontal: 8},
             });
       }
     },

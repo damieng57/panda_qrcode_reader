@@ -1,5 +1,5 @@
 import {TouchableNativeFeedback} from 'react-native';
-import {Text, Switch, Box, Heading, HStack, VStack} from 'native-base';
+import {Text, Switch, Heading, HStack, VStack} from 'native-base';
 import React from 'react';
 
 export interface IProps {

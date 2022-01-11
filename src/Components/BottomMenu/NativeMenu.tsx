@@ -4,6 +4,44 @@ import React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {getTranslation as t} from '../../utils/helpers';
 
+const StyledIcon = (selected: boolean, name: string, text: string) => {
+  return selected ? (
+    <>
+      <Icon
+        mb="1"
+        as={<MaterialCommunityIcons name={name} />}
+        color="white"
+        size="sm"
+        bg="red.100"
+        borderRadius={100}
+        minWidth={12}
+        minHeight={7}
+        textAlign={'center'}
+        padding={0.5}
+      />
+      <Text color="white" fontSize="12">
+        {text}
+      </Text>
+    </>
+  ) : (
+    <>
+      <Icon
+        mb="1"
+        as={<MaterialCommunityIcons name={name} />}
+        color="white"
+        size="sm"
+        minWidth={12}
+        minHeight={7}
+        textAlign={'center'}
+        padding={0.5}
+      />
+      <Text color="white" fontSize="12">
+        {text}
+      </Text>
+    </>
+  );
+};
+
 export const NativeMenu = ({
   state,
   descriptors,
@@ -16,86 +54,34 @@ export const NativeMenu = ({
   }, [selected]);
 
   return (
-    <HStack bg="indigo.600" alignItems="center" safeAreaBottom shadow={6}>
+    <HStack bg="indigo.300" alignItems="center" safeAreaBottom shadow={6}>
       <Pressable
         opacity={selected === 0 ? 1 : 0.5}
         py="3"
         flex={1}
         onPress={() => setSelected(0)}>
-        <Center>
-          <Icon
-            mb="1"
-            as={
-              <MaterialCommunityIcons
-                name='qrcode'
-              />
-            }
-            color="white"
-            size="sm"
-          />
-          <Text color="white" fontSize="12">
-            {t('bottom_menu_scanner')}
-          </Text>
-        </Center>
+        <Center>{StyledIcon(selected === 0, 'qrcode', t('bottom_menu_scanner'))}</Center>
       </Pressable>
       <Pressable
         opacity={selected === 1 ? 1 : 0.5}
         py="2"
         flex={1}
         onPress={() => setSelected(1)}>
-        <Center>
-          <Icon
-            mb="1"
-            as={<MaterialCommunityIcons name="history" />}
-            color="white"
-            size="sm"
-          />
-          <Text color="white" fontSize="12">
-            {t('bottom_menu_history')}
-          </Text>
-        </Center>
+        <Center>{StyledIcon(selected === 1, 'history', t('bottom_menu_history'))}</Center>
       </Pressable>
       <Pressable
         opacity={selected === 2 ? 1 : 0.6}
         py="2"
         flex={1}
         onPress={() => setSelected(2)}>
-        <Center>
-          <Icon
-            mb="1"
-            as={
-              <MaterialCommunityIcons
-                name='cog'
-              />
-            }
-            color="white"
-            size="sm"
-          />
-          <Text color="white" fontSize="12">
-            {t('bottom_menu_settings')}
-          </Text>
-        </Center>
+        <Center>{StyledIcon(selected === 2, 'cog', t('bottom_menu_settings'))}</Center>
       </Pressable>
       <Pressable
         opacity={selected === 3 ? 1 : 0.5}
         py="2"
         flex={1}
         onPress={() => setSelected(3)}>
-        <Center>
-          <Icon
-            mb="1"
-            as={
-              <MaterialCommunityIcons
-                name='information'
-              />
-            }
-            color="white"
-            size="sm"
-          />
-          <Text color="white" fontSize="12">
-            {t('bottom_menu_about')}
-          </Text>
-        </Center>
+        <Center>{StyledIcon(selected === 3, 'information', t('bottom_menu_about'))}</Center>
       </Pressable>
     </HStack>
   );

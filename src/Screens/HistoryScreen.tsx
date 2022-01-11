@@ -1,7 +1,7 @@
 import * as React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ITEM_HEIGHT, Item} from '../Components/Item';
-import {getTranslation as t} from '../utils/helpers';
+import {getTranslation as t, settingsAtom} from '../utils/helpers';
 import {useQrCodes} from '../realm/Provider';
 import {
   HStack,
@@ -13,13 +13,17 @@ import {
   Box,
   useColorModeValue,
 } from 'native-base';
+import {useAtom} from 'jotai';
 
 export const HistoryScreen = () => {
   const {qrCodes, filterQrCodes, deleteQrCode, updateQrCode} = useQrCodes();
-  const [showFavorites, setShowFavorites] = React.useState<boolean>();
-  const [searchQuery, setSearchQuery] = React.useState<string>('');
+  const [settings, setSettings] = useAtom(settingsAtom);
 
-  const _onChangeSearch = (search: string) => setSearchQuery(search);
+  const _onChangeSearch = (search: string) =>
+    setSettings({
+      ...settings,
+      criteria: search,
+    });
 
   const _renderItem = (data: any) => {
     return (
@@ -32,8 +36,8 @@ export const HistoryScreen = () => {
   };
 
   React.useEffect(() => {
-    filterQrCodes(searchQuery, showFavorites);
-  }, [searchQuery, showFavorites]);
+    filterQrCodes(settings.criteria, settings.showFavorites);
+  }, [settings.criteria, settings.showFavorites, qrCodes.length]);
 
   return (
     <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
@@ -43,7 +47,7 @@ export const HistoryScreen = () => {
           flex="1"
           placeholder={t('search_placeholder')}
           onChangeText={_onChangeSearch}
-          value={searchQuery}
+          value={settings.criteria}
           borderRadius="50"
           py="3"
           px="1"
@@ -63,7 +67,12 @@ export const HistoryScreen = () => {
               size="5"
               color="gray.400"
               as={<MaterialCommunityIcons name="close" />}
-              onPress={() => setSearchQuery('')}
+              onPress={() =>
+                setSettings({
+                  ...settings,
+                  criteria: '',
+                })
+              }
             />
           }
         />
@@ -74,13 +83,18 @@ export const HistoryScreen = () => {
               <Icon
                 as={
                   <MaterialCommunityIcons
-                    name={showFavorites ? 'star' : 'star-outline'}
+                    name={settings.showFavorites ? 'star' : 'star-outline'}
                   />
                 }
                 size="sm"
               />
             }
-            onPress={() => setShowFavorites(!showFavorites)}
+            onPress={() =>
+              setSettings({
+                ...settings,
+                showFavorites: !settings.showFavorites,
+              })
+            }
           />
         </HStack>
       </HStack>

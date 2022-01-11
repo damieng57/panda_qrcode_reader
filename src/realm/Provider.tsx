@@ -3,15 +3,17 @@ import Realm from 'realm';
 import {IQrCode} from '../types';
 import {DecorationSchema, QrCodeSchema} from './models';
 import {ObjectId} from 'bson';
+import {useAtom} from 'jotai';
+import {settingsAtom} from '../utils/helpers';
 
 export const message = (
-  status: string = 'undefined',
-  message: string,
+  status: string | undefined,
+  _message: string,
   error?: any,
 ) => {
   return {
     status,
-    message,
+    _message,
     error,
   };
 };
@@ -29,6 +31,7 @@ export interface IProps {
 
 const QrCodesProvider = ({children}: IProps) => {
   const [qrCodes, setQrCodes] = useState([]);
+  const [settings] = useAtom(settingsAtom);
 
   // Use a Ref to store the realm rather than the state because it is not
   // directly rendered, so updating it should not trigger a re-render as using
@@ -37,18 +40,18 @@ const QrCodesProvider = ({children}: IProps) => {
 
   useEffect(() => {
     // open a realm for this particular project
-    Realm.open(realmSchemaConfiguration).then(realm => {
-      // @ts-ignore
-      realmRef.current = realm;
+    Realm.open(realmSchemaConfiguration)
+      .then(realm => {
+        // @ts-ignore
+        realmRef.current = realm;
 
-      const qrCodes = realm.objects('QrCode').sorted('date', true);
-      setQrCodes([...qrCodes]);
-      qrCodes.addListener(() => {
+        const qrCodes = realm.objects('QrCode').sorted('date', true);
         setQrCodes([...qrCodes]);
-      });
-    }).catch(
-      e => console.error(e)
-    );
+        qrCodes.addListener(() => {
+          setQrCodes([...qrCodes]);
+        });
+      })
+      .catch(e => console.error(e));
 
     return () => {
       // cleanup function
@@ -101,7 +104,6 @@ const QrCodesProvider = ({children}: IProps) => {
     try {
       if (realm === null) return;
       realm.write(() => {
-        // Create a new task in the same partition -- that is, in the same project.
         realm.delete(realm.objects('QrCode'));
       });
     } catch (error) {
@@ -116,7 +118,6 @@ const QrCodesProvider = ({children}: IProps) => {
     try {
       if (realm === null) return;
       realm.write(() => {
-        // Create a new task in the same partition -- that is, in the same project.
         realm.delete(qrcode);
       });
     } catch (error) {
@@ -132,42 +133,35 @@ const QrCodesProvider = ({children}: IProps) => {
       if (realm === null) return;
       realm.write(() => {
         // Find qrCodes which are favorites.
-        const qrCodes = realm.objects("QrCode").filtered('favorite == true');
+        const qrCodes = realm.objects('QrCode').filtered('favorite == true');
         // Loop through to update.
-        qrCodes.map((qrCode) => {
+        qrCodes.map(qrCode => {
           // All favorites to false.
           qrCode.favorite = false;
         });
-
       });
     } catch (error) {
       return message('error', 'Cannot clear the QrCode elements', error);
     }
   };
 
-  const filterQrCodes = (criteria: string = '', favorite: boolean = false) => {
+  const filterQrCodes = (
+    criteria: string = '',
+    favorite: boolean = settings.showFavorites || false,
+  ) => {
     // @ts-ignore
     const realm: Realm = realmRef.current;
 
+    let query = settings.showFavorites
+      ? 'data CONTAINS[c] $0 && favorite == $1'
+      : 'data CONTAINS[c] $0';
+
     try {
       let filteredQrCodes: any = [];
-      if (favorite) {
-        filteredQrCodes = realm
-          .objects('QrCode')
-          .filtered(
-            'data CONTAINS[c] $0 && favorite == $1',
-            criteria,
-            favorite,
-          );
-      } else {
-        filteredQrCodes = realm
-          .objects('QrCode')
-          .filtered(
-            'data CONTAINS[c] $0',
-            criteria,
-            favorite,
-          );
-      }
+      filteredQrCodes = realm
+        .objects('QrCode')
+        .sorted('date', true)
+        .filtered(query, criteria, favorite);
       setQrCodes([...filteredQrCodes]);
     } catch (error) {
       return message('error', 'Cannot filters these QrCodes', error);

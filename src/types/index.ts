@@ -6,6 +6,8 @@ export interface ISettings {
   accentColor?: string;
   maxItems: number;
   openUrlAuto: boolean;
+  showFavorites: boolean;
+  criteria: string;
 }
 
 export interface IQrCode {

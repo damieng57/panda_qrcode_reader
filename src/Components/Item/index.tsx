@@ -6,7 +6,7 @@ import fromUnixTime from 'date-fns/fromUnixTime';
 import {format} from 'date-fns';
 import {getTranslation as t} from '../../utils/helpers';
 import {useNavigation} from '@react-navigation/native';
-import {Text, HStack, VStack, Icon, IconButton, Menu} from 'native-base';
+import {Text, HStack, VStack, Icon, IconButton, Menu, Box} from 'native-base';
 import {ObjectId} from 'bson';
 
 export interface IProps {
@@ -15,13 +15,18 @@ export interface IProps {
   onDelete: (qrcode: IQrCode) => void;
 }
 
-export const ITEM_HEIGHT = 64;
+export const ITEM_HEIGHT = 58;
 
 export const Item = React.memo((props: IProps) => {
   const [shouldOverlapWithTrigger] = React.useState(false);
   const navigation = useNavigation();
   const {item} = props;
+
   if (!item) return null;
+
+  const handleDelete = () => {
+    props.onDelete(item);
+  };
 
   const handlePress = async () => {
     // Checking if the link is supported for links with custom URL scheme.
@@ -55,74 +60,77 @@ export const Item = React.memo((props: IProps) => {
         borderColor: 'gray.400',
       }
     : {
-        borderColor: 'transparent'
+        borderColor: 'transparent',
       };
 
   return (
     // For HStack, we use style to be sure tht the height corresponding to the layout
-    <HStack
-      alignItems="center"
-      style={{height: ITEM_HEIGHT}}
-      mr="3"
-      borderLeftWidth={3}
-      {...additionalStyle}>
-      <Icon
-        m="2"
-        ml="3"
-        size="6"
-        color="gray.400"
-        as={
-          <MaterialCommunityIcons
-            name={item.decoration ? item.decoration?.icon : 'link'}
-          />
-        }
-      />
-
-      <VStack flex="1" p="2">
-        <Pressable onPress={handlePress}>
-          <Text bold noOfLines={1} isTruncated={true}>
-            {item.decoration?.title}
-          </Text>
-
-          <HStack>
-            <Text>{t(item.decoration?.text)} - </Text>
-            <Text>{`${t('added')}`} </Text>
-            <Text>{`${format(
-              fromUnixTime(item.date / 1000),
-              'dd/MM/yyyy',
-            )}`}</Text>
-          </HStack>
-        </Pressable>
-      </VStack>
-
-      <Menu
-        shouldOverlapWithTrigger={shouldOverlapWithTrigger}
-        mr={3}
-        // @ts-ignore
-        trigger={triggerProps => {
-          return (
-            <IconButton
-              icon={
-                <Icon
-                  size="sm"
-                  as={<MaterialCommunityIcons name="dots-vertical" />}
-                />
-              }
-              {...triggerProps}
+    <>
+      <HStack
+        alignItems="center"
+        mr="3"
+        borderLeftWidth={3}
+        {...additionalStyle}>
+        <Icon
+          m="2"
+          ml="3"
+          size="6"
+          color="gray.400"
+          as={
+            <MaterialCommunityIcons
+              name={item.decoration ? item.decoration?.icon : 'link'}
             />
-          );
-        }}>
-        <Menu.Item onPress={handlePress}>{t('action.view_details')}</Menu.Item>
-        <Menu.Item onPress={() => props.onFavorite(props.item._id)}>
-          {item.favorite ? t('action.remove_from_favorites') : t('action.add_to_favorites')}
-        </Menu.Item>
-        <Menu.Item onPress={handleShare}>{t('action.share')}</Menu.Item>
-        {/* <Menu.Item onPress={() => console.log('Customize')}>Personnaliser</Menu.Item>
+          }
+        />
+
+        <VStack flex="1" p="2">
+          <Pressable onPress={handlePress}>
+            <Text bold noOfLines={1} isTruncated={true}>
+              {item.decoration?.title}
+            </Text>
+
+            <HStack>
+              <Text>{t(item.decoration?.text)} - </Text>
+              <Text>{`${t('added')}`} </Text>
+              <Text>{`${format(
+                fromUnixTime(item.date / 1000),
+                'dd/MM/yyyy',
+              )}`}</Text>
+            </HStack>
+          </Pressable>
+        </VStack>
+
+        <Menu
+          shouldOverlapWithTrigger={shouldOverlapWithTrigger}
+          mr={3}
+          // @ts-ignore
+          trigger={triggerProps => {
+            return (
+              <IconButton
+                icon={
+                  <Icon
+                    size="sm"
+                    as={<MaterialCommunityIcons name="dots-vertical" />}
+                  />
+                }
+                {...triggerProps}
+              />
+            );
+          }}>
+          <Menu.Item onPress={handlePress}>
+            {t('action.view_details')}
+          </Menu.Item>
+          <Menu.Item onPress={() => props.onFavorite(props.item._id)}>
+            {item.favorite
+              ? t('action.remove_from_favorites')
+              : t('action.add_to_favorites')}
+          </Menu.Item>
+          <Menu.Item onPress={handleShare}>{t('action.share')}</Menu.Item>
+          {/* <Menu.Item onPress={() => console.log('Customize')}>Personnaliser</Menu.Item>
         <Menu.Item onPress={() => console.log('Pin/Unpin')}>Epingler/Retirer</Menu.Item> */}
-        <Menu.Item onPress={() => props.onDelete(props.item)}>
-          {t('action.delete')}
-        </Menu.Item>
-      </Menu>
-    </HStack>
+          <Menu.Item onPress={handleDelete}>{t('action.delete')}</Menu.Item>
+        </Menu>
+      </HStack>
+    </>
   );
 });
