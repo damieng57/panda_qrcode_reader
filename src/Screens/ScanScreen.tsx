@@ -55,13 +55,13 @@ export const ScanScreen = (props: IState) => {
 
   React.useEffect(() => {
     if (!state.isActive && state.current) {
-      createQrCode(state.current);
+      !settings.isAnonym && createQrCode(state.current);
     }
   }, [state.current, state.isActive]);
 
-  const _openURL = async () => {
+  const _openURL = async (item: BarCodeReadEvent) => {
     try {
-      const url = state.current?.data;
+      const url = item?.data;
       if (!url) {
         return null;
       }
