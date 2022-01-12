@@ -4,10 +4,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {IQrCode} from '../../types';
 import fromUnixTime from 'date-fns/fromUnixTime';
 import {format} from 'date-fns';
-import {getTranslation as t} from '../../utils/helpers';
+import {getTranslation as t, settingsAtom} from '../../utils/helpers';
 import {useNavigation} from '@react-navigation/native';
-import {Text, HStack, VStack, Icon, IconButton, Menu, Box} from 'native-base';
+import {Text, HStack, VStack, Icon, IconButton, Menu} from 'native-base';
 import {ObjectId} from 'bson';
+import {useAtom} from 'jotai';
 
 export interface IProps {
   item: IQrCode;
@@ -19,6 +20,7 @@ export const ITEM_HEIGHT = 58;
 
 export const Item = React.memo((props: IProps) => {
   const [shouldOverlapWithTrigger] = React.useState(false);
+  const [settings, setSettings] = useAtom(settingsAtom);
   const navigation = useNavigation();
   const {item} = props;
 
@@ -53,6 +55,24 @@ export const Item = React.memo((props: IProps) => {
     } catch (error) {
       Alert.alert(error?.message);
     }
+  };
+
+  const handleFavorite = () => {
+    if (props.item.favorite) {
+      // In that case, the item will not be a favorite after the update, that why we need to decrement the value
+      setSettings({
+        ...settings,
+        numberOfFavorites: settings.numberOfFavorites - 1,
+      });
+    } else {
+      // In that case, the item will be added to favorite after the update, that why we need to increment the value
+      setSettings({
+        ...settings,
+        numberOfFavorites: settings.numberOfFavorites + 1,
+      });
+    }
+
+    props.onFavorite(props.item._id);
   };
 
   const additionalStyle = item.favorite
@@ -120,7 +140,7 @@ export const Item = React.memo((props: IProps) => {
           <Menu.Item onPress={handlePress}>
             {t('action.view_details')}
           </Menu.Item>
-          <Menu.Item onPress={() => props.onFavorite(props.item._id)}>
+          <Menu.Item onPress={handleFavorite}>
             {item.favorite
               ? t('action.remove_from_favorites')
               : t('action.add_to_favorites')}

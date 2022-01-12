@@ -37,7 +37,7 @@ export const HistoryScreen = () => {
 
   React.useEffect(() => {
     filterQrCodes(settings.criteria, settings.showFavorites);
-  }, [settings.criteria, settings.showFavorites, qrCodes.length]);
+  }, [settings.criteria, settings.showFavorites, qrCodes.length, settings.numberOfFavorites]);
 
   return (
     <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>

@@ -32,6 +32,7 @@ export interface IProps {
 const QrCodesProvider = ({children}: IProps) => {
   const [qrCodes, setQrCodes] = useState([]);
   const [settings] = useAtom(settingsAtom);
+  const [updateTimestamp, setUpdateTimestamp] = useState([]);
 
   // Use a Ref to store the realm rather than the state because it is not
   // directly rendered, so updating it should not trigger a re-render as using
@@ -46,8 +47,10 @@ const QrCodesProvider = ({children}: IProps) => {
         realmRef.current = realm;
 
         const qrCodes = realm.objects('QrCode').sorted('date', true);
+
         setQrCodes([...qrCodes]);
-        qrCodes.addListener(() => {
+        realm.addListener('change', () => {
+          console.log('update');
           setQrCodes([...qrCodes]);
         });
       })
@@ -135,7 +138,7 @@ const QrCodesProvider = ({children}: IProps) => {
         // Find qrCodes which are favorites.
         const qrCodes = realm.objects('QrCode').filtered('favorite == true');
         // Loop through to update.
-        qrCodes.map(qrCode => {
+        qrCodes.forEach(qrCode => {
           // All favorites to false.
           qrCode.favorite = false;
         });

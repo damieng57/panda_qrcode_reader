@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Vibration, Linking} from 'react-native';
-import {Barcode, RNCamera} from 'react-native-camera';
+import {BarCodeReadEvent, RNCamera} from 'react-native-camera';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
 import {
   getTranslation as t,
@@ -21,69 +21,67 @@ import {
   Icon,
 } from 'native-base';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {debounce} from 'lodash';
 
 const MAX_LENGHT_SNACKBAR = 57;
 
 interface IState {
   isActive: boolean;
-  isVisible: boolean;
-  barcode?: Barcode;
   current?: IQrCode;
 }
 
 const defaultState = {
   isActive: true,
-  isVisible: false,
-  barcode: undefined,
   current: undefined,
 };
 
-export const ScanScreen = (props: any & IState) => {
+export const ScanScreen = (props: IState) => {
   const [state, setState] = React.useState<IState>(defaultState);
   const [settings] = useAtom(settingsAtom);
   const toast = useToast();
+  const navigation = useNavigation();
   const {createQrCode} = useQrCodes();
+  const isFocused = useIsFocused();
 
   const _init = () => {
     setState({
-      isVisible: false,
-      isActive: true,
-      barcode: undefined,
+      isActive: isFocused,
       current: undefined,
     });
   };
 
+  const timer = React.useCallback(debounce(_init, 4000, {trailing: true}), []);
+
   React.useEffect(() => {
-    if (!state.isActive && state.barcode) {
+    if (!state.isActive && state.current) {
       createQrCode(state.current);
     }
-  }, [state.barcode, state.isActive]);
+  }, [state.current, state.isActive]);
 
-  const _openURL = React.useCallback(
-    async (item: IQrCode) => {
-      try {
-        const url = item?.data;
-        if (!url) {
-          return null;
-        }
-        // Checking if the link is supported for links with custom URL scheme.
-        const supported = await Linking.canOpenURL(url);
-
-        if (supported) {
-          // Opening the link with some app, if the URL scheme is "http" the web link should be opened
-          // by some browser in the mobile
-          await Linking.openURL(url);
-        } else {
-          props.navigation.navigate('details', state.current);
-        }
-      } catch (error) {
-        console.warn(error);
-      } finally {
-        setTimeout(_init(), 2000);
+  const _openURL = async () => {
+    try {
+      const url = state.current?.data;
+      if (!url) {
+        return null;
       }
-    },
-    [state],
-  );
+
+      // Checking if the link is supported for links with custom URL scheme.
+      const supported = await Linking.canOpenURL(url);
+
+      if (supported) {
+        // Opening the link with some app, if the URL scheme is "http" the web link should be opened
+        // by some browser in the mobile
+        await Linking.openURL(url);
+      } else {
+        navigation.navigate('details', state.current);
+      }
+    } catch (error) {
+      console.warn(error);
+    } finally {
+      timer()
+    }
+  };
 
   const _formatTextSnackBar = (text: string): string => {
     // TODO: Improve using Dimensions of the screen
@@ -94,30 +92,24 @@ export const ScanScreen = (props: any & IState) => {
     return text;
   };
 
-  const _isScanned = React.useCallback(
-    (item: any) => {
-      if (!settings?.isAnonym && state.isActive) {
-        Vibration.vibrate(500);
+  const handleScan = (item: BarCodeReadEvent) => {
+    if (!state.isActive) return;
+    Vibration.vibrate(500);
 
-        setState({
-          isActive: false,
-          isVisible: true,
-          barcode: item,
-          current: formatQrCode(item, false),
+    setState({
+      isActive: false,
+      current: formatQrCode(item, false),
+    });
+
+    settings.openUrlAuto
+      ? _openURL(item)
+      : toast.show({
+          description: _formatTextSnackBar(item?.data || ''),
+          isClosable: true,
+          onCloseComplete: timer,
+          style: {marginHorizontal: 8},
         });
-
-        settings.openUrlAuto
-          ? _openURL(item)
-          : toast.show({
-              description: _formatTextSnackBar(item?.data || ''),
-              isClosable: true,
-              onCloseComplete: _init,
-              style: {marginHorizontal: 8},
-            });
-      }
-    },
-    [state],
-  );
+  };
 
   return (
     <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
@@ -159,7 +151,7 @@ export const ScanScreen = (props: any & IState) => {
             alignItems: 'center',
           }}
           barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
-          onBarCodeRead={data => _isScanned(data)}
+          onBarCodeRead={item => handleScan(item)}
           type={RNCamera.Constants.Type.back}
           flashMode={RNCamera.Constants.FlashMode.on}
           androidCameraPermissionOptions={{

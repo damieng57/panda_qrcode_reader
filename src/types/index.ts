@@ -7,6 +7,7 @@ export interface ISettings {
   maxItems: number;
   openUrlAuto: boolean;
   showFavorites: boolean;
+  numberOfFavorites: number;
   criteria: string;
 }
 

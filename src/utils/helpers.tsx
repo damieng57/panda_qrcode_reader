@@ -1,4 +1,4 @@
-import {Barcode} from 'react-native-camera';
+import {Barcode, BarCodeReadEvent} from 'react-native-camera';
 import {URL} from 'react-native-url-polyfill';
 import {getLocales} from 'react-native-localize';
 import {atomWithStorage} from './atomWithStorage';
@@ -13,18 +13,19 @@ export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
   maxItems: 100,
   openUrlAuto: false,
   showFavorites: false,
+  numberOfFavorites: 0,
   criteria: '',
 });
 
-export const formatQrCode = (element: Barcode, favorite: boolean): IQrCode => ({
+export const formatQrCode = (element: BarCodeReadEvent, favorite: boolean): IQrCode => ({
   _id: new ObjectId(),
   date: new Date(),
   type: element.type,
   _type: getInternalType(element),
   data: element.data,
-  favorite: favorite,
   decoration: parseData(element),
   qrCode: '',
+  favorite,
 });
 
 const language = getLocales()[0].languageCode;
