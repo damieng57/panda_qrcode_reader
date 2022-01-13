@@ -30,9 +30,8 @@ export interface IProps {
 }
 
 const QrCodesProvider = ({children}: IProps) => {
-  const [qrCodes, setQrCodes] = useState([]);
-  const [settings] = useAtom(settingsAtom);
-  const [updateTimestamp, setUpdateTimestamp] = useState([]);
+  const [resultSet, setResultSet] = useState([]);
+  const [settings, setSettings] = useAtom(settingsAtom);
 
   // Use a Ref to store the realm rather than the state because it is not
   // directly rendered, so updating it should not trigger a re-render as using
@@ -46,12 +45,11 @@ const QrCodesProvider = ({children}: IProps) => {
         // @ts-ignore
         realmRef.current = realm;
 
-        const qrCodes = realm.objects('QrCode').sorted('date', true);
+        const resultSet = realm.objects('QrCode').sorted('date', true);
 
-        setQrCodes([...qrCodes]);
+        setResultSet(resultSet);
         realm.addListener('change', () => {
-          console.log('update');
-          setQrCodes([...qrCodes]);
+          setResultSet(resultSet);
         });
       })
       .catch(e => console.error(e));
@@ -60,9 +58,10 @@ const QrCodesProvider = ({children}: IProps) => {
       // cleanup function
       const realm = realmRef.current;
       if (realm) {
+        realm.removeListener('change');
         realm.close();
         realmRef.current = null;
-        setQrCodes([]);
+        setResultSet([]);
       }
     };
   }, []);
@@ -95,6 +94,12 @@ const QrCodesProvider = ({children}: IProps) => {
         // These changes are saved to the realm.
         qrCode.favorite = !qrCode.favorite;
       });
+      // Keep number of favorites updated
+      setSettings({
+        ...settings,
+        numberOfFavorites: realm.objects('QrCode').filtered('favorite == true')
+          .length,
+      });
     } catch (error) {
       return message('error', 'Cannot create QrCode', error);
     }
@@ -108,6 +113,11 @@ const QrCodesProvider = ({children}: IProps) => {
       if (realm === null) return;
       realm.write(() => {
         realm.delete(realm.objects('QrCode'));
+      });
+      // Keep number of favorites updated
+      setSettings({
+        ...settings,
+        numberOfFavorites: 0,
       });
     } catch (error) {
       return message('error', 'Cannot clear the QrCode elements', error);
@@ -123,6 +133,12 @@ const QrCodesProvider = ({children}: IProps) => {
       realm.write(() => {
         realm.delete(qrcode);
       });
+      // Keep number of favorites updated
+      setSettings({
+        ...settings,
+        numberOfFavorites: realm.objects('QrCode').filtered('favorite == true')
+          .length,
+      });
     } catch (error) {
       return message('error', 'Cannot delete this QrCode', error);
     }
@@ -136,19 +152,19 @@ const QrCodesProvider = ({children}: IProps) => {
       if (realm === null) return;
       realm.write(() => {
         // Find qrCodes which are favorites.
-        const qrCodes = realm.objects('QrCode').filtered('favorite == true');
-        // Loop through to update.
-        qrCodes.forEach(qrCode => {
-          // All favorites to false.
-          qrCode.favorite = false;
-        });
+        realm.objects('QrCode').update('favorite', false);
       });
     } catch (error) {
       return message('error', 'Cannot clear the QrCode elements', error);
     }
+    // Keep number of favorites updated
+    setSettings({
+      ...settings,
+      numberOfFavorites: 0,
+    });
   };
 
-  const filterQrCodes = (
+  const getQrCodes = (
     criteria: string = '',
     favorite: boolean = settings.showFavorites || false,
   ) => {
@@ -165,7 +181,7 @@ const QrCodesProvider = ({children}: IProps) => {
         .objects('QrCode')
         .sorted('date', true)
         .filtered(query, criteria, favorite);
-      setQrCodes([...filteredQrCodes]);
+      setResultSet(filteredQrCodes);
     } catch (error) {
       return message('error', 'Cannot filters these QrCodes', error);
     }
@@ -182,8 +198,8 @@ const QrCodesProvider = ({children}: IProps) => {
         deleteAllQrCodes,
         clearAllFavoritesQrCodes,
         deleteQrCode,
-        filterQrCodes,
-        qrCodes,
+        getQrCodes,
+        resultSet,
       }}>
       {children}
     </QrCodesContext.Provider>
@@ -194,11 +210,11 @@ const QrCodesProvider = ({children}: IProps) => {
 // provides the tasks of the TasksProvider's project and various functions to
 // create, update, and delete the tasks in that project.
 const useQrCodes = () => {
-  const qrCodes = useContext(QrCodesContext);
-  if (qrCodes == null) {
+  const resultSet = useContext(QrCodesContext);
+  if (resultSet == null) {
     throw new Error('useQrCodes() called outside of a QrCodesProvider?'); // an alert is not placed because this is an error for the developer not the user
   }
-  return qrCodes;
+  return resultSet;
 };
 
 export {QrCodesProvider, useQrCodes};

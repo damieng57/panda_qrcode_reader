@@ -3,20 +3,22 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {ITEM_HEIGHT, Item} from '../Components/Item';
 import {getTranslation as t, settingsAtom} from '../utils/helpers';
 import {useQrCodes} from '../realm/Provider';
+import {VirtualizedList} from 'react-native';
 import {
   HStack,
   IconButton,
   Icon,
   Divider,
   Input,
-  FlatList,
   Box,
   useColorModeValue,
+  VStack,
+  Badge,
 } from 'native-base';
 import {useAtom} from 'jotai';
 
 export const HistoryScreen = () => {
-  const {qrCodes, filterQrCodes, deleteQrCode, updateQrCode} = useQrCodes();
+  const {resultSet, deleteQrCode, updateQrCode, getQrCodes} = useQrCodes();
   const [settings, setSettings] = useAtom(settingsAtom);
 
   const _onChangeSearch = (search: string) =>
@@ -35,9 +37,20 @@ export const HistoryScreen = () => {
     );
   };
 
+  const getItem = (data: any, index: number) => {
+    return data[index];
+  };
+
   React.useEffect(() => {
-    filterQrCodes(settings.criteria, settings.showFavorites);
-  }, [settings.criteria, settings.showFavorites, qrCodes.length, settings.numberOfFavorites]);
+    console.log(settings.numberOfFavorites);
+
+    getQrCodes(settings.criteria, settings.showFavorites);
+  }, [
+    settings.criteria,
+    settings.showFavorites,
+    settings.numberOfFavorites,
+    resultSet.length,
+  ]);
 
   return (
     <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
@@ -77,33 +90,51 @@ export const HistoryScreen = () => {
           }
         />
         <HStack alignItems="center">
-          <IconButton
-            marginLeft={2}
-            icon={
-              <Icon
-                as={
-                  <MaterialCommunityIcons
-                    name={settings.showFavorites ? 'star' : 'star-outline'}
-                  />
-                }
-                size="sm"
-              />
-            }
-            onPress={() =>
-              setSettings({
-                ...settings,
-                showFavorites: !settings.showFavorites,
-              })
-            }
-          />
+          <VStack>
+            <Badge // bg="red.400"
+              colorScheme="danger"
+              rounded="999px"
+              mb={-4}
+              mr={0}
+              zIndex={1}
+              variant="solid"
+              alignSelf="flex-end"
+              _text={{
+                fontSize: 12,
+              }}>
+              {settings.numberOfFavorites}
+            </Badge>
+            <IconButton
+              ml={2}
+              mr={2}
+              icon={
+                <Icon
+                  as={
+                    <MaterialCommunityIcons
+                      name={settings.showFavorites ? 'star' : 'star-outline'}
+                    />
+                  }
+                  size="sm"
+                />
+              }
+              onPress={() =>
+                setSettings({
+                  ...settings,
+                  showFavorites: !settings.showFavorites,
+                })
+              }
+            />
+          </VStack>
         </HStack>
       </HStack>
       {/* End of searchbar */}
 
-      <FlatList
+      <VirtualizedList
         keyExtractor={(_item, index) => index.toString()}
         renderItem={data => _renderItem(data)}
-        data={qrCodes}
+        data={resultSet}
+        getItemCount={data => data.length}
+        getItem={getItem}
         getItemLayout={(data, index) => ({
           length: ITEM_HEIGHT,
           offset: ITEM_HEIGHT * index,
