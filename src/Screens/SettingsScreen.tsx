@@ -131,6 +131,10 @@ export const SettingsScreen = (props: any) => {
       <FlatList
         numColumns={5}
         data={listThemeColors}
+        columnWrapperStyle={{
+          paddingLeft: 32,
+          paddingRight: 12,
+        }}
         ListHeaderComponent={
           <>
             <Heading size={'xs'} p={3}>
