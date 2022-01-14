@@ -42,8 +42,6 @@ export const HistoryScreen = () => {
   };
 
   React.useEffect(() => {
-    console.log(settings.numberOfFavorites);
-
     getQrCodes(settings.criteria, settings.showFavorites);
   }, [
     settings.criteria,
