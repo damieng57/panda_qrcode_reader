@@ -18,7 +18,7 @@ export const SettingsItem = (props: IProps) => {
     <TouchableNativeFeedback
       onPress={onPress}
       useForeground
-      background={TouchableNativeFeedback.Ripple('white', false)}>
+      background={TouchableNativeFeedback.Ripple('lightGray', false)}>
       <HStack
         flex="1"
         paddingLeft={12}
@@ -26,10 +26,10 @@ export const SettingsItem = (props: IProps) => {
         height={24}
         alignItems={'center'}>
         <VStack flex={1}>
-          <Heading color="white" size={'xs'}>
+          <Heading size={'xs'}>
             {title}
           </Heading>
-          <Text color="white">{description}</Text>
+          <Text >{description}</Text>
         </VStack>
         {hasSwitch && (
           <Switch

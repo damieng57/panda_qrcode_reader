@@ -9,6 +9,7 @@ export interface ISettings {
   showFavorites: boolean;
   numberOfFavorites: number;
   criteria: string;
+  currentScreen: number;
 }
 
 export interface IQrCode {

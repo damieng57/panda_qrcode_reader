@@ -28,7 +28,7 @@ export const AboutScreen = () => {
             resizeMode="cover"
             m={3}
           />
-          <Heading color="white" size={'xs'} m={3}>
+          <Heading size={'xs'} m={3}>
             {t('about_subtitle')}
           </Heading>
           <Text>{t('about_text_1')}</Text>

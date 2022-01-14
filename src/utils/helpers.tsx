@@ -1,9 +1,9 @@
-import {Barcode, BarCodeReadEvent} from 'react-native-camera';
+import {BarCodeReadEvent} from 'react-native-camera';
 import {URL} from 'react-native-url-polyfill';
 import {getLocales} from 'react-native-localize';
 import {atomWithStorage} from './atomWithStorage';
 import {IQrCodeDecoration, ISettings, IQrCode} from '../types';
-import {ObjectId} from 'bson'
+import {ObjectId} from 'bson';
 
 // Jotai Store
 export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
@@ -15,9 +15,13 @@ export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
   showFavorites: false,
   numberOfFavorites: 0,
   criteria: '',
+  currentScreen: 0,
 });
 
-export const formatQrCode = (element: BarCodeReadEvent, favorite: boolean): IQrCode => ({
+export const formatQrCode = (
+  element: BarCodeReadEvent,
+  favorite: boolean,
+): IQrCode => ({
   _id: new ObjectId(),
   date: new Date(),
   type: element.type,
@@ -54,13 +58,15 @@ export const getTranslation = (key: string | undefined): string => {
   return translation[key];
 };
 
-export const getInternalType = (item: Barcode) => {
+export const getInternalType = (item: BarCodeReadEvent) => {
   const type = item.data.split(':');
   if (type[0].toUpperCase() === 'BEGIN') return type[1].toUpperCase();
   return type[0].toUpperCase();
 };
 
-export const parseData = (item: Barcode): IQrCodeDecoration | undefined => {
+export const parseData = (
+  item: BarCodeReadEvent,
+): IQrCodeDecoration | undefined => {
   if (!item.type) return;
   switch (getInternalType(item) || item.type) {
     case 'EMAIL':
@@ -140,18 +146,17 @@ export const parseData = (item: Barcode): IQrCodeDecoration | undefined => {
       return extractTypeFromData(item);
   }
 };
-function extractTypeFromData(item: Barcode): IQrCodeDecoration | undefined {
-  if (typeof item.data !== 'string') return;
+function extractTypeFromData(
+  item: BarCodeReadEvent,
+): IQrCodeDecoration | undefined {
+  if (typeof item.data !== 'string') {
+    return;
+  }
   const type = item.data.split(':')[0].toUpperCase();
 
   // TODO: images, music, video, pdf, text and more social network
   switch (type) {
     case 'BITCOIN':
-      return {
-        icon: 'bitcoin',
-        title: 'bitcoin_title',
-        text: 'bitcoin_text',
-      };
     case 'LITECOIN':
       return {
         icon: 'bitcoin',
@@ -161,41 +166,52 @@ function extractTypeFromData(item: Barcode): IQrCodeDecoration | undefined {
     case 'HTTP':
     case 'HTTPS':
       const url = new URL(item.data);
-      if (url.hostname.toLowerCase().includes('twitter'))
+      if (url.hostname.toLowerCase().includes('twitter')) {
         return {
           icon: 'twitter',
           title: url.hostname,
           text: 'twitter_link',
         };
-      if (url.hostname.toLowerCase().includes('facebook'))
+      }
+      if (url.hostname.toLowerCase().includes('facebook')) {
         return {
           icon: 'facebook',
           title: url.hostname,
           text: 'facebook_link',
         };
-      if (url.hostname.toLowerCase().includes('instagram'))
+      }
+      if (url.hostname.toLowerCase().includes('instagram')) {
         return {
           icon: 'instagram',
           title: url.hostname,
           text: 'instagram_link',
         };
-      if (url.hostname.toLowerCase().includes('pinterest'))
+      }
+      if (url.hostname.toLowerCase().includes('pinterest')) {
         return {
           icon: 'pinterest',
           title: url.hostname,
           text: 'pinterest_link',
         };
-      if (url.hostname.toLowerCase().includes('linkedin'))
+      }
+      if (url.hostname.toLowerCase().includes('linkedin')) {
         return {
           icon: 'linkedin',
           title: url.hostname,
           text: 'linkedin_link',
         };
-    default:
+      }
       return {
         icon: 'link',
         title: item.data,
         text: 'url_link',
       };
+    default: {
+      return {
+        icon: 'link',
+        title: item.data,
+        text: 'url_link',
+      };
+    }
   }
 }
