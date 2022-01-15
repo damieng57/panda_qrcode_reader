@@ -166,12 +166,12 @@ const QrCodesProvider = ({children}: IProps) => {
 
   const getQrCodes = (
     criteria: string = '',
-    favorite: boolean = settings.showFavorites || false,
+    favorite: boolean = settings?.showFavorites || false,
   ) => {
     // @ts-ignore
     const realm: Realm = realmRef.current;
 
-    let query = settings.showFavorites
+    let query = settings?.showFavorites
       ? 'data CONTAINS[c] $0 && favorite == $1'
       : 'data CONTAINS[c] $0';
 

@@ -1,22 +1,59 @@
 import {BarCodeReadEvent} from 'react-native-camera';
 import {URL} from 'react-native-url-polyfill';
 import {getLocales} from 'react-native-localize';
-import {atomWithStorage} from './atomWithStorage';
-import {IQrCodeDecoration, ISettings, IQrCode} from '../types';
+import {IQrCodeDecoration, IQrCode} from '../types';
 import {ObjectId} from 'bson';
+import {atomWithStorage} from 'jotai/utils';
+import AsyncStorage from '@react-native-community/async-storage';
 
-// Jotai Store
-export const settingsAtom = atomWithStorage<ISettings>('QRCODE:SETTINGS', {
+export const defaultConfig = {
   isAnonym: false,
-  isDarkMode: 'dark',
-  accentColor: undefined,
+  isDarkMode: 'light',
+  accentColor: 'red.500',
   maxItems: 100,
   openUrlAuto: false,
   showFavorites: false,
   numberOfFavorites: 0,
   criteria: '',
   currentScreen: 0,
-});
+  welcomeScreen: true,
+};
+
+type Storage<Value> = {
+  getItem: (key: string) => Value | Promise<Value>;
+  setItem: (key: string, newValue: Value) => void | Promise<void>;
+  removeItem: (key: string) => void | Promise<void>;
+};
+
+const defaultStorage: Storage<unknown> = {
+  getItem: async key => {
+    return AsyncStorage.getItem(key)
+      .then(value => {
+        if (value === null || !value) {
+          throw Error('Value cannot be null');
+        }
+        return JSON.parse(value);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  },
+  setItem: async (key, newValue) => {
+    await AsyncStorage.setItem(key, JSON.stringify(newValue));
+  },
+  removeItem: key => {
+    AsyncStorage.removeItem(key).catch(error => {
+      console.log(error);
+    });
+  },
+};
+
+// Jotai Store
+export const settingsAtom = atomWithStorage(
+  'QRCODE:SETTINGS',
+  defaultConfig,
+  defaultStorage,
+);
 
 export const formatQrCode = (
   element: BarCodeReadEvent,
@@ -214,4 +251,21 @@ function extractTypeFromData(
       };
     }
   }
+}
+function atomWithAsyncStorage(
+  arg0: string,
+  defaultConfig: {
+    isAnonym: boolean;
+    isDarkMode: string;
+    accentColor: string;
+    maxItems: number;
+    openUrlAuto: boolean;
+    showFavorites: boolean;
+    numberOfFavorites: number;
+    criteria: string;
+    currentScreen: number;
+    welcomeScreen: boolean;
+  },
+) {
+  throw new Error('Function not implemented.');
 }

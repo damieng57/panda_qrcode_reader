@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {ViewStyle} from 'react-native';
-import {getTranslation as t, settingsAtom} from '../utils/helpers';
+import {defaultConfig, getTranslation as t, settingsAtom} from '../utils/helpers';
 import {useAtom} from 'jotai';
 import {useQrCodes} from '../realm/Provider';
 import {
@@ -99,21 +99,21 @@ export const SettingsScreen = (props: any) => {
   const _setAnonymousMode = () => {
     setSettings({
       ...settings,
-      isAnonym: !settings.isAnonym,
+      isAnonym: !settings?.isAnonym,
     });
   };
 
   const _setOpenUrlAuto = () => {
     setSettings({
       ...settings,
-      openUrlAuto: !settings.openUrlAuto,
+      openUrlAuto: !settings?.openUrlAuto,
     });
   };
 
   const _setDarkMode = () => {
     setSettings({
       ...settings,
-      isDarkMode: settings.isDarkMode === 'dark' ? 'light' : 'dark',
+      isDarkMode: settings?.isDarkMode === 'dark' ? 'light' : 'dark',
     });
   };
 
@@ -146,7 +146,7 @@ export const SettingsScreen = (props: any) => {
               onPress={_setAnonymousMode}
               title={t('settings_anonym_mode')}
               description={t('settings_anonym_mode_description')}
-              isChecked={settings.isAnonym}
+              isChecked={settings?.isAnonym}
               hasSwitch={true}
             />
             {/* End of set anonymous mode */}
@@ -174,7 +174,7 @@ export const SettingsScreen = (props: any) => {
               onPress={_setOpenUrlAuto}
               title={t('settings_open_url_auto')}
               description={t('settings_open_url_auto_description')}
-              isChecked={settings.openUrlAuto}
+              isChecked={settings?.openUrlAuto}
               hasSwitch={true}
             />
             {/* End of set open url */}
@@ -188,7 +188,7 @@ export const SettingsScreen = (props: any) => {
               onPress={_setDarkMode}
               title={t('settings_dark_mode')}
               description={t('settings_dark_mode_description')}
-              isChecked={settings.isDarkMode === 'dark'}
+              isChecked={settings?.isDarkMode === 'dark'}
               hasSwitch={true}
             />
             {/* End of set theme (dark/light) */}
@@ -200,8 +200,23 @@ export const SettingsScreen = (props: any) => {
           </>
         }
         keyExtractor={(item, index) => `Icon${index}`}
+        ListFooterComponent={
+          <>
+            <Heading size={'xs'} p={3}>
+              {t('app_settings_title')}
+            </Heading>
+            <SettingsItem
+              onPress={() => {
+                setSettings({...defaultConfig});
+              }}
+              title={t('settings_init')}
+              description={t('settings_init_description')}
+              hasSwitch={false}
+            />
+          </>
+        }
         renderItem={({item}) => (
-          <Center flex={1} mb={2} >
+          <Center flex={1} mb={2}>
             <IconButton
               flex={1}
               height={12}
@@ -209,7 +224,7 @@ export const SettingsScreen = (props: any) => {
               bg={`${item}.500`}
               borderRadius="999px"
               icon={
-                settings.accentColor === `${item}.500` ? (
+                settings?.accentColor === `${item}.500` ? (
                   <Icon
                     alignSelf={'center'}
                     pt={1}

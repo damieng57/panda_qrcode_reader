@@ -55,7 +55,7 @@ export const ScanScreen = (props: IState) => {
 
   React.useEffect(() => {
     if (!state.isActive && state.current) {
-      !settings.isAnonym && createQrCode(state.current);
+      !settings?.isAnonym && createQrCode(state.current);
     }
   }, [state.current, state.isActive]);
 
@@ -101,7 +101,7 @@ export const ScanScreen = (props: IState) => {
       current: formatQrCode(item, false),
     });
 
-    settings.openUrlAuto
+    settings?.openUrlAuto
       ? _openURL(item)
       : toast.show({
           description: _formatTextSnackBar(item?.data || ''),
