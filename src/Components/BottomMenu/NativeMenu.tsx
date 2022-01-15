@@ -19,7 +19,7 @@ const StyledIcon = (selected: boolean, name: string, text: string) => {
           bg: 'primary.200',
         }}
         borderRadius={100}
-        minWidth={12}
+        minWidth={16}
         minHeight={7}
         textAlign={'center'}
         padding={0.5}
