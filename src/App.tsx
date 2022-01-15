@@ -36,14 +36,18 @@ const BaseApp = () => {
       }),
   };
 
-  const baseColor = settings?.accentColor?.split('.')[0] || 'red';
+  const baseColor =
+    settings?.accentColor?.split('.')[0] ||
+    defaultConfig.accentColor.split('.')[0];
 
   // Define the config
   const theme = extendTheme({
     colors: {
       // Add new colors
       // @ts-ignore
-      primary: colors[settings?.accentColor?.split('.')[0]],
+      primary:
+        colors[settings?.accentColor?.split('.')[0]] ||
+        colors[defaultConfig.accentColor.split('.')[0]],
     },
     config: {
       // Changing initialColorMode to 'dark'

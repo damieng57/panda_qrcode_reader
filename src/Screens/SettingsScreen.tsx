@@ -1,6 +1,10 @@
 import * as React from 'react';
 import {ViewStyle} from 'react-native';
-import {defaultConfig, getTranslation as t, settingsAtom} from '../utils/helpers';
+import {
+  defaultConfig,
+  getTranslation as t,
+  settingsAtom,
+} from '../utils/helpers';
 import {useAtom} from 'jotai';
 import {useQrCodes} from '../realm/Provider';
 import {
@@ -224,7 +228,8 @@ export const SettingsScreen = (props: any) => {
               bg={`${item}.500`}
               borderRadius="999px"
               icon={
-                settings?.accentColor === `${item}.500` ? (
+                settings?.accentColor === `${item}.500` ||
+                (!settings?.accentColor && defaultConfig.accentColor === `${item}.500`) ? (
                   <Icon
                     alignSelf={'center'}
                     pt={1}

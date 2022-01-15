@@ -3,7 +3,7 @@ import {useAtom} from 'jotai';
 import {HStack, Center, Icon, Pressable, Text} from 'native-base';
 import React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {getTranslation as t, settingsAtom} from '../../utils/helpers';
+import {defaultConfig, getTranslation as t, settingsAtom} from '../../utils/helpers';
 
 const StyledIcon = (selected: boolean, name: string, text: string) => {
   return selected ? (
@@ -52,14 +52,14 @@ export const NativeMenu = ({
   navigation,
 }: BottomTabBarProps) => {
   const [settings] = useAtom(settingsAtom);
-  const [selected, setSelected] = React.useState(1);
+  const [selected, setSelected] = React.useState(settings?.currentScreen || 0);
 
   React.useEffect(() => {
     navigation.navigate(state.routes[selected].name);
   }, [selected]);
 
   return (
-    <HStack style={{height: 56}} alignItems="center" bg={settings?.accentColor}>
+    <HStack style={{height: 56}} alignItems="center" bg={settings?.accentColor || defaultConfig.accentColor}>
       <Pressable
         opacity={selected === 0 ? 1 : 0.5}
         py="3"
