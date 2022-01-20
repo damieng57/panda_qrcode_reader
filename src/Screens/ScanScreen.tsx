@@ -4,7 +4,6 @@ import {BarCodeReadEvent, RNCamera} from 'react-native-camera';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
 import {
   getTranslation as t,
-  settingsAtom,
   formatQrCode,
 } from '../utils/helpers';
 import {useAtom} from 'jotai';
@@ -23,6 +22,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {debounce} from 'lodash';
+import {isAnonymAtom, openUrlAutoAtom} from '../utils/store';
 
 const MAX_LENGHT_SNACKBAR = 57;
 
@@ -38,11 +38,12 @@ const defaultState = {
 
 export const ScanScreen = (props: IState) => {
   const [state, setState] = React.useState<IState>(defaultState);
-  const [settings] = useAtom(settingsAtom);
-  const toast = useToast();
-  const navigation = useNavigation();
   const {createQrCode} = useQrCodes();
+  const navigation = useNavigation();
   const isFocused = useIsFocused();
+  const toast = useToast();
+  const [openUrlAuto] = useAtom(openUrlAutoAtom);
+  const [isAnonym] = useAtom(isAnonymAtom);
 
   const _init = () => {
     setState({
@@ -55,7 +56,7 @@ export const ScanScreen = (props: IState) => {
 
   React.useEffect(() => {
     if (!state.isActive && state.current) {
-      !settings?.isAnonym && createQrCode(state.current);
+      !isAnonym && createQrCode(state.current);
     }
   }, [state.current, state.isActive]);
 
@@ -79,13 +80,15 @@ export const ScanScreen = (props: IState) => {
     } catch (error) {
       console.warn(error);
     } finally {
-      timer()
+      timer();
     }
   };
 
   const _formatTextSnackBar = (text: string): string => {
     // TODO: Improve using Dimensions of the screen
-    if (!text) return '';
+    if (!text) {
+      return '';
+    }
     if (text.length > MAX_LENGHT_SNACKBAR) {
       return text.slice(0, MAX_LENGHT_SNACKBAR - 3) + '...';
     }
@@ -93,7 +96,9 @@ export const ScanScreen = (props: IState) => {
   };
 
   const handleScan = (item: BarCodeReadEvent) => {
-    if (!state.isActive) return;
+    if (!state.isActive) {
+      return undefined;
+    }
     Vibration.vibrate(500);
 
     setState({
@@ -101,7 +106,7 @@ export const ScanScreen = (props: IState) => {
       current: formatQrCode(item, false),
     });
 
-    settings?.openUrlAuto
+    openUrlAuto
       ? _openURL(item)
       : toast.show({
           description: _formatTextSnackBar(item?.data || ''),
@@ -114,7 +119,7 @@ export const ScanScreen = (props: IState) => {
   return (
     <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
       {/* Infobar - anonymous mode */}
-      {settings?.isAnonym && (
+      {isAnonym && (
         <Alert w="100%" status="warning" borderRadius={0}>
           <VStack space={1} flexShrink={1} w="100%">
             <HStack flexShrink={1} space={2} alignItems="center">

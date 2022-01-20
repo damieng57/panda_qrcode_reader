@@ -20,7 +20,7 @@ export const message = (
 
 export const realmSchemaConfiguration = {
   schema: [QrCodeSchema, DecorationSchema],
-  schemaVersion: 1,
+  schemaVersion: 2,
 };
 
 const QrCodesContext = React.createContext(null);
@@ -101,7 +101,32 @@ const QrCodesProvider = ({children}: IProps) => {
           .length,
       });
     } catch (error) {
-      return message('error', 'Cannot create QrCode', error);
+      return message('error', 'Cannot update QrCode', error);
+    }
+  };
+
+  const updateQrCodeToDelete = (_id: ObjectId) => {
+    // @ts-ignore
+    const realm: Realm = realmRef.current;
+
+    try {
+      if (realm === null) return;
+      realm.write(() => {
+        // Get a qrCode to update.
+        const qrCode = realm.objectForPrimaryKey('QrCode', _id);
+        // Update some properties on the instance.
+        // These changes are saved to the realm.
+        qrCode.markedToDelete = !qrCode.markedToDelete;
+      });
+      // Keep number of favorites updated
+      setSettings({
+        ...settings,
+        numberOfItemsMarkedToDeletion: realm
+          .objects('QrCode')
+          .filtered('markedToDelete == true').length,
+      });
+    } catch (error) {
+      return message('error', 'Cannot update QrCode', error);
     }
   };
 
@@ -164,6 +189,47 @@ const QrCodesProvider = ({children}: IProps) => {
     });
   };
 
+  const clearAllMarkedToDeleteQrCodes = () => {
+    // @ts-ignore
+    const realm: Realm = realmRef.current;
+
+    try {
+      if (realm === null) return;
+      realm.write(() => {
+        // Find qrCodes which are favorites.
+        realm.objects('QrCode').update('markedToDelete', false);
+      });
+      // Keep number of favorites updated
+      setSettings({
+        ...settings,
+        numberOfItemsMarkedToDeletion: 0,
+      });
+    } catch (error) {
+      return message('error', 'Cannot clear the QrCode elements', error);
+    }
+  };
+
+  const deleteAllMarkedQrCodes = () => {
+    // @ts-ignore
+    const realm: Realm = realmRef.current;
+    try {
+      if (realm === null) return;
+      realm.write(() => {
+        realm.delete(
+          realm.objects('QrCode').filtered('markedToDelete == true'),
+        );
+      });
+      // Keep number of favorites updated
+      setSettings({
+        ...settings,
+        numberOfFavorites: realm.objects('QrCode').filtered('favorite == true'),
+        numberOfItemsMarkedToDeletion: 0,
+      });
+    } catch (error) {
+      return message('error', 'Cannot clear the QrCode elements', error);
+    }
+  };
+
   const getQrCodes = (
     criteria: string = '',
     favorite: boolean = settings?.showFavorites || false,
@@ -197,6 +263,9 @@ const QrCodesProvider = ({children}: IProps) => {
         updateQrCode,
         deleteAllQrCodes,
         clearAllFavoritesQrCodes,
+        updateQrCodeToDelete,
+        deleteAllMarkedQrCodes,
+        clearAllMarkedToDeleteQrCodes,
         deleteQrCode,
         getQrCodes,
         resultSet,

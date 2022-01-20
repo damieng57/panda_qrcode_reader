@@ -4,20 +4,34 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {IQrCode} from '../../types';
 import fromUnixTime from 'date-fns/fromUnixTime';
 import {format} from 'date-fns';
-import {getTranslation as t, settingsAtom} from '../../utils/helpers';
+import {getTranslation as t} from '../../utils/helpers';
 import {useNavigation} from '@react-navigation/native';
-import {Text, HStack, VStack, Icon, IconButton, Menu} from 'native-base';
+import {
+  Text,
+  HStack,
+  VStack,
+  Icon,
+  IconButton,
+  Menu,
+  Checkbox,
+  Box,
+} from 'native-base';
 import {ObjectId} from 'bson';
+import {useAtom} from 'jotai';
+import {accentColorAtom, isDeleteModeAtom} from '../../utils/store';
 
 export interface IProps {
   item: IQrCode;
   onFavorite: (_id: ObjectId | string) => void;
   onDelete: (qrcode: IQrCode) => void;
+  onMarkedToDelete: (_id: ObjectId | string) => void;
 }
 
 export const ITEM_HEIGHT = 58;
 
 export const Item = React.memo((props: IProps) => {
+  const [accentColor, setAccentColor] = useAtom(accentColorAtom);
+  const [isDeleteMode, setIsDeleteMode] = useAtom(isDeleteModeAtom);
   const [shouldOverlapWithTrigger] = React.useState(false);
   const navigation = useNavigation();
   const {item} = props;
@@ -32,7 +46,16 @@ export const Item = React.memo((props: IProps) => {
     props.onFavorite(props.item._id);
   };
 
+  const handleMarkedToDelete = () => {
+    props.onMarkedToDelete(props.item._id);
+  };
+
   const handlePress = async () => {
+    if (isDeleteMode) {
+      setIsDeleteMode();
+      return;
+    }
+
     // Checking if the link is supported for links with custom URL scheme.
     const supported = await Linking.canOpenURL(item.data);
 
@@ -48,6 +71,19 @@ export const Item = React.memo((props: IProps) => {
       console.warn(error);
     }
   };
+
+  const handleLongPress = async () => {
+    console.log('longpress');
+    if (!isDeleteMode) {
+      props.onMarkedToDelete(props.item._id);
+    }
+  };
+
+  React.useEffect(() => {
+    if (!isDeleteMode && props.item.markedToDelete) {
+      setIsDeleteMode();
+    }
+  }, [props.item.markedToDelete]);
 
   const handleShare = async () => {
     try {
@@ -88,7 +124,7 @@ export const Item = React.memo((props: IProps) => {
         />
 
         <VStack flex="1" p="2">
-          <Pressable onPress={handlePress}>
+          <Pressable onPress={handlePress} onLongPress={handleLongPress}>
             <Text bold noOfLines={1} isTruncated={true}>
               {item.decoration?.title}
             </Text>
@@ -104,36 +140,60 @@ export const Item = React.memo((props: IProps) => {
           </Pressable>
         </VStack>
 
-        <Menu
-          shouldOverlapWithTrigger={shouldOverlapWithTrigger}
-          mr={3}
-          // @ts-ignore
-          trigger={triggerProps => {
-            return (
-              <IconButton
-                icon={
-                  <Icon
-                    size="sm"
-                    as={<MaterialCommunityIcons name="dots-vertical" />}
-                  />
+        {isDeleteMode ? (
+          <Checkbox
+            isChecked={props.item.markedToDelete}
+            accessible={true}
+            accessibilityLabel="Select to delete"
+            accessibilityRole="checkbox"
+            onChange={handleMarkedToDelete}
+            value="delete"
+            colorScheme={accentColor.split('.')[0]}
+            size="md"
+            mr={2}
+            borderRadius="999px"
+            icon={
+              <Icon
+                as={
+                  <Box bg="white" borderRadius="999px" p={1}>
+                    <Box flex={1} bg={accentColor} borderRadius="999px" />
+                  </Box>
                 }
-                {...triggerProps}
               />
-            );
-          }}>
-          <Menu.Item onPress={handlePress}>
-            {t('action.view_details')}
-          </Menu.Item>
-          <Menu.Item onPress={handleFavorite}>
-            {item.favorite
-              ? t('action.remove_from_favorites')
-              : t('action.add_to_favorites')}
-          </Menu.Item>
-          <Menu.Item onPress={handleShare}>{t('action.share')}</Menu.Item>
-          {/* <Menu.Item onPress={() => console.log('Customize')}>Personnaliser</Menu.Item>
+            }
+          />
+        ) : (
+          <Menu
+            shouldOverlapWithTrigger={shouldOverlapWithTrigger}
+            mr={3}
+            // @ts-ignore
+            trigger={triggerProps => {
+              return (
+                <IconButton
+                  icon={
+                    <Icon
+                      size="sm"
+                      as={<MaterialCommunityIcons name="dots-vertical" />}
+                    />
+                  }
+                  {...triggerProps}
+                />
+              );
+            }}>
+            <Menu.Item onPress={handlePress}>
+              {t('action.view_details')}
+            </Menu.Item>
+            <Menu.Item onPress={handleFavorite}>
+              {item.favorite
+                ? t('action.remove_from_favorites')
+                : t('action.add_to_favorites')}
+            </Menu.Item>
+            <Menu.Item onPress={handleShare}>{t('action.share')}</Menu.Item>
+            {/* <Menu.Item onPress={() => console.log('Customize')}>Personnaliser</Menu.Item>
         <Menu.Item onPress={() => console.log('Pin/Unpin')}>Epingler/Retirer</Menu.Item> */}
-          <Menu.Item onPress={handleDelete}>{t('action.delete')}</Menu.Item>
-        </Menu>
+            <Menu.Item onPress={handleDelete}>{t('action.delete')}</Menu.Item>
+          </Menu>
+        )}
       </HStack>
     </>
   );

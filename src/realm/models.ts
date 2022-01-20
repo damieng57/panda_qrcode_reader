@@ -51,6 +51,7 @@ export const QrCodeSchema = {
     type: 'string',
     data: 'string',
     favorite: 'bool',
+    markedToDelete: 'bool',
     date: 'date',
     decoration: 'Decoration?',
     qrCode: 'string?',

@@ -14,9 +14,13 @@ export const defaultConfig = {
   openUrlAuto: false,
   showFavorites: false,
   numberOfFavorites: 0,
+  numberOfItemsMarkedToDeletion: 0,
   criteria: '',
   currentScreen: 0,
   welcomeScreen: true,
+  isDeleteMode: false,
+  backgroundColorDarkMode: '#1f2937',
+  backgroundColorLightMode: '#fafaf9',
 };
 
 type Storage<Value> = {

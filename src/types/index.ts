@@ -8,9 +8,13 @@ export interface ISettings {
   openUrlAuto: boolean;
   showFavorites: boolean;
   numberOfFavorites: number;
+  numberOfItemsMarkedToDeletion: number;
   criteria: string;
   currentScreen: number;
   welcomeScreen: boolean;
+  isDeleteMode: boolean;
+  backgroundColorDarkMode: string;
+  backgroundColorLightMode: string;
 }
 
 export interface IQrCode {
@@ -22,6 +26,7 @@ export interface IQrCode {
   date: Date;
   decoration?: IQrCodeDecoration | string;
   qrCode?: string;
+  markedToDelete: boolean;
 }
 
 export interface IQrCodeDecoration {

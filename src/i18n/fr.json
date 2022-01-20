@@ -76,5 +76,9 @@
   "action.share": "Partager",
   "action.add_to_favorites": "Ajouter aux favoris",
   "action.remove_from_favorites": "Supprimer des favoris",
-  "action.view_details": "Voir les détails"
+  "action.view_details": "Voir les détails",
+  "about_made_with": "Fait avec",
+  "about_for": "pour",
+  "settings_background_color": "Couleur d'arrière-plan",
+  "settings_background_color_description": "Choisir une couleur d'arrière plan"
 }

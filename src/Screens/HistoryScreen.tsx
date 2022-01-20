@@ -1,6 +1,6 @@
 import * as React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {ITEM_HEIGHT, Item} from '../Components/Item';
+import {ITEM_HEIGHT, Item} from '../Components/Item/Item';
 import {getTranslation as t, settingsAtom} from '../utils/helpers';
 import {useQrCodes} from '../realm/Provider';
 import {
@@ -23,7 +23,15 @@ import {
 import {useAtom} from 'jotai';
 
 export const HistoryScreen = () => {
-  const {resultSet, deleteQrCode, updateQrCode, getQrCodes} = useQrCodes();
+  const {
+    resultSet,
+    deleteQrCode,
+    updateQrCode,
+    getQrCodes,
+    updateQrCodeToDelete,
+    deleteAllMarkedQrCodes,
+    clearAllMarkedToDeleteQrCodes,
+  } = useQrCodes();
   const [settings, setSettings] = useAtom(settingsAtom);
   const [showToGoTop, setShowToGoTop] = React.useState(false);
   const flatListRef = React.useRef(null);
@@ -52,6 +60,7 @@ export const HistoryScreen = () => {
         item={data.item}
         onFavorite={updateQrCode}
         onDelete={deleteQrCode}
+        onMarkedToDelete={updateQrCodeToDelete}
       />
     );
   };
@@ -61,17 +70,47 @@ export const HistoryScreen = () => {
   };
 
   React.useEffect(() => {
-    if (!settings) return
+    if (!settings) return;
     getQrCodes(settings?.criteria, settings?.showFavorites);
   }, [
     settings?.criteria,
     settings?.showFavorites,
     settings?.numberOfFavorites,
+    settings?.isAnonym,
     resultSet.length,
   ]);
 
+  React.useEffect(() => {
+    if (
+      settings?.numberOfItemsMarkedToDeletion === 0 ||
+      settings?.numberOfItemsMarkedToDeletion === undefined
+    ) {
+      setSettings({
+        ...settings,
+        isDeleteMode: false,
+      });
+    } else {
+      setSettings({
+        ...settings,
+        isDeleteMode: true,
+      });
+    }
+  }, [settings?.numberOfItemsMarkedToDeletion]);
+
+  React.useEffect(() => {
+    if (settings?.isDeleteMode) {
+      setSettings({
+        ...settings,
+        isDeleteMode: false,
+      });
+    }
+    if (settings?.numberOfItemsMarkedToDeletion !== 0) {
+      clearAllMarkedToDeleteQrCodes();
+    }
+  }, []);
+
   return (
-    <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
+    <Box flex="1" bg={useColorModeValue(settings?.backgroundColorDarkMode, settings?.backgroundColorLightMode)}>
       {/* Searchbar */}
       <HStack p={3}>
         <Input
@@ -109,39 +148,58 @@ export const HistoryScreen = () => {
         />
         <HStack alignItems="center">
           <VStack>
-            <Badge
-              colorScheme="danger"
-              rounded="999px"
-              mb={-4}
-              mr={0}
-              zIndex={1}
-              variant="solid"
-              alignSelf="flex-end"
-              _text={{
-                fontSize: 12,
-              }}>
-              {settings?.numberOfFavorites || '0'}
-            </Badge>
-            <IconButton
-              ml={2}
-              mr={2}
-              icon={
-                <Icon
-                  as={
-                    <MaterialCommunityIcons
-                      name={settings?.showFavorites ? 'star' : 'star-outline'}
-                    />
-                  }
-                  size="sm"
-                />
-              }
-              onPress={() =>
-                setSettings({
-                  ...settings,
-                  showFavorites: !settings?.showFavorites,
-                })
-              }
-            />
+            {!settings?.isDeleteMode &&
+              typeof settings?.numberOfFavorites === 'number' && (
+                <Badge
+                  colorScheme="danger"
+                  rounded="999px"
+                  mb={-6}
+                  mr={0}
+                  zIndex={1}
+                  variant="solid"
+                  alignSelf="flex-end"
+                  _text={{
+                    fontSize: 12,
+                  }}>
+                  {settings?.numberOfFavorites}
+                </Badge>
+              )}
+            {settings?.isDeleteMode ? (
+              <IconButton
+                ml={2}
+                mr={2}
+                mt={2}
+                icon={
+                  <Icon
+                    as={<MaterialCommunityIcons name={'trash-can-outline'} />}
+                    size="sm"
+                  />
+                }
+                onPress={() => deleteAllMarkedQrCodes()}
+              />
+            ) : (
+              <IconButton
+                ml={2}
+                mr={2}
+                mt={2}
+                icon={
+                  <Icon
+                    as={
+                      <MaterialCommunityIcons
+                        name={settings?.showFavorites ? 'star' : 'star-outline'}
+                      />
+                    }
+                    size="sm"
+                  />
+                }
+                onPress={() =>
+                  setSettings({
+                    ...settings,
+                    showFavorites: !settings?.showFavorites,
+                  })
+                }
+              />
+            )}
           </VStack>
         </HStack>
       </HStack>

@@ -1,26 +1,19 @@
 import * as React from 'react';
 import {getTranslation as t} from '../utils/helpers';
 import VersionInfo from 'react-native-version-info';
-import {
-  Heading,
-  Text,
-  ScrollView,
-  VStack,
-  Link,
-  Image,
-  Box,
-  useColorModeValue,
-  Center,
-} from 'native-base';
-import {AppBar} from '../Components/AppBar';
+import {Heading, Text, ScrollView, Link, Image, Box} from 'native-base';
+import {AppBar} from '../Components/AppBar/AppBar';
 import {Linking} from 'react-native';
 import Emoji from 'react-native-emoji';
+import {useAtom} from 'jotai';
+import {backgroundColorAtom} from '../utils/store';
 
 export const AboutScreen = () => {
-  return (
-    <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
-      <AppBar title={t('bottom_menu_about')} />
+  const [backgroundColor] = useAtom(backgroundColorAtom);
 
+  return (
+    <Box flex="1" bg={backgroundColor}>
+      <AppBar title={t('bottom_menu_about')} />
       <ScrollView
         contentContainerStyle={{
           alignItems: 'center',
@@ -39,8 +32,8 @@ export const AboutScreen = () => {
         <Text mx={2}>{t('about_text_1')}</Text>
 
         <Text mt={20}>
-          Made with <Emoji name="heart" /> and <Emoji name="coffee" /> for{' '}
-          <Emoji name="man" />, <Emoji name="woman" /> and <Emoji name="cat" />
+          {t('about_made_with')} <Emoji name="heart" /> {t('about_for')}{' '}
+          <Emoji name="busts_in_silhouette" /> and <Emoji name="cat2" />
         </Text>
         <Link
           href={'https://paypal.me/damieng57'}

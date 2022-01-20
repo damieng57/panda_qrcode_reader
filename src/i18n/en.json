@@ -76,5 +76,9 @@
   "action.share": "Share",
   "action.add_to_favorites": "Add to favorites",
   "action.remove_from_favorites": "Delete from favorites",
-  "action.view_details": "View details"
+  "action.view_details": "View details",
+  "about_made_with": "Made with",
+  "about_for": "for",
+  "settings_background_color": "Background Color",
+  "settings_background_color_description": "Choose an background color for the app"
 }

@@ -93,7 +93,7 @@ export const NativeMenu = ({
         flex={1}
         onPress={() => setSelected(3)}>
         <Center>
-          {StyledIcon(selected === 3, 'information', t('bottom_menu_about'))}
+          {StyledIcon(selected === 3, selected === 3 ? 'information' : 'information-outline', t('bottom_menu_about'))}
         </Center>
       </Pressable>
     </HStack>

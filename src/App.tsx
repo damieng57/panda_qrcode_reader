@@ -13,32 +13,35 @@ import {
   ColorMode,
   StatusBar,
 } from 'native-base';
-import {defaultConfig, settingsAtom} from './utils/helpers';
 import {colors} from './utils/colors';
 import {ActivityIndicator, View} from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
+import {
+  accentColorAtom,
+  backgroundColorAtom,
+  isDarkModeAtom,
+} from './utils/store';
+import {defaultConfig} from './utils/helpers';
 
 const Stack = createStackNavigator();
 
 const BaseApp = () => {
-  const [settings, setSettings] = useAtom(settingsAtom);
-  const background = settings?.isDarkMode === 'dark' ? '#1f2937' : '#fafaf9';
+  const [backgroundColor] = useAtom(backgroundColorAtom);
+  const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
+  const [accentColor] = useAtom(accentColorAtom);
+
   const statusBarColor =
-    settings?.isDarkMode === 'dark' ? 'light-content' : 'dark-content';
+    isDarkMode === 'dark' ? 'light-content' : 'dark-content';
 
   // Define the colorModeManager,
   const colorModeManager: StorageManager = {
-    get: async () => (settings?.isDarkMode === 'dark' ? 'dark' : 'light'),
+    get: async () => (isDarkMode === 'dark' ? 'dark' : 'light'),
     set: (value: ColorMode) =>
-      setSettings({
-        ...settings,
-        isDarkMode: value === 'dark' ? 'dark' : 'light',
-      }),
+      setIsDarkMode(value === 'dark' ? 'dark' : 'light'),
   };
 
   const baseColor =
-    settings?.accentColor?.split('.')[0] ||
-    defaultConfig.accentColor.split('.')[0];
+    accentColor.split('.')[0] || defaultConfig.accentColor.split('.')[0];
 
   // Define the config
   const theme = extendTheme({
@@ -46,12 +49,12 @@ const BaseApp = () => {
       // Add new colors
       // @ts-ignore
       primary:
-        colors[settings?.accentColor?.split('.')[0]] ||
+        colors[accentColor.split('.')[0]] ||
         colors[defaultConfig.accentColor.split('.')[0]],
     },
     config: {
       // Changing initialColorMode to 'dark'
-      initialColorMode: settings?.isDarkMode,
+      initialColorMode: isDarkMode,
     },
   });
 
@@ -59,11 +62,13 @@ const BaseApp = () => {
     try {
       changeNavigationBarColor(
         colors[baseColor]['500'],
-        settings?.isDarkMode === 'dark' ? false : true,
+        isDarkMode === 'dark' ? false : true,
         false,
       );
     } catch (e) {
-      console.error(e); // {failed: false}
+      if (__DEV__) {
+        console.error(e);
+      }
     } finally {
       SplashScreen.hide();
     }
@@ -71,23 +76,24 @@ const BaseApp = () => {
 
   React.useEffect(() => {
     navigationBarIsReady();
-  }, [settings?.accentColor, settings?.isDarkMode]);
+  }, [accentColor, isDarkMode]);
 
   return (
     <NativeBaseProvider theme={theme} colorModeManager={colorModeManager}>
       <NavigationContainer>
-        <QrCodesProvider>
-          <>
-            <StatusBar backgroundColor={background} barStyle={statusBarColor} />
-            <Stack.Navigator
-              screenOptions={{
-                header: () => null,
-              }}>
-              <Stack.Screen name="main" component={BottomMenu} />
-              <Stack.Screen name="details" component={DetailsScreen} />
-            </Stack.Navigator>
-          </>
-        </QrCodesProvider>
+        <>
+          <StatusBar
+            backgroundColor={backgroundColor}
+            barStyle={statusBarColor}
+          />
+          <Stack.Navigator
+            screenOptions={{
+              header: () => null,
+            }}>
+            <Stack.Screen name="main" component={BottomMenu} />
+            <Stack.Screen name="details" component={DetailsScreen} />
+          </Stack.Navigator>
+        </>
       </NavigationContainer>
     </NativeBaseProvider>
   );
@@ -107,7 +113,9 @@ export default function App() {
         </View>
       }>
       <StoreProvider>
-        <BaseApp />
+        <QrCodesProvider>
+          <BaseApp />
+        </QrCodesProvider>
       </StoreProvider>
     </React.Suspense>
   );

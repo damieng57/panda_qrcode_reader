@@ -1,287 +1,185 @@
 import * as React from 'react';
-import {ViewStyle} from 'react-native';
-import {
-  defaultConfig,
-  getTranslation as t,
-  settingsAtom,
-} from '../utils/helpers';
+import {Animated} from 'react-native';
+import {getTranslation as t} from '../utils/helpers';
 import {useAtom} from 'jotai';
-import {useQrCodes} from '../realm/Provider';
 import {
-  AlertDialog,
   Box,
   Heading,
-  useColorModeValue,
-  Button,
-  useTheme,
-  FlatList,
   VStack,
   Text,
   Icon,
   IconButton,
-  Center,
+  ScrollView,
+  HStack,
 } from 'native-base';
 import {SettingsItem} from '../Components/SettingsItem';
-import {AppBar} from '../Components/AppBar';
+import {AppBar} from '../Components/AppBar/AppBar';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {ApplicationSettings} from '../Components/ApplicationSettings/ApplicationSettings';
+import {HistorySettings} from '../Components/HistorySettings/HistorySettings';
+import {ColorPicker} from '../Components/ColorPicker/ColorPicker';
+import {
+  accentColorAtom,
+  backgroundColorAtom,
+  isDarkModeAtom,
+} from '../utils/store';
 
-export interface ITouchableColor {
-  size?: number;
-  color?: string;
-  style?: ViewStyle;
-  onPress: () => void;
-}
+const ThemeSettings = () => {
+  const [backgroundColor, setBackgroundColor] = useAtom(backgroundColorAtom);
+  const [isDarkMode, setIsDarkMode] = useAtom(isDarkModeAtom);
+  const [accentColor, setAccentColor] = useAtom(accentColorAtom);
 
-const excludedColors = [
-  'contrastThreshold',
-  'white',
-  'black',
-  'lightText',
-  'darkText',
-  'warmGray',
-  'trueGray',
-  'dark',
-  'gray',
-  'danger',
-  'error',
-  'success',
-  'warning',
-  'muted',
-  'info',
-  'light',
-  'primary',
-  'secondary',
-  'tertiary',
-];
+  const _heightAccentColor = React.useRef(new Animated.Value(0)).current;
+  const _heightBackground = React.useRef(new Animated.Value(0)).current;
+  const [isOpenAccentColor, setIsOpenAccentColor] = React.useState(true);
+  const [isOpenBackgroundColor, setIsOpenBackgroundColor] =
+    React.useState(true);
 
-export const SettingsScreen = (props: any) => {
-  const [settings, setSettings] = useAtom(settingsAtom);
-  const {colors} = useTheme();
-
-  const listThemeColors = Object.keys(colors).filter(
-    (color: string) =>
-      !excludedColors.find(excludedColor => color === excludedColor),
-  );
-
-  const {deleteAllQrCodes, clearAllFavoritesQrCodes} = useQrCodes();
-  const [alert, setAlert] = React.useState({
-    isOpen: false,
-    title: '',
-    description: '',
-    type: '',
-  });
-
-  const cancelRef = React.useRef(null);
-
-  const _clear = (type: string) => {
-    if (type === 'FAVORITES') {
-      clearAllFavoritesQrCodes();
-    }
-    if (type === 'HISTORY') {
-      deleteAllQrCodes();
-    }
+  const openColorPickerAccentColor = () => {
+    Animated.timing(_heightAccentColor, {
+      toValue: 0,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start(() => setIsOpenAccentColor(true));
   };
 
-  const _clearFavorites = () => {
-    setAlert({
-      isOpen: true,
-      title: t('alert_clear_favorites'),
-      description: t('alert_clear_favorites_message'),
-      type: 'FAVORITES',
-    });
+  const closeColorPickerAccentColor = () => {
+    Animated.timing(_heightAccentColor, {
+      toValue: 230,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start(() => setIsOpenAccentColor(false));
   };
 
-  const _clearHistory = () => {
-    setAlert({
-      isOpen: true,
-      title: t('alert_delete_list'),
-      description: t('alert_delete_list_message'),
-      type: 'HISTORY',
-    });
+  const openColorPickerBackground = () => {
+    Animated.timing(_heightBackground, {
+      toValue: 0,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start(() => setIsOpenBackgroundColor(true));
   };
 
-  const _setAnonymousMode = () => {
-    setSettings({
-      ...settings,
-      isAnonym: !settings?.isAnonym,
-    });
+  const closeColorPickerBackground = () => {
+    Animated.timing(_heightBackground, {
+      toValue: 230,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start(() => setIsOpenBackgroundColor(false));
   };
 
-  const _setOpenUrlAuto = () => {
-    setSettings({
-      ...settings,
-      openUrlAuto: !settings?.openUrlAuto,
-    });
+  const _setDarkMode = () => setIsDarkMode();
+
+  const _setAccentColor = (color: string) => {
+    setAccentColor(color);
   };
 
-  const _setDarkMode = () => {
-    setSettings({
-      ...settings,
-      isDarkMode: settings?.isDarkMode === 'dark' ? 'light' : 'dark',
-    });
-  };
-
-  const _setAccentColor = (accentColor: string) => {
-    setSettings({
-      ...settings,
-      accentColor,
-    });
+  const _setBackgroundColor = (color: string) => {
+    setBackgroundColor(color);
   };
 
   return (
-    <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
+    <>
+      <Heading size={'xs'} p={3}>
+        {t('settings_theme_title')}
+      </Heading>
+
+      {/* Set theme (dark/light) */}
+      <SettingsItem
+        onPress={_setDarkMode}
+        title={t('settings_dark_mode')}
+        description={t('settings_dark_mode_description')}
+        isChecked={isDarkMode === 'dark'}
+        hasSwitch={true}
+      />
+      {/* End of set theme (dark/light) */}
+
+      <HStack>
+        <VStack flex={1} ml={12} mt={6} mb={4}>
+          <Heading size={'xs'}>{t('settings_accent_color')}</Heading>
+          <Text>{t('settings_accent_color_description')}</Text>
+        </VStack>
+        <IconButton
+          style={{justifyContent: 'center'}}
+          mr={6}
+          borderRadius={'999px'}
+          mt={5}
+          mb={5}
+          icon={
+            <Icon
+              as={<MaterialCommunityIcons size={8} name={'arrow-right'} />}
+            />
+          }
+          onPress={() =>
+            isOpenAccentColor
+              ? closeColorPickerAccentColor()
+              : openColorPickerAccentColor()
+          }
+        />
+      </HStack>
+
+      <Animated.View
+        style={{
+          overflow: 'hidden',
+          height: _heightAccentColor,
+        }}>
+        <ColorPicker
+          onPress={_setAccentColor}
+          shade="500"
+          selectedColor={accentColor}
+        />
+      </Animated.View>
+
+      <HStack>
+        <VStack flex={1} ml={12} mt={6} mb={4}>
+          <Heading size={'xs'}>{t('settings_background_color')}</Heading>
+          <Text>{t('settings_background_color_description')}</Text>
+        </VStack>
+        <IconButton
+          style={{justifyContent: 'center'}}
+          mr={6}
+          borderRadius={'999px'}
+          mt={5}
+          mb={5}
+          icon={
+            <Icon
+              as={<MaterialCommunityIcons size={8} name={'arrow-right'} />}
+            />
+          }
+          onPress={() =>
+            isOpenBackgroundColor
+              ? closeColorPickerBackground()
+              : openColorPickerBackground()
+          }
+        />
+      </HStack>
+
+      <Animated.View
+        style={{
+          overflow: 'hidden',
+          height: _heightBackground,
+        }}>
+        <ColorPicker
+          onPress={_setBackgroundColor}
+          shade="100"
+          selectedColor={backgroundColor}
+        />
+      </Animated.View>
+    </>
+  );
+};
+
+export const SettingsScreen = (props: any) => {
+  const [backgroundColor] = useAtom(backgroundColorAtom);
+
+  return (
+    <Box flex="1" bg={backgroundColor}>
       <AppBar title={t('bottom_menu_settings')} />
 
-      <FlatList
-        numColumns={5}
-        data={listThemeColors}
-        columnWrapperStyle={{
-          paddingLeft: 32,
-          paddingRight: 12,
-        }}
-        ListHeaderComponent={
-          <>
-            <Heading size={'xs'} p={3}>
-              {t('history_settings_title')}
-            </Heading>
-
-            {/* Set anonymous mode */}
-            <SettingsItem
-              onPress={_setAnonymousMode}
-              title={t('settings_anonym_mode')}
-              description={t('settings_anonym_mode_description')}
-              isChecked={settings?.isAnonym}
-              hasSwitch={true}
-            />
-            {/* End of set anonymous mode */}
-
-            {/* Clear history */}
-            <SettingsItem
-              onPress={_clearHistory}
-              title={t('settings_clear_history')}
-              description={t('settings_clear_history_description')}
-              hasSwitch={false}
-            />
-            {/* End of clear history */}
-
-            {/* Clear favorites */}
-            <SettingsItem
-              onPress={_clearFavorites}
-              title={t('settings_clear_favorites')}
-              description={t('settings_clear_favorites_description')}
-              hasSwitch={false}
-            />
-            {/* End of clear favorites */}
-
-            {/* Set open url */}
-            <SettingsItem
-              onPress={_setOpenUrlAuto}
-              title={t('settings_open_url_auto')}
-              description={t('settings_open_url_auto_description')}
-              isChecked={settings?.openUrlAuto}
-              hasSwitch={true}
-            />
-            {/* End of set open url */}
-
-            <Heading size={'xs'} p={3}>
-              {t('settings_theme_title')}
-            </Heading>
-
-            {/* Set theme (dark/light) */}
-            <SettingsItem
-              onPress={_setDarkMode}
-              title={t('settings_dark_mode')}
-              description={t('settings_dark_mode_description')}
-              isChecked={settings?.isDarkMode === 'dark'}
-              hasSwitch={true}
-            />
-            {/* End of set theme (dark/light) */}
-
-            <VStack flex={1} ml={12} mt={6} mb={4}>
-              <Heading size={'xs'}>{t('settings_accent_color')}</Heading>
-              <Text>{t('settings_accent_color_description')}</Text>
-            </VStack>
-          </>
-        }
-        keyExtractor={(item, index) => `Icon${index}`}
-        ListFooterComponent={
-          <>
-            <Heading size={'xs'} p={3}>
-              {t('app_settings_title')}
-            </Heading>
-            <SettingsItem
-              onPress={() => {
-                setSettings({...defaultConfig});
-              }}
-              title={t('settings_init')}
-              description={t('settings_init_description')}
-              hasSwitch={false}
-            />
-          </>
-        }
-        renderItem={({item}) => (
-          <Center flex={1} mb={2}>
-            <IconButton
-              flex={1}
-              height={12}
-              width={12}
-              bg={`${item}.500`}
-              borderRadius="999px"
-              icon={
-                settings?.accentColor === `${item}.500` ||
-                (!settings?.accentColor && defaultConfig.accentColor === `${item}.500`) ? (
-                  <Icon
-                    alignSelf={'center'}
-                    pt={1}
-                    as={<MaterialCommunityIcons name={'check'} />}
-                    size="sm"
-                  />
-                ) : (
-                  <React.Fragment></React.Fragment>
-                )
-              }
-              onPress={() => _setAccentColor(`${item}.500`)}
-            />
-          </Center>
-        )}
-      />
-
-      <AlertDialog leastDestructiveRef={cancelRef} isOpen={alert.isOpen}>
-        <AlertDialog.Content>
-          <AlertDialog.Header>{alert.title}</AlertDialog.Header>
-          <AlertDialog.Body>{alert.description}</AlertDialog.Body>
-          <AlertDialog.Footer>
-            <Button.Group space={2}>
-              <Button
-                variant="unstyled"
-                colorScheme="coolGray"
-                onPress={() => {
-                  setAlert({
-                    isOpen: false,
-                    title: '',
-                    description: '',
-                    type: '',
-                  });
-                }}>
-                {t('alert_cancel')}
-              </Button>
-              <Button
-                colorScheme="danger"
-                onPress={() => {
-                  _clear(alert.type);
-                  setAlert({
-                    isOpen: false,
-                    title: '',
-                    description: '',
-                    type: '',
-                  });
-                }}>
-                {t('alert_ok')}
-              </Button>
-            </Button.Group>
-          </AlertDialog.Footer>
-        </AlertDialog.Content>
-      </AlertDialog>
+      <ScrollView nestedScrollEnabled={true}>
+        <HistorySettings />
+        <ThemeSettings />
+        <ApplicationSettings />
+      </ScrollView>
     </Box>
   );
 };

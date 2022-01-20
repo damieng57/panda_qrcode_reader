@@ -1,8 +1,10 @@
 import * as React from 'react';
 import {ScrollView, ViewStyle} from 'react-native';
 import {getTranslation as t} from '../utils/helpers';
-import {Text, Box, useColorModeValue} from 'native-base';
-import { AppBar } from '../Components/AppBar';
+import {Text, Box} from 'native-base';
+import {AppBar} from '../Components/AppBar/AppBar';
+import {useAtom} from 'jotai';
+import {backgroundColorAtom} from '../utils/store';
 
 export interface ITouchableColor {
   size?: number;
@@ -12,8 +14,10 @@ export interface ITouchableColor {
 }
 
 export const DetailsScreen = (props: any) => {
+  const [backgroundColor] = useAtom(backgroundColorAtom);
+
   return (
-    <Box flex="1" bg={useColorModeValue('warmGray.50', 'coolGray.800')}>
+    <Box flex="1" bg={backgroundColor}>
       <AppBar title={t('header_title_details')} />
 
       <ScrollView
