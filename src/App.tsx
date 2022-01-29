@@ -41,7 +41,7 @@ const BaseApp = () => {
   };
 
   const baseColor =
-    accentColor.split('.')[0] || defaultConfig.accentColor.split('.')[0];
+    accentColor?.split('.')[0] || defaultConfig.accentColor.split('.')[0];
 
   // Define the config
   const theme = extendTheme({
@@ -49,7 +49,7 @@ const BaseApp = () => {
       // Add new colors
       // @ts-ignore
       primary:
-        colors[accentColor.split('.')[0]] ||
+        colors[accentColor?.split('.')[0]] ||
         colors[defaultConfig.accentColor.split('.')[0]],
     },
     config: {

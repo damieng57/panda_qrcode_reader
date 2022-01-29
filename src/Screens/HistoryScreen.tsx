@@ -1,7 +1,7 @@
 import * as React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ITEM_HEIGHT, Item} from '../Components/Item/Item';
-import {getTranslation as t, settingsAtom} from '../utils/helpers';
+import {getTranslation as t} from '../utils/helpers';
 import {useQrCodes} from '../realm/Provider';
 import {
   NativeScrollEvent,
@@ -15,12 +15,21 @@ import {
   Divider,
   Input,
   Box,
-  useColorModeValue,
   VStack,
   Badge,
   Fab,
 } from 'native-base';
 import {useAtom} from 'jotai';
+import {
+  accentColorAtom,
+  backgroundColorAtom,
+  criteriaAtom,
+  isAnonymAtom,
+  isDeleteModeAtom,
+  numberOfFavoritesAtom,
+  numberOfItemsMarkedToDeletionAtom,
+  showFavoritesAtom,
+} from '../utils/store';
 
 export const HistoryScreen = () => {
   const {
@@ -32,9 +41,26 @@ export const HistoryScreen = () => {
     deleteAllMarkedQrCodes,
     clearAllMarkedToDeleteQrCodes,
   } = useQrCodes();
-  const [settings, setSettings] = useAtom(settingsAtom);
+  const [criteria, setCriteria] = useAtom(criteriaAtom);
+  const [backgroundColor] = useAtom(backgroundColorAtom);
+  const [isAnonym] = useAtom(isAnonymAtom);
+  const [accentColor] = useAtom(accentColorAtom);
+  const [isDeleteMode, setIsDeleteMode] = useAtom(isDeleteModeAtom);
+  const [showFavorites, setShowFavorites] = useAtom(showFavoritesAtom);
+  const [numberOfFavorites, setNumberOfFavorites] = useAtom(
+    numberOfFavoritesAtom,
+  );
+  const [numberOfItemsMarkedToDeletion, setNumberOfItemsMarkedToDeletion] =
+    useAtom(numberOfItemsMarkedToDeletionAtom);
   const [showToGoTop, setShowToGoTop] = React.useState(false);
   const flatListRef = React.useRef(null);
+
+  const _updateQrCodeToDelete = (data: any) => {
+    console.log(data);
+    updateQrCodeToDelete(data.item._id, () =>
+      setNumberOfItemsMarkedToDeletion(getQrCodes.markedToDelete()),
+    );
+  };
 
   const _showToGoTopButton = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
@@ -48,11 +74,7 @@ export const HistoryScreen = () => {
     }
   };
 
-  const _onChangeSearch = (search: string) =>
-    setSettings({
-      ...settings,
-      criteria: search,
-    });
+  const _onChangeSearch = (search: string) => setCriteria(search);
 
   const _renderItem = (data: any) => {
     return (
@@ -60,7 +82,7 @@ export const HistoryScreen = () => {
         item={data.item}
         onFavorite={updateQrCode}
         onDelete={deleteQrCode}
-        onMarkedToDelete={updateQrCodeToDelete}
+        onMarkedToDelete={_updateQrCodeToDelete}
       />
     );
   };
@@ -70,54 +92,38 @@ export const HistoryScreen = () => {
   };
 
   React.useEffect(() => {
-    if (!settings) return;
-    getQrCodes(settings?.criteria, settings?.showFavorites);
-  }, [
-    settings?.criteria,
-    settings?.showFavorites,
-    settings?.numberOfFavorites,
-    settings?.isAnonym,
-    resultSet.length,
-  ]);
+    getQrCodes.favorites(criteria);
+  }, [criteria, showFavorites, numberOfFavorites, isAnonym, resultSet.length]);
 
   React.useEffect(() => {
     if (
-      settings?.numberOfItemsMarkedToDeletion === 0 ||
-      settings?.numberOfItemsMarkedToDeletion === undefined
+      numberOfItemsMarkedToDeletion === 0 ||
+      numberOfItemsMarkedToDeletion === undefined
     ) {
-      setSettings({
-        ...settings,
-        isDeleteMode: false,
-      });
+      setIsDeleteMode(false);
     } else {
-      setSettings({
-        ...settings,
-        isDeleteMode: true,
-      });
+      setIsDeleteMode(true);
     }
-  }, [settings?.numberOfItemsMarkedToDeletion]);
+  }, [numberOfItemsMarkedToDeletion]);
 
   React.useEffect(() => {
-    if (settings?.isDeleteMode) {
-      setSettings({
-        ...settings,
-        isDeleteMode: false,
-      });
+    if (isDeleteMode) {
+      setIsDeleteMode(false);
     }
-    if (settings?.numberOfItemsMarkedToDeletion !== 0) {
+    if (numberOfItemsMarkedToDeletion !== 0) {
       clearAllMarkedToDeleteQrCodes();
     }
   }, []);
 
   return (
-    <Box flex="1" bg={useColorModeValue(settings?.backgroundColorDarkMode, settings?.backgroundColorLightMode)}>
+    <Box flex="1" bg={backgroundColor}>
       {/* Searchbar */}
       <HStack p={3}>
         <Input
           flex="1"
           placeholder={t('search_placeholder')}
           onChangeText={_onChangeSearch}
-          value={settings?.criteria}
+          value={criteria}
           borderRadius="50"
           py="3"
           px="1"
@@ -137,34 +143,28 @@ export const HistoryScreen = () => {
               size="5"
               color="gray.400"
               as={<MaterialCommunityIcons name="close" />}
-              onPress={() =>
-                setSettings({
-                  ...settings,
-                  criteria: '',
-                })
-              }
+              onPress={() => setCriteria('')}
             />
           }
         />
         <HStack alignItems="center">
           <VStack>
-            {!settings?.isDeleteMode &&
-              typeof settings?.numberOfFavorites === 'number' && (
-                <Badge
-                  colorScheme="danger"
-                  rounded="999px"
-                  mb={-6}
-                  mr={0}
-                  zIndex={1}
-                  variant="solid"
-                  alignSelf="flex-end"
-                  _text={{
-                    fontSize: 12,
-                  }}>
-                  {settings?.numberOfFavorites}
-                </Badge>
-              )}
-            {settings?.isDeleteMode ? (
+            {!isDeleteMode && typeof numberOfFavorites === 'number' && (
+              <Badge
+                colorScheme="danger"
+                rounded="999px"
+                mb={-6}
+                mr={0}
+                zIndex={1}
+                variant="solid"
+                alignSelf="flex-end"
+                _text={{
+                  fontSize: 12,
+                }}>
+                {numberOfFavorites}
+              </Badge>
+            )}
+            {isDeleteMode ? (
               <IconButton
                 ml={2}
                 mr={2}
@@ -186,18 +186,13 @@ export const HistoryScreen = () => {
                   <Icon
                     as={
                       <MaterialCommunityIcons
-                        name={settings?.showFavorites ? 'star' : 'star-outline'}
+                        name={showFavorites ? 'star' : 'star-outline'}
                       />
                     }
                     size="sm"
                   />
                 }
-                onPress={() =>
-                  setSettings({
-                    ...settings,
-                    showFavorites: !settings?.showFavorites,
-                  })
-                }
+                onPress={() => setShowFavorites()}
               />
             )}
           </VStack>
@@ -223,7 +218,7 @@ export const HistoryScreen = () => {
 
       {showToGoTop && (
         <Fab
-          bg={settings?.accentColor}
+          bg={accentColor}
           position="absolute"
           bottom={'24'}
           size="sm"

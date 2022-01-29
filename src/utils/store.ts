@@ -96,10 +96,13 @@ const updateIsDarkMode = (state: IStore, mode?: string): IStore => {
   };
 };
 
-const updateIsDeleteMode = (state: IStore): IStore => {
+const updateIsDeleteMode = (
+  state: IStore,
+  value: boolean | undefined = undefined,
+): IStore => {
   return {
     ...state,
-    isDeleteMode: !state.isDeleteMode,
+    isDeleteMode: typeof value !== 'undefined' ? value : !state.isDeleteMode,
   };
 };
 
@@ -114,6 +117,37 @@ const updateOpenUrlAuto = (state: IStore): IStore => {
   return {
     ...state,
     openUrlAuto: !state.openUrlAuto,
+  };
+};
+
+const updateCriteria = (state: IStore, criteria?: string): IStore => {
+  return {
+    ...state,
+    criteria: criteria || '',
+  };
+};
+
+const updateShowFavorites = (state: IStore): IStore => {
+  return {
+    ...state,
+    showFavorites: !state.showFavorites,
+  };
+};
+
+const updateNumberOfFavorites = (state: IStore, value: number): IStore => {
+  return {
+    ...state,
+    numberOfFavorites: value,
+  };
+};
+
+const updateNumberOfItemsMarkedToDeletion = (
+  state: IStore,
+  value: number,
+): IStore => {
+  return {
+    ...state,
+    numberOfItemsMarkedToDeletion: value,
   };
 };
 
@@ -146,12 +180,35 @@ export const isAnonymAtom = atom<boolean, void>(
   (get, set) => set(storeAtom, updateIsAnonym(get(storeAtom))),
 );
 
-export const isDeleteModeAtom = atom<boolean, void>(
+export const isDeleteModeAtom = atom<boolean, boolean>(
   get => get(storeAtom).isDeleteMode,
-  (get, set) => set(storeAtom, updateIsDeleteMode(get(storeAtom))),
+  (get, set, param) =>
+    set(storeAtom, updateIsDeleteMode(get(storeAtom), param)),
 );
 
 export const openUrlAutoAtom = atom<boolean, void>(
   get => get(storeAtom).openUrlAuto,
   (get, set) => set(storeAtom, updateOpenUrlAuto(get(storeAtom))),
+);
+
+export const criteriaAtom = atom<string, string>(
+  get => get(storeAtom).criteria,
+  (get, set) => set(storeAtom, updateCriteria(get(storeAtom))),
+);
+
+export const showFavoritesAtom = atom<boolean, void>(
+  get => get(storeAtom).showFavorites,
+  (get, set) => set(storeAtom, updateShowFavorites(get(storeAtom))),
+);
+
+export const numberOfFavoritesAtom = atom<number, number>(
+  get => get(storeAtom).numberOfFavorites,
+  (get, set, param) =>
+    set(storeAtom, updateNumberOfFavorites(get(storeAtom), param)),
+);
+
+export const numberOfItemsMarkedToDeletionAtom = atom<number, number>(
+  get => get(storeAtom).numberOfItemsMarkedToDeletion,
+  (get, set, param) =>
+    set(storeAtom, updateNumberOfItemsMarkedToDeletion(get(storeAtom), param)),
 );
