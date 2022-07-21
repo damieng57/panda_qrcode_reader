@@ -96,7 +96,7 @@ export const ScanScreen = (props: IState) => {
   };
 
   const handleScan = (item: BarCodeReadEvent) => {
-    if (!state.isActive) {
+    if (!state.isActive || !isFocused) {
       return undefined;
     }
     Vibration.vibrate(500);

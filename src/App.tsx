@@ -12,9 +12,10 @@ import {
   StorageManager,
   ColorMode,
   StatusBar,
+  useToken,
 } from 'native-base';
 import {colors} from './utils/colors';
-import {ActivityIndicator, View} from 'react-native';
+import {ActivityIndicator, SafeAreaView} from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {
   accentColorAtom,
@@ -22,6 +23,9 @@ import {
   isDarkModeAtom,
 } from './utils/store';
 import {defaultConfig} from './utils/helpers';
+import {PERMISSIONS, request} from 'react-native-permissions';
+
+request(PERMISSIONS.IOS.CAMERA).then(result => {});
 
 const Stack = createStackNavigator();
 
@@ -78,23 +82,34 @@ const BaseApp = () => {
     navigationBarIsReady();
   }, [accentColor, isDarkMode]);
 
+
+  // TODO: Optimize
+  const getColorFromToken = (token: string) => {
+    const _color = token.split('.')[0]
+    const _variant = token.split('.')[1]
+
+    return colors[_color][_variant]
+  }
+
   return (
     <NativeBaseProvider theme={theme} colorModeManager={colorModeManager}>
-      <NavigationContainer>
-        <>
-          <StatusBar
-            backgroundColor={backgroundColor}
-            barStyle={statusBarColor}
-          />
-          <Stack.Navigator
-            screenOptions={{
-              header: () => null,
-            }}>
-            <Stack.Screen name="main" component={BottomMenu} />
-            <Stack.Screen name="details" component={DetailsScreen} />
-          </Stack.Navigator>
-        </>
-      </NavigationContainer>
+      <SafeAreaView style={{flex: 1, backgroundColor: getColorFromToken(accentColor)}}>
+        <NavigationContainer>
+          <>
+            <StatusBar
+              backgroundColor={backgroundColor}
+              barStyle={statusBarColor}
+            />
+            <Stack.Navigator
+              screenOptions={{
+                header: () => null,
+              }}>
+              <Stack.Screen name="main" component={BottomMenu} />
+              <Stack.Screen name="details" component={DetailsScreen} />
+            </Stack.Navigator>
+          </>
+        </NavigationContainer>
+      </SafeAreaView>
     </NativeBaseProvider>
   );
 };
@@ -103,14 +118,14 @@ export default function App() {
   return (
     <React.Suspense
       fallback={
-        <View
+        <SafeAreaView
           style={{
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
           }}>
           <ActivityIndicator />
-        </View>
+        </SafeAreaView>
       }>
       <StoreProvider>
         <QrCodesProvider>

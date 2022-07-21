@@ -2,6 +2,5 @@
     "i18n-ally.localesPaths": [
         "src/i18n"
     ],
-    "i18n-ally.extract.autoDetect": true,
-    "workspace.isHidden": true
+    "i18n-ally.extract.autoDetect": true
 }

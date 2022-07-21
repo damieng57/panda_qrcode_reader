@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import {atom, WritableAtom} from 'jotai';
-import {atomWithStorage} from 'jotai/utils';
+import {atomWithStorage, createJSONStorage} from 'jotai/utils';
 
 interface IStore {
   isAnonym: boolean;
@@ -38,28 +38,7 @@ type Storage<Value> = {
   removeItem: (key: string) => void | Promise<void>;
 };
 
-const defaultStorage: Storage<unknown> = {
-  getItem: async key => {
-    return AsyncStorage.getItem(key)
-      .then(value => {
-        if (value === null || !value) {
-          throw Error('Value cannot be null');
-        }
-        return JSON.parse(value);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  },
-  setItem: async (key, newValue) => {
-    await AsyncStorage.setItem(key, JSON.stringify(newValue));
-  },
-  removeItem: key => {
-    AsyncStorage.removeItem(key).catch(error => {
-      console.error(error);
-    });
-  },
-};
+const defaultStorage = createJSONStorage(() => AsyncStorage);
 
 // Jotai Store
 export const storeAtom: WritableAtom<any, IStore, void | Promise<void>> =
@@ -69,7 +48,7 @@ const updateBackgroundColor = (state: IStore, color?: string): IStore => {
   if (!state) {
     return defaultStore;
   }
-  if (state.isDarkMode === 'dark') {
+  if (state?.isDarkMode === 'dark') {
     return {
       ...state,
       backgroundColorDarkMode: color || '#1f2937',
@@ -152,6 +131,9 @@ const updateNumberOfItemsMarkedToDeletion = (
 };
 
 const getBackgroundColor = (state: IStore): string => {
+  if (!state) {
+    return defaultStore.backgroundColorDarkMode;
+  }
   return state.isDarkMode === 'dark'
     ? state.backgroundColorDarkMode
     : state.backgroundColorLightMode;
@@ -171,7 +153,7 @@ export const accentColorAtom = atom<string, string>(
 );
 
 export const isDarkModeAtom = atom<string, string | undefined>(
-  get => get(storeAtom).isDarkMode,
+  get => get(storeAtom).isDarkMode || true,
   (get, set, param) => set(storeAtom, updateIsDarkMode(get(storeAtom), param)),
 );
 

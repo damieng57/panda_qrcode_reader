@@ -77,9 +77,10 @@ export const HistoryScreen = () => {
   const _onChangeSearch = (search: string) => setCriteria(search);
 
   const _renderItem = (data: any) => {
+
     return (
       <Item
-        item={data.item}
+        item={data?.item}
         onFavorite={updateQrCode}
         onDelete={deleteQrCode}
         onMarkedToDelete={_updateQrCodeToDelete}
@@ -92,7 +93,7 @@ export const HistoryScreen = () => {
   };
 
   React.useEffect(() => {
-    getQrCodes.favorites(criteria);
+    getQrCodes?.favorites(criteria);
   }, [criteria, showFavorites, numberOfFavorites, isAnonym, resultSet.length]);
 
   React.useEffect(() => {

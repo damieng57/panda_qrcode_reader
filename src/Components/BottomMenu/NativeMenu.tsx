@@ -1,44 +1,45 @@
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import {useAtom} from 'jotai';
-import {HStack, Center, Icon, Pressable, Text} from 'native-base';
+import {HStack, Center, Icon, Pressable, Text, Box} from 'native-base';
 import React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {defaultConfig, getTranslation as t, settingsAtom} from '../../utils/helpers';
+import {
+  defaultConfig,
+  getTranslation as t,
+  settingsAtom,
+} from '../../utils/helpers';
 
 const StyledIcon = (selected: boolean, name: string, text: string) => {
   return selected ? (
     <>
-      <Icon
-        mb="1"
-        as={<MaterialCommunityIcons name={name} />}
-        size="sm"
+      <Box
+        borderRadius={14}
         _dark={{
           bg: 'primary.700',
         }}
         _light={{
           bg: 'primary.200',
         }}
-        borderRadius={100}
+        alignItems={'center'}
+        paddingTop={0.5}
         minWidth={16}
-        minHeight={7}
-        textAlign={'center'}
-        padding={0.5}
-      />
+        minHeight={7}>
+        <Icon mb="1" as={<MaterialCommunityIcons name={name} />} size="sm" />
+      </Box>
       <Text bold fontSize="12">
         {text}
       </Text>
     </>
   ) : (
     <>
-      <Icon
-        mb="1"
-        as={<MaterialCommunityIcons name={name} />}
-        size="sm"
-        minWidth={12}
-        minHeight={7}
-        textAlign={'center'}
-        padding={0.5}
-      />
+      <Box
+        borderRadius={14}
+        alignItems={'center'}
+        paddingTop={0.5}
+        minWidth={16}
+        minHeight={7}>
+        <Icon mb="1" as={<MaterialCommunityIcons name={name} />} size="sm" />
+      </Box>
       <Text bold fontSize="12">
         {text}
       </Text>
@@ -59,7 +60,10 @@ export const NativeMenu = ({
   }, [selected]);
 
   return (
-    <HStack style={{height: 56}} alignItems="center" bg={settings?.accentColor || defaultConfig.accentColor}>
+    <HStack
+      style={{height: 56}}
+      alignItems="center"
+      bg={'primary.500' || defaultConfig.accentColor}>
       <Pressable
         opacity={selected === 0 ? 1 : 0.5}
         py="3"
@@ -93,7 +97,11 @@ export const NativeMenu = ({
         flex={1}
         onPress={() => setSelected(3)}>
         <Center>
-          {StyledIcon(selected === 3, selected === 3 ? 'information' : 'information-outline', t('bottom_menu_about'))}
+          {StyledIcon(
+            selected === 3,
+            selected === 3 ? 'information' : 'information-outline',
+            t('bottom_menu_about'),
+          )}
         </Center>
       </Pressable>
     </HStack>

@@ -323,7 +323,9 @@ const QrCodesProvider = ({children}: IProps) => {
           // Update some properties on the instance.
           // These changes are saved to the realm.
           for (const [key, value] of Object.entries(params)) {
-            qrCode && qrCode[key] = value;
+            if (qrCode) {
+              qrCode[key] = value;
+            }
           }
         });
         // Calback should update the number of favorite
