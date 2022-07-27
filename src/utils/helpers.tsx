@@ -3,61 +3,6 @@ import {URL} from 'react-native-url-polyfill';
 import {getLocales} from 'react-native-localize';
 import {IQrCodeDecoration, IQrCode} from '../types';
 import {ObjectId} from 'bson';
-import {atomWithStorage} from 'jotai/utils';
-import AsyncStorage from '@react-native-community/async-storage';
-
-export const defaultConfig = {
-  isAnonym: false,
-  isDarkMode: 'light',
-  accentColor: 'red.500',
-  maxItems: 100,
-  openUrlAuto: false,
-  showFavorites: false,
-  numberOfFavorites: 0,
-  numberOfItemsMarkedToDeletion: 0,
-  criteria: '',
-  currentScreen: 0,
-  welcomeScreen: true,
-  isDeleteMode: false,
-  backgroundColorDarkMode: '#1f2937',
-  backgroundColorLightMode: '#fafaf9',
-};
-
-type Storage<Value> = {
-  getItem: (key: string) => Value | Promise<Value>;
-  setItem: (key: string, newValue: Value) => void | Promise<void>;
-  removeItem: (key: string) => void | Promise<void>;
-};
-
-const defaultStorage: Storage<unknown> = {
-  getItem: async key => {
-    return AsyncStorage.getItem(key)
-      .then(value => {
-        if (value === null || !value) {
-          throw Error('Value cannot be null');
-        }
-        return JSON.parse(value);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  },
-  setItem: async (key, newValue) => {
-    await AsyncStorage.setItem(key, JSON.stringify(newValue));
-  },
-  removeItem: key => {
-    AsyncStorage.removeItem(key).catch(error => {
-      console.log(error);
-    });
-  },
-};
-
-// Jotai Store
-export const settingsAtom = atomWithStorage(
-  'QRCODE:SETTINGS',
-  defaultConfig,
-  defaultStorage,
-);
 
 export const formatQrCode = (
   element: BarCodeReadEvent,
@@ -71,9 +16,22 @@ export const formatQrCode = (
   decoration: parseData(element),
   qrCode: '',
   favorite,
+  markedToDelete: false,
 });
 
-const language = getLocales()[0].languageCode;
+export const message = (
+  status: string | undefined,
+  _message: string,
+  error?: any,
+) => {
+  return {
+    status,
+    _message,
+    error,
+  };
+};
+
+export const language = getLocales()[0].languageCode;
 let translation = require(`../i18n/en.json`);
 switch (language) {
   case 'fr':
@@ -85,9 +43,8 @@ switch (language) {
 }
 
 export const isValidHttpUrl = (string: string): boolean => {
-  let url;
   try {
-    url = new URL(string);
+    new URL(string);
   } catch (_) {
     return false;
   }
@@ -206,6 +163,9 @@ function extractTypeFromData(
       };
     case 'HTTP':
     case 'HTTPS':
+      if (!isValidHttpUrl(item.data)) {
+        return;
+      }
       const url = new URL(item.data);
       if (url.hostname.toLowerCase().includes('twitter')) {
         return {
@@ -255,21 +215,4 @@ function extractTypeFromData(
       };
     }
   }
-}
-function atomWithAsyncStorage(
-  arg0: string,
-  defaultConfig: {
-    isAnonym: boolean;
-    isDarkMode: string;
-    accentColor: string;
-    maxItems: number;
-    openUrlAuto: boolean;
-    showFavorites: boolean;
-    numberOfFavorites: number;
-    criteria: string;
-    currentScreen: number;
-    welcomeScreen: boolean;
-  },
-) {
-  throw new Error('Function not implemented.');
 }

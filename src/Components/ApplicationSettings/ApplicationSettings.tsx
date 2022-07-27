@@ -1,8 +1,8 @@
 import {useAtom} from 'jotai';
 import {Heading} from 'native-base';
 import React from 'react';
-import {defaultConfig, getTranslation as t} from '../../utils/helpers';
-import {storeAtom} from '../../utils/store';
+import {getTranslation as t} from '../../utils/helpers';
+import {defaultStore, storeAtom} from '../../utils/store';
 import {SettingsItem} from '../SettingsItem';
 
 export const ApplicationSettings = () => {
@@ -14,7 +14,7 @@ export const ApplicationSettings = () => {
       </Heading>
       <SettingsItem
         onPress={() => {
-          setStore({...defaultConfig});
+          setStore({...defaultStore});
         }}
         title={t('settings_init')}
         description={t('settings_init_description')}

@@ -3,13 +3,13 @@ import {AlertDialog, Button, Heading} from 'native-base';
 import React from 'react';
 import {useQrCodes} from '../../realm/Provider';
 import {getTranslation as t} from '../../utils/helpers';
-import {isAnonymAtom, openUrlAutoAtom} from '../../utils/store';
+import {isAnonymAtom, openUrlAutoAtom} from '../../utils/atoms';
 import {SettingsItem} from '../SettingsItem';
 
 export const HistorySettings = () => {
   const [isAnonym, setIsAnonym] = useAtom(isAnonymAtom);
   const [openUrlAuto, setOpenUrlAuto] = useAtom(openUrlAutoAtom);
-  const {deleteAllQrCodes, clearAllFavoritesQrCodes} = useQrCodes();
+  const {deleteAll, clearFavorites} = useQrCodes();
   const [alert, setAlert] = React.useState({
     isOpen: false,
     title: '',
@@ -20,10 +20,10 @@ export const HistorySettings = () => {
 
   const _clear = (type: string) => {
     if (type === 'FAVORITES') {
-      clearAllFavoritesQrCodes();
+      clearFavorites();
     }
     if (type === 'HISTORY') {
-      deleteAllQrCodes();
+      deleteAll();
     }
   };
 

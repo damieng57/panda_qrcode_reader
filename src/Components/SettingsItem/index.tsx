@@ -1,9 +1,9 @@
 import {TouchableNativeFeedback} from 'react-native';
 import {Text, Switch, Heading, HStack, VStack} from 'native-base';
 import React from 'react';
-import { colors } from '../../utils/colors';
-import { useAtom } from 'jotai';
-import { defaultConfig, settingsAtom } from '../../utils/helpers';
+import {getVariantColorFromToken} from '../../utils/colors';
+import {useAtom} from 'jotai';
+import {accentColorAtom} from '../../utils/atoms';
 
 export interface IProps {
   onPress: () => void;
@@ -15,19 +15,18 @@ export interface IProps {
 }
 
 export const SettingsItem = (props: IProps) => {
-  const [settings] = useAtom(settingsAtom);
+  const [accentColor] = useAtom(accentColorAtom);
   const {onPress, title, description, hasSwitch, isChecked, switchColor} =
     props;
-
-  const baseColor =
-    settings?.accentColor?.split('.')[0] ||
-    defaultConfig.accentColor.split('.')[0];
 
   return (
     <TouchableNativeFeedback
       onPress={onPress}
       useForeground
-      background={TouchableNativeFeedback.Ripple(colors[baseColor]['100'], false)}>
+      background={TouchableNativeFeedback.Ripple(
+        getVariantColorFromToken(accentColor, '100'),
+        false,
+      )}>
       <HStack
         flex="1"
         paddingLeft={12}
@@ -35,10 +34,8 @@ export const SettingsItem = (props: IProps) => {
         height={24}
         alignItems={'center'}>
         <VStack flex={1}>
-          <Heading size={'xs'}>
-            {title}
-          </Heading>
-          <Text >{description}</Text>
+          <Heading size={'xs'}>{title}</Heading>
+          <Text>{description}</Text>
         </VStack>
         {hasSwitch && (
           <Switch

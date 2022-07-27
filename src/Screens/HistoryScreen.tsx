@@ -4,6 +4,7 @@ import {ITEM_HEIGHT, Item} from '../Components/Item/Item';
 import {getTranslation as t} from '../utils/helpers';
 import {useQrCodes} from '../realm/Provider';
 import {
+  FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
   VirtualizedList,
@@ -25,42 +26,28 @@ import {
   backgroundColorAtom,
   criteriaAtom,
   isAnonymAtom,
-  isDeleteModeAtom,
-  numberOfFavoritesAtom,
-  numberOfItemsMarkedToDeletionAtom,
   showFavoritesAtom,
-} from '../utils/store';
+} from '../utils/atoms';
 
 export const HistoryScreen = () => {
   const {
     resultSet,
-    deleteQrCode,
-    updateQrCode,
-    getQrCodes,
-    updateQrCodeToDelete,
-    deleteAllMarkedQrCodes,
-    clearAllMarkedToDeleteQrCodes,
+    getAll,
+    getFavorites,
+    updateOne,
+    deleteOne,
   } = useQrCodes();
+  
   const [criteria, setCriteria] = useAtom(criteriaAtom);
   const [backgroundColor] = useAtom(backgroundColorAtom);
-  const [isAnonym] = useAtom(isAnonymAtom);
+  // const [isAnonym] = useAtom(isAnonymAtom);
   const [accentColor] = useAtom(accentColorAtom);
-  const [isDeleteMode, setIsDeleteMode] = useAtom(isDeleteModeAtom);
   const [showFavorites, setShowFavorites] = useAtom(showFavoritesAtom);
-  const [numberOfFavorites, setNumberOfFavorites] = useAtom(
-    numberOfFavoritesAtom,
-  );
-  const [numberOfItemsMarkedToDeletion, setNumberOfItemsMarkedToDeletion] =
-    useAtom(numberOfItemsMarkedToDeletionAtom);
-  const [showToGoTop, setShowToGoTop] = React.useState(false);
-  const flatListRef = React.useRef(null);
 
-  const _updateQrCodeToDelete = (data: any) => {
-    console.log(data);
-    updateQrCodeToDelete(data.item._id, () =>
-      setNumberOfItemsMarkedToDeletion(getQrCodes.markedToDelete()),
-    );
-  };
+  const [numberOfFavorites, setNumberOfFavorites] = React.useState(0);
+  const [showToGoTop, setShowToGoTop] = React.useState(false);
+
+  const flatListRef = React.useRef<FlatList>(null);
 
   const _showToGoTopButton = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
@@ -77,13 +64,12 @@ export const HistoryScreen = () => {
   const _onChangeSearch = (search: string) => setCriteria(search);
 
   const _renderItem = (data: any) => {
-
     return (
       <Item
         item={data?.item}
-        onFavorite={updateQrCode}
-        onDelete={deleteQrCode}
-        onMarkedToDelete={_updateQrCodeToDelete}
+        onFavorite={updateOne}
+        onDelete={deleteOne}
+        onMarkedToDelete={() => null}
       />
     );
   };
@@ -93,28 +79,11 @@ export const HistoryScreen = () => {
   };
 
   React.useEffect(() => {
-    getQrCodes?.favorites(criteria);
-  }, [criteria, showFavorites, numberOfFavorites, isAnonym, resultSet.length]);
-
-  React.useEffect(() => {
-    if (
-      numberOfItemsMarkedToDeletion === 0 ||
-      numberOfItemsMarkedToDeletion === undefined
-    ) {
-      setIsDeleteMode(false);
-    } else {
-      setIsDeleteMode(true);
+    if (showFavorites) {
+      return getFavorites(criteria);
     }
-  }, [numberOfItemsMarkedToDeletion]);
-
-  React.useEffect(() => {
-    if (isDeleteMode) {
-      setIsDeleteMode(false);
-    }
-    if (numberOfItemsMarkedToDeletion !== 0) {
-      clearAllMarkedToDeleteQrCodes();
-    }
-  }, []);
+    getAll(criteria);
+  }, [criteria, showFavorites, numberOfFavorites, resultSet.length]);
 
   return (
     <Box flex="1" bg={backgroundColor}>
@@ -150,7 +119,7 @@ export const HistoryScreen = () => {
         />
         <HStack alignItems="center">
           <VStack>
-            {!isDeleteMode && typeof numberOfFavorites === 'number' && (
+            {typeof numberOfFavorites === 'number' && (
               <Badge
                 colorScheme="danger"
                 rounded="999px"
@@ -165,37 +134,22 @@ export const HistoryScreen = () => {
                 {numberOfFavorites}
               </Badge>
             )}
-            {isDeleteMode ? (
-              <IconButton
-                ml={2}
-                mr={2}
-                mt={2}
-                icon={
-                  <Icon
-                    as={<MaterialCommunityIcons name={'trash-can-outline'} />}
-                    size="sm"
-                  />
-                }
-                onPress={() => deleteAllMarkedQrCodes()}
-              />
-            ) : (
-              <IconButton
-                ml={2}
-                mr={2}
-                mt={2}
-                icon={
-                  <Icon
-                    as={
-                      <MaterialCommunityIcons
-                        name={showFavorites ? 'star' : 'star-outline'}
-                      />
-                    }
-                    size="sm"
-                  />
-                }
-                onPress={() => setShowFavorites()}
-              />
-            )}
+            <IconButton
+              ml={2}
+              mr={2}
+              mt={2}
+              icon={
+                <Icon
+                  as={
+                    <MaterialCommunityIcons
+                      name={showFavorites ? 'star' : 'star-outline'}
+                    />
+                  }
+                  size="sm"
+                />
+              }
+              onPress={() => setShowFavorites()}
+            />
           </VStack>
         </HStack>
       </HStack>

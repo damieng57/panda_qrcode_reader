@@ -1,4 +1,6 @@
-// @ts-ignore
+import {ColorMode, StorageManager} from 'native-base';
+import {defaultStore} from './store';
+
 // Based on native-base colors system
 export const colors = {
   rose: {
@@ -289,4 +291,32 @@ export const colors = {
     800: '#f4f4f5',
     900: '#fafafa',
   },
+};
+
+export const getColorFromToken = (token: string): string => {
+  const [_color, _variant] = token.split('.');
+  return colors[_color][_variant];
+};
+
+export const getVariantColorFromToken = (
+  token: string,
+  variant: string,
+): string => {
+  const [_color] = token.split('.');
+  return colors[_color][variant] || colors[_color]['500'];
+};
+
+export const getBaseColorFromToken = (token: string): string => {
+  return token?.split('.')[0] || defaultStore.accentColor.split('.')[0];
+};
+
+// Define the colorModeManager for NativeBase Provider
+export const colorModeManager = (
+  isDarkMode: string,
+  callBack: (value: string) => void,
+): StorageManager => {
+  return {
+    get: async () => (isDarkMode === 'dark' ? 'dark' : 'light'),
+    set: (value: ColorMode) => callBack(value === 'dark' ? 'dark' : 'light'),
+  };
 };

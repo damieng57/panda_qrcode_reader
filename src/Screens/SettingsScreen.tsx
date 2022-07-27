@@ -22,7 +22,7 @@ import {
   accentColorAtom,
   backgroundColorAtom,
   isDarkModeAtom,
-} from '../utils/store';
+} from '../utils/atoms';
 
 const ThemeSettings = () => {
   const [backgroundColor, setBackgroundColor] = useAtom(backgroundColorAtom);
@@ -49,22 +49,6 @@ const ThemeSettings = () => {
       duration: 1000,
       useNativeDriver: false,
     }).start(() => setIsOpenAccentColor(false));
-  };
-
-  const openColorPickerBackground = () => {
-    Animated.timing(_heightBackground, {
-      toValue: 0,
-      duration: 1000,
-      useNativeDriver: false,
-    }).start(() => setIsOpenBackgroundColor(true));
-  };
-
-  const closeColorPickerBackground = () => {
-    Animated.timing(_heightBackground, {
-      toValue: 230,
-      duration: 1000,
-      useNativeDriver: false,
-    }).start(() => setIsOpenBackgroundColor(false));
   };
 
   const _setDarkMode = () => setIsDarkMode();
@@ -128,30 +112,6 @@ const ThemeSettings = () => {
           selectedColor={accentColor}
         />
       </Animated.View>
-
-      <HStack>
-        <VStack flex={1} ml={12} mt={6} mb={4}>
-          <Heading size={'xs'}>{t('settings_background_color')}</Heading>
-          <Text>{t('settings_background_color_description')}</Text>
-        </VStack>
-        <IconButton
-          style={{justifyContent: 'center'}}
-          mr={6}
-          borderRadius={'999px'}
-          mt={5}
-          mb={5}
-          icon={
-            <Icon
-              as={<MaterialCommunityIcons size={8} name={'arrow-right'} />}
-            />
-          }
-          onPress={() =>
-            isOpenBackgroundColor
-              ? closeColorPickerBackground()
-              : openColorPickerBackground()
-          }
-        />
-      </HStack>
 
       <Animated.View
         style={{

@@ -2,10 +2,7 @@ import * as React from 'react';
 import {Vibration, Linking} from 'react-native';
 import {BarCodeReadEvent, RNCamera} from 'react-native-camera';
 import {BarcodeMask} from '@nartc/react-native-barcode-mask';
-import {
-  getTranslation as t,
-  formatQrCode,
-} from '../utils/helpers';
+import {getTranslation as t, formatQrCode} from '../utils/helpers';
 import {useAtom} from 'jotai';
 import {useQrCodes} from '../realm/Provider';
 import {IQrCode} from '../types';
@@ -22,23 +19,25 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {debounce} from 'lodash';
-import {isAnonymAtom, openUrlAutoAtom} from '../utils/store';
+import {isAnonymAtom, openUrlAutoAtom} from '../utils/atoms';
 
-const MAX_LENGHT_SNACKBAR = 57;
+const MAX_LENGTH_SNACKBAR = 57;
 
 interface IState {
   isActive: boolean;
   current?: IQrCode;
+  error: boolean;
 }
 
 const defaultState = {
   isActive: true,
   current: undefined,
+  error: false,
 };
 
-export const ScanScreen = (props: IState) => {
+export const ScanScreen = () => {
   const [state, setState] = React.useState<IState>(defaultState);
-  const {createQrCode} = useQrCodes();
+  const {create} = useQrCodes();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const toast = useToast();
@@ -49,6 +48,7 @@ export const ScanScreen = (props: IState) => {
     setState({
       isActive: isFocused,
       current: undefined,
+      error: false,
     });
   };
 
@@ -56,7 +56,7 @@ export const ScanScreen = (props: IState) => {
 
   React.useEffect(() => {
     if (!state.isActive && state.current) {
-      !isAnonym && createQrCode(state.current);
+      !isAnonym && create(state.current);
     }
   }, [state.current, state.isActive]);
 
@@ -89,21 +89,31 @@ export const ScanScreen = (props: IState) => {
     if (!text) {
       return '';
     }
-    if (text.length > MAX_LENGHT_SNACKBAR) {
-      return text.slice(0, MAX_LENGHT_SNACKBAR - 3) + '...';
+    if (text.length > MAX_LENGTH_SNACKBAR) {
+      return text.slice(0, MAX_LENGTH_SNACKBAR - 3) + '...';
     }
     return text;
   };
 
   const handleScan = (item: BarCodeReadEvent) => {
-    if (!state.isActive || !isFocused) {
+    if (!state.isActive || !isFocused || state.error) {
       return undefined;
     }
     Vibration.vibrate(500);
 
+    const formattedQrCode = formatQrCode(item, false);
+
+    if (formattedQrCode.decoration === undefined) {
+      return setState({
+        isActive: false,
+        error: true,
+      });
+    }
+
     setState({
       isActive: false,
       current: formatQrCode(item, false),
+      error: false,
     });
 
     openUrlAuto

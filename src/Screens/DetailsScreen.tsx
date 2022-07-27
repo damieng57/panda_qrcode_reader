@@ -4,7 +4,7 @@ import {getTranslation as t} from '../utils/helpers';
 import {Text, Box} from 'native-base';
 import {AppBar} from '../Components/AppBar/AppBar';
 import {useAtom} from 'jotai';
-import {backgroundColorAtom} from '../utils/store';
+import {backgroundColorAtom} from '../utils/atoms';
 
 export interface ITouchableColor {
   size?: number;

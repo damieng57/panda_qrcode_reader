@@ -18,7 +18,7 @@ import {
 } from 'native-base';
 import {ObjectId} from 'bson';
 import {useAtom} from 'jotai';
-import {accentColorAtom, isDeleteModeAtom} from '../../utils/store';
+import {accentColorAtom, isDeleteModeAtom} from '../../utils/atoms';
 
 export interface IProps {
   item: IQrCode;

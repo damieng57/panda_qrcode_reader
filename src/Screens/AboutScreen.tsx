@@ -6,7 +6,7 @@ import {AppBar} from '../Components/AppBar/AppBar';
 import {Linking} from 'react-native';
 import Emoji from 'react-native-emoji';
 import {useAtom} from 'jotai';
-import {backgroundColorAtom} from '../utils/store';
+import {backgroundColorAtom} from '../utils/atoms';
 
 export const AboutScreen = () => {
   const [backgroundColor] = useAtom(backgroundColorAtom);

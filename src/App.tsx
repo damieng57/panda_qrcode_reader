@@ -6,26 +6,20 @@ import {Provider as StoreProvider, useAtom} from 'jotai';
 import {BottomMenu} from './Components/BottomMenu/BottomMenu';
 import {DetailsScreen} from './Screens/DetailsScreen';
 import {QrCodesProvider} from './realm/Provider';
+import {NativeBaseProvider, extendTheme, StatusBar} from 'native-base';
 import {
-  NativeBaseProvider,
-  extendTheme,
-  StorageManager,
-  ColorMode,
-  StatusBar,
-  useToken,
-} from 'native-base';
-import {colors} from './utils/colors';
+  colorModeManager,
+  colors,
+  getBaseColorFromToken,
+  getColorFromToken,
+} from './utils/colors';
 import {ActivityIndicator, SafeAreaView} from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import {
   accentColorAtom,
   backgroundColorAtom,
   isDarkModeAtom,
-} from './utils/store';
-import {defaultConfig} from './utils/helpers';
-import {PERMISSIONS, request} from 'react-native-permissions';
-
-request(PERMISSIONS.IOS.CAMERA).then(result => {});
+} from './utils/atoms';
 
 const Stack = createStackNavigator();
 
@@ -37,24 +31,13 @@ const BaseApp = () => {
   const statusBarColor =
     isDarkMode === 'dark' ? 'light-content' : 'dark-content';
 
-  // Define the colorModeManager,
-  const colorModeManager: StorageManager = {
-    get: async () => (isDarkMode === 'dark' ? 'dark' : 'light'),
-    set: (value: ColorMode) =>
-      setIsDarkMode(value === 'dark' ? 'dark' : 'light'),
-  };
-
-  const baseColor =
-    accentColor?.split('.')[0] || defaultConfig.accentColor.split('.')[0];
+  const baseColor = getBaseColorFromToken(accentColor);
 
   // Define the config
   const theme = extendTheme({
     colors: {
       // Add new colors
-      // @ts-ignore
-      primary:
-        colors[accentColor?.split('.')[0]] ||
-        colors[defaultConfig.accentColor.split('.')[0]],
+      primary: baseColor,
     },
     config: {
       // Changing initialColorMode to 'dark'
@@ -65,7 +48,7 @@ const BaseApp = () => {
   const navigationBarIsReady = async () => {
     try {
       changeNavigationBarColor(
-        colors[baseColor]['500'],
+        baseColor,
         isDarkMode === 'dark' ? false : true,
         false,
       );
@@ -82,18 +65,12 @@ const BaseApp = () => {
     navigationBarIsReady();
   }, [accentColor, isDarkMode]);
 
-
-  // TODO: Optimize
-  const getColorFromToken = (token: string) => {
-    const _color = token.split('.')[0]
-    const _variant = token.split('.')[1]
-
-    return colors[_color][_variant]
-  }
-
   return (
-    <NativeBaseProvider theme={theme} colorModeManager={colorModeManager}>
-      <SafeAreaView style={{flex: 1, backgroundColor: getColorFromToken(accentColor)}}>
+    <NativeBaseProvider
+      theme={theme}
+      colorModeManager={colorModeManager(isDarkMode, setIsDarkMode)}>
+      <SafeAreaView
+        style={{flex: 1, backgroundColor: getColorFromToken(accentColor)}}>
         <NavigationContainer>
           <>
             <StatusBar
