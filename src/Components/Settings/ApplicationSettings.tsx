@@ -3,7 +3,7 @@ import {Heading} from 'native-base';
 import React from 'react';
 import {getTranslation as t} from '../../utils/helpers';
 import {defaultStore, storeAtom} from '../../utils/store';
-import {SettingsItem} from '../SettingsItem';
+import {SettingsItem} from './SettingsItem';
 
 export const ApplicationSettings = () => {
   const [, setStore] = useAtom(storeAtom);

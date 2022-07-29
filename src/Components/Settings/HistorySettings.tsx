@@ -4,7 +4,7 @@ import React from 'react';
 import {useQrCodes} from '../../realm/Provider';
 import {getTranslation as t} from '../../utils/helpers';
 import {isAnonymAtom, openUrlAutoAtom} from '../../utils/atoms';
-import {SettingsItem} from '../SettingsItem';
+import {SettingsItem} from './SettingsItem';
 
 export const HistorySettings = () => {
   const [isAnonym, setIsAnonym] = useAtom(isAnonymAtom);
