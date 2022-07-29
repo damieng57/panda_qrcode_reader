@@ -25,28 +25,27 @@ import {
   accentColorAtom,
   backgroundColorAtom,
   criteriaAtom,
-  isAnonymAtom,
   showFavoritesAtom,
 } from '../utils/atoms';
 
 export const HistoryScreen = () => {
-  const {
-    resultSet,
-    getAll,
-    getFavorites,
-    updateOne,
-    deleteOne,
-  } = useQrCodes();
-  
+  const {resultSet, getAll, getFavorites, updateOne, deleteOne, setResultSet} =
+    useQrCodes();
+
   const [criteria, setCriteria] = useAtom(criteriaAtom);
   const [backgroundColor] = useAtom(backgroundColorAtom);
-  // const [isAnonym] = useAtom(isAnonymAtom);
   const [accentColor] = useAtom(accentColorAtom);
   const [showFavorites, setShowFavorites] = useAtom(showFavoritesAtom);
 
-  const [numberOfFavorites, setNumberOfFavorites] = React.useState(0);
-  const [showToGoTop, setShowToGoTop] = React.useState(false);
+  const favoritesSetData = getFavorites('');
+  if (!favoritesSetData || favoritesSetData.error) {
+    // Show UI error
+    return null;
+  }
 
+  const [numberOfFavorites, setNumberOfFavorites] =
+    React.useState(favoritesSetData.length);
+  const [showToGoTop, setShowToGoTop] = React.useState(false);
   const flatListRef = React.useRef<FlatList>(null);
 
   const _showToGoTopButton = (
@@ -69,7 +68,6 @@ export const HistoryScreen = () => {
         item={data?.item}
         onFavorite={updateOne}
         onDelete={deleteOne}
-        onMarkedToDelete={() => null}
       />
     );
   };
@@ -80,9 +78,15 @@ export const HistoryScreen = () => {
 
   React.useEffect(() => {
     if (showFavorites) {
-      return getFavorites(criteria);
+      const _data = getFavorites(criteria);
+      if (!_data || _data.error) return;
+      setNumberOfFavorites(_data.length);
+      setResultSet([..._data.resultSet]);
+    } else {
+      const _data = getAll(criteria);
+      if (!_data || _data.error) return;
+      setResultSet([..._data.resultSet]);
     }
-    getAll(criteria);
   }, [criteria, showFavorites, numberOfFavorites, resultSet.length]);
 
   return (

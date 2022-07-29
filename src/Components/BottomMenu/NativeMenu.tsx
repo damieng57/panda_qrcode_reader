@@ -60,7 +60,8 @@ export const NativeMenu = ({
     <HStack
       style={{height: 56}}
       alignItems="center"
-      bg={'primary.500' || defaultStore.accentColor}>
+      bg={'primary.500' || defaultStore.accentColor}
+      >
       <Pressable
         opacity={selected === 0 ? 1 : 0.5}
         py="3"

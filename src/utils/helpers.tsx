@@ -1,7 +1,7 @@
 import {BarCodeReadEvent} from 'react-native-camera';
 import {URL} from 'react-native-url-polyfill';
 import {getLocales} from 'react-native-localize';
-import {IQrCodeDecoration, IQrCode} from '../types';
+import {IQrCodeDecoration, IQrCode, IMessage} from '../types';
 import {ObjectId} from 'bson';
 
 export const formatQrCode = (
@@ -23,7 +23,7 @@ export const message = (
   status: string | undefined,
   _message: string,
   error?: any,
-) => {
+): IMessage => {
   return {
     status,
     _message,

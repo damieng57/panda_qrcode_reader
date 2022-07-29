@@ -6,32 +6,18 @@ import fromUnixTime from 'date-fns/fromUnixTime';
 import {format} from 'date-fns';
 import {getTranslation as t} from '../../utils/helpers';
 import {useNavigation} from '@react-navigation/native';
-import {
-  Text,
-  HStack,
-  VStack,
-  Icon,
-  IconButton,
-  Menu,
-  Checkbox,
-  Box,
-} from 'native-base';
+import {Text, HStack, VStack, Icon, IconButton, Menu, Box} from 'native-base';
 import {ObjectId} from 'bson';
-import {useAtom} from 'jotai';
-import {accentColorAtom, isDeleteModeAtom} from '../../utils/atoms';
 
 export interface IProps {
   item: IQrCode;
-  onFavorite: (_id: ObjectId | string) => void;
+  onFavorite: (_id: ObjectId, param: Partial<IQrCode>) => void;
   onDelete: (qrcode: IQrCode) => void;
-  onMarkedToDelete: (_id: ObjectId | string) => void;
 }
 
 export const ITEM_HEIGHT = 58;
 
 export const Item = React.memo((props: IProps) => {
-  const [accentColor, setAccentColor] = useAtom(accentColorAtom);
-  const [isDeleteMode, setIsDeleteMode] = useAtom(isDeleteModeAtom);
   const [shouldOverlapWithTrigger] = React.useState(false);
   const navigation = useNavigation();
   const {item} = props;
@@ -43,19 +29,10 @@ export const Item = React.memo((props: IProps) => {
   };
 
   const handleFavorite = () => {
-    props.onFavorite(props.item._id);
-  };
-
-  const handleMarkedToDelete = () => {
-    props.onMarkedToDelete(props.item._id);
+    props.onFavorite(props.item._id, {favorite: true});
   };
 
   const handlePress = async () => {
-    if (isDeleteMode) {
-      setIsDeleteMode();
-      return;
-    }
-
     // Checking if the link is supported for links with custom URL scheme.
     const supported = await Linking.canOpenURL(item.data);
 
@@ -72,26 +49,13 @@ export const Item = React.memo((props: IProps) => {
     }
   };
 
-  const handleLongPress = async () => {
-    console.log('longpress');
-    if (!isDeleteMode) {
-      props.onMarkedToDelete(props.item._id);
-    }
-  };
-
-  React.useEffect(() => {
-    if (!isDeleteMode && props.item.markedToDelete) {
-      setIsDeleteMode();
-    }
-  }, [props.item.markedToDelete]);
-
   const handleShare = async () => {
     try {
       await Share.share({
         message: item.data,
       });
     } catch (error) {
-      Alert.alert(error?.message);
+      Alert.alert(t('error_generic'));
     }
   };
 
@@ -104,7 +68,6 @@ export const Item = React.memo((props: IProps) => {
       };
 
   return (
-    // For HStack, we use style to be sure tht the height corresponding to the layout
     <>
       <HStack
         alignItems="center"
@@ -124,45 +87,18 @@ export const Item = React.memo((props: IProps) => {
         />
 
         <VStack flex="1" p="2">
-          <Pressable onPress={handlePress} onLongPress={handleLongPress}>
+          <Pressable onPress={handlePress}>
             <Text bold noOfLines={1} isTruncated={true}>
               {item.decoration?.title}
             </Text>
 
-            <HStack>
-              <Text>{t(item.decoration?.text)} - </Text>
-              <Text>{`${t('added')}`} </Text>
-              <Text>{`${format(
-                fromUnixTime(item.date / 1000),
-                'dd/MM/yyyy',
-              )}`}</Text>
-            </HStack>
+            <Text>{t(item.decoration?.text)} </Text>
+            <Text alignSelf={'flex-end'} color={'gray.500'}>
+              {`${format(fromUnixTime(item.date / 1000), 'dd/MM/yyyy')}`}
+            </Text>
           </Pressable>
         </VStack>
-
-        {isDeleteMode ? (
-          <Checkbox
-            isChecked={props.item.markedToDelete}
-            accessible={true}
-            accessibilityLabel="Select to delete"
-            accessibilityRole="checkbox"
-            onChange={handleMarkedToDelete}
-            value="delete"
-            colorScheme={accentColor.split('.')[0]}
-            size="md"
-            mr={2}
-            borderRadius="999px"
-            icon={
-              <Icon
-                as={
-                  <Box bg="white" borderRadius="999px" p={1}>
-                    <Box flex={1} bg={accentColor} borderRadius="999px" />
-                  </Box>
-                }
-              />
-            }
-          />
-        ) : (
+        <Box>
           <Menu
             shouldOverlapWithTrigger={shouldOverlapWithTrigger}
             mr={3}
@@ -193,7 +129,7 @@ export const Item = React.memo((props: IProps) => {
         <Menu.Item onPress={() => console.log('Pin/Unpin')}>Epingler/Retirer</Menu.Item> */}
             <Menu.Item onPress={handleDelete}>{t('action.delete')}</Menu.Item>
           </Menu>
-        )}
+        </Box>
       </HStack>
     </>
   );

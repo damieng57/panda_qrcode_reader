@@ -80,5 +80,6 @@
   "about_made_with": "Made with",
   "about_for": "for",
   "settings_background_color": "Background Color",
-  "settings_background_color_description": "Choose an background color for the app"
+  "settings_background_color_description": "Choose an background color for the app",
+  "error_generic": "Ooops, something goes wrong..."
 }

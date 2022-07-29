@@ -80,5 +80,6 @@
   "about_made_with": "Fait avec",
   "about_for": "pour",
   "settings_background_color": "Couleur d'arrière-plan",
-  "settings_background_color_description": "Choisir une couleur d'arrière plan"
+  "settings_background_color_description": "Choisir une couleur d'arrière plan",
+  "error_generic": "Oups, quelque chose s'est mal passé..."
 }

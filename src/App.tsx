@@ -9,9 +9,9 @@ import {QrCodesProvider} from './realm/Provider';
 import {NativeBaseProvider, extendTheme, StatusBar} from 'native-base';
 import {
   colorModeManager,
-  colors,
-  getBaseColorFromToken,
+  getColorAndVariantFromToken,
   getColorFromToken,
+  getVariantColorFromToken,
 } from './utils/colors';
 import {ActivityIndicator, SafeAreaView} from 'react-native';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
@@ -31,7 +31,7 @@ const BaseApp = () => {
   const statusBarColor =
     isDarkMode === 'dark' ? 'light-content' : 'dark-content';
 
-  const baseColor = getBaseColorFromToken(accentColor);
+  const baseColor = getColorAndVariantFromToken(accentColor);
 
   // Define the config
   const theme = extendTheme({
@@ -48,7 +48,7 @@ const BaseApp = () => {
   const navigationBarIsReady = async () => {
     try {
       changeNavigationBarColor(
-        baseColor,
+        getVariantColorFromToken(accentColor, '500'),
         isDarkMode === 'dark' ? false : true,
         false,
       );

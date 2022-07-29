@@ -1,6 +1,6 @@
 import React, {useContext, useState, useEffect, useRef} from 'react';
 import Realm from 'realm';
-import {IQrCode, IQrCodeContext} from '../types';
+import {EMessageCode, IQrCode, IQrCodeContext, IResultSetData} from '../types';
 import {DecorationSchema, QrCodeSchema} from './models';
 import {ObjectId} from 'bson';
 import {useAtom} from 'jotai';
@@ -18,8 +18,13 @@ export interface IProps {
   children?: JSX.Element;
 }
 
+/**
+ * Set a Realm provider
+ * @param param
+ * @returns
+ */
 const QrCodesProvider = ({children}: IProps): React.ReactElement => {
-  const [resultSet, setResultSet] = useState<Realm.Results<Object> | []>([]);
+  const [resultSet, setResultSet] = useState<Object[]>([]);
   const [store, setStore] = useAtom(storeAtom);
 
   // Use a Ref to store the realm rather than the state because it is not
@@ -33,17 +38,24 @@ const QrCodesProvider = ({children}: IProps): React.ReactElement => {
       .then((realm: Realm) => {
         realmRef.current = realm;
 
-        const result: Realm.Results<Object> = realm
+        const _resultSet: Realm.Results<Object> = realm
           .objects('QrCode')
           .sorted('date', true);
-        setResultSet(result);
+        setResultSet([..._resultSet]);
         console.log('1. ResultSet update triggered first useEffect');
         realm.addListener('change', () => {
-          setResultSet(resultSet);
-          console.log('ResultSet update triggered inside the listener');
+          console.log('2. ResultSet update triggered inside the listener');
+          setResultSet([..._resultSet]);
         });
       })
-      .catch(e => console.error(e));
+      .catch(error => {
+        const _error = message(
+          EMessageCode.ERROR,
+          'Cannot create QrCode',
+          error,
+        );
+        throw new Error(_error.message);
+      });
 
     return () => {
       // cleanup function
@@ -58,9 +70,8 @@ const QrCodesProvider = ({children}: IProps): React.ReactElement => {
     };
   }, []);
 
-  /* Create QrCode */
   /**
-   *
+   * Create QrCode
    * @param rawQrCode
    * @returns
    */
@@ -74,54 +85,90 @@ const QrCodesProvider = ({children}: IProps): React.ReactElement => {
         realm.create('QrCode', rawQrCode);
       });
     } catch (error) {
-      return message('error', 'Cannot create QrCode', error);
+      const _error = message(EMessageCode.ERROR, 'Cannot create QrCode', error);
+      throw new Error(_error.message);
     }
   };
 
-  /* Request QrCodes */
   /**
-   *
+   * Request QrCodes
    * @param query
    * @param sortedByDate
    * @param params
    * @returns
    */
-  const get = (query: string, sortedByDate = true, ...params: any) => {
+  const get = (
+    query: string,
+    sortedByDate = true,
+    ...params: any
+  ): IResultSetData | undefined => {
     const realm: Realm | null = realmRef.current;
     try {
       if (realm === null) return;
-      const result: Realm.Results<Object> = realm
+      const _resultSet: Realm.Results<Object> = realm
         .objects('QrCode')
         .sorted('date', sortedByDate)
         .filtered(query, ...params);
-      setResultSet([...result]);
-      console.log('ResultSet update triggered');
+      return {
+        resultSet: _resultSet,
+        length: _resultSet.length,
+        error: undefined,
+      };
     } catch (error) {
-      return message('error', 'Cannot filters these QrCodes', error);
+      return {
+        resultSet: [],
+        length: 0,
+        error: message(
+          EMessageCode.ERROR,
+          'Cannot filters these QrCodes',
+          error,
+        ),
+      };
     }
   };
 
-  const getAll = (criteria = '') => {
-    get('data CONTAINS[c] $0', true, criteria);
-  };
-  const getFavorites = (criteria = '') => {
-    get('data CONTAINS[c] $0 && favorite == $1', true, criteria, true);
-    console.log('Ready to trigger another action');
-  };
-  const getToDelete = (criteria = '') => {
-    get('data CONTAINS[c] $0 && markedToDelete == $1', true, criteria, true);
+  /**
+   * Get all items
+   * @param criteria
+   * @returns
+   */
+  const getAll = (criteria = ''): IResultSetData | undefined => {
+    return get('data CONTAINS[c] $0', true, criteria);
   };
 
-  /* Update QrCodes */
   /**
-   *
+   * Get all items marked as favorties
+   * @param criteria
+   * @returns
+   */
+  const getFavorites = (criteria = ''): IResultSetData | undefined => {
+    return get('data CONTAINS[c] $0 && favorite == $1', true, criteria, true);
+  };
+
+  /**
+   * Get all items marked to delete
+   * @param criteria
+   * @returns
+   */
+  const getToDelete = (criteria = ''): IResultSetData | undefined => {
+    return get(
+      'data CONTAINS[c] $0 && markedToDelete == $1',
+      true,
+      criteria,
+      true,
+    );
+  };
+
+  /**
+   * Update one item
    * @param _id
    * @param params
    * @returns
-   *
-   * Example
-   * updateOne(_id, {favorites: true})
-   *
+   * @example
+   * ```
+   * // Item with _id will change favorites attribute to true
+   * updateOne(_id, {favorites: true});
+   * ```
    */
   const updateOne = (_id: ObjectId, params: Partial<IQrCode>) => {
     const realm: Realm | null = realmRef.current;
@@ -134,16 +181,27 @@ const QrCodesProvider = ({children}: IProps): React.ReactElement => {
         // These changes are saved to the realm.
         for (const [key, value] of Object.entries(params)) {
           if (qrCode) {
+            // @ts-ignore
             qrCode[key] = value;
           }
         }
       });
     } catch (error) {
-      message('error', 'Cannot update QrCode', error);
+      const _error = message(
+        EMessageCode.ERROR,
+        'Cannot update this QrCode',
+        error,
+      );
+      throw new Error(_error.message);
     }
   };
 
-  // All QrCodes marked as favorites will be unsetted
+  /**
+   * All QrCodes marked as favorites will be unsetted
+   * Change the value of favorite attribute to false for all items
+   * It's a bulk update
+   * @returns
+   */
   const clearFavorites = () => {
     const realm: Realm | null = realmRef.current;
 
@@ -154,13 +212,17 @@ const QrCodesProvider = ({children}: IProps): React.ReactElement => {
         realm.objects('QrCode').update('favorite', false);
       });
     } catch (error) {
-      return message('error', 'Cannot clear the QrCode elements', error);
+      const _error = message(
+        EMessageCode.ERROR,
+        'Cannot update the favorties',
+        error,
+      );
+      throw new Error(_error.message);
     }
   };
 
-  /* Delete QrCodes */
   /**
-   *
+   * Delete a specific item
    * @param qrcode
    * @returns
    */
@@ -173,10 +235,19 @@ const QrCodesProvider = ({children}: IProps): React.ReactElement => {
         realm.delete(qrcode);
       });
     } catch (error) {
-      return message('error', 'Cannot delete this QrCode', error);
+      const _error = message(
+        EMessageCode.ERROR,
+        'Cannot delete this QrCode',
+        error,
+      );
+      throw new Error(_error.message);
     }
   };
 
+  /**
+   * Delete all items
+   * @returns
+   */
   const deleteAll = () => {
     const realm: Realm | null = realmRef.current;
 
@@ -186,7 +257,12 @@ const QrCodesProvider = ({children}: IProps): React.ReactElement => {
         realm.delete(realm.objects('QrCode'));
       });
     } catch (error) {
-      return message('error', 'Cannot clear the QrCode elements', error);
+      const _error = message(
+        EMessageCode.ERROR,
+        'Cannot update the QrCodes',
+        error,
+      );
+      throw new Error(_error.message);
     }
   };
 
@@ -205,6 +281,7 @@ const QrCodesProvider = ({children}: IProps): React.ReactElement => {
         deleteOne,
         deleteAll,
         clearFavorites,
+        setResultSet,
         resultSet,
       }}>
       {children}

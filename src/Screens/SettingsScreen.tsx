@@ -32,8 +32,6 @@ const ThemeSettings = () => {
   const _heightAccentColor = React.useRef(new Animated.Value(0)).current;
   const _heightBackground = React.useRef(new Animated.Value(0)).current;
   const [isOpenAccentColor, setIsOpenAccentColor] = React.useState(true);
-  const [isOpenBackgroundColor, setIsOpenBackgroundColor] =
-    React.useState(true);
 
   const openColorPickerAccentColor = () => {
     Animated.timing(_heightAccentColor, {

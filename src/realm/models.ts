@@ -3,7 +3,7 @@ import Realm from 'realm';
 import {IQrCodeDecoration} from '../types';
 
 /**
- * Decoration
+ * Decoration class
  */
 export class DecorationSchema implements IQrCodeDecoration {
   title = '';

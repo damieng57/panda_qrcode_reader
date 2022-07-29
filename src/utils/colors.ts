@@ -1,8 +1,9 @@
 import {ColorMode, StorageManager} from 'native-base';
+import { IColors, IColorVariant } from '../types';
 import {defaultStore} from './store';
 
 // Based on native-base colors system
-export const colors = {
+export const colors: IColors = {
   rose: {
     50: '#fff1f2',
     100: '#ffe4e6',
@@ -304,6 +305,11 @@ export const getVariantColorFromToken = (
 ): string => {
   const [_color] = token.split('.');
   return colors[_color][variant] || colors[_color]['500'];
+};
+
+export const getColorAndVariantFromToken = (token: string): IColorVariant => {
+  const [_color] = token.split('.');
+  return colors[_color] || colors.rose;
 };
 
 export const getBaseColorFromToken = (token: string): string => {

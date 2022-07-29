@@ -6,10 +6,10 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "ios:device": "react-native run-ios --device",
-    "start": "react-native start --reset-cache",
+    "start": "react-native start --reset-cache --port 8089",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "killpackager": "sh lsof -n -i4TCP:8081 | sed '1 d' | awk '{print $2}' | xargs kill -9"
+    "killpackager": "sh lsof -n -i4TCP:8089 | sed '1 d' | awk '{print $2}' | xargs kill -9"
   },
   "dependencies": {
     "@nartc/react-native-barcode-mask": "^1.2.0",

@@ -32,8 +32,24 @@ target 'qrcode' do
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable the next line.
   use_flipper!()
-
+  
   post_install do |installer|
     react_native_post_install(installer)
+    # Only for Mac M1 if needed
+    # __apply_Xcode_12_5_M1_post_install_workaround(installer)
+    
+    # set a specific port for Mtro bundler
+    installer.pods_project.targets.each do |target|
+      if target.name == 'React-Core'
+        target.build_configurations.each do |config|
+          if config.name == 'Debug'
+            config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+            config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] + ['RCT_METRO_PORT=8089']
+          end
+        end
+      end
+    end
   end
+
+
 end
